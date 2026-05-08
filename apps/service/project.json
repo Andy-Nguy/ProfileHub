@@ -1,0 +1,28 @@
+{
+  "name": "service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/service/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/service",
+        "main": "apps/service/src/main.ts",
+        "tsConfig": "apps/service/tsconfig.json",
+        "rootDir": "."
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "service:build",
+        "watch": true,
+        "buildTargetOptions": {
+          "outputFileName": "apps/service/src/main.js"
+        }
+      }
+    }
+  }
+}

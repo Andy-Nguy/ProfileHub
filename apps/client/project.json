@@ -1,0 +1,16 @@
+{
+  "name": "client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/client/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "options": { "outputPath": "dist/apps/client" }
+    },
+    "serve": {
+      "executor": "@nx/vite:dev-server",
+      "options": { "buildTarget": "client:build" }
+    }
+  }
+}

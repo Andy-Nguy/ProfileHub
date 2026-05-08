@@ -1,0 +1,9 @@
+# Build outputs
+dist
+.nx/cache
+
+# Deps
+node_modules
+
+# Generated
+*.lock
