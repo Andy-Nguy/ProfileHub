@@ -1,16 +1,16 @@
-# ProfileHub
+# ProfileHub-Duy Anh Nguyen
 
 A professional community portfolio platform built as an Nx monorepo.
 
 ## Stack
 
-| Layer | Tech |
-|-------|------|
-| Frontend | React 18 + Vite + Tailwind CSS + Framer Motion |
-| Backend | NestJS + TypeORM + PostgreSQL |
-| Validation | Zod (shared FE ↔ BE) |
-| State | TanStack Query v5 |
-| Monorepo | Nx |
+| Layer      | Tech                                           |
+| ---------- | ---------------------------------------------- |
+| Frontend   | React 18 + Vite + Tailwind CSS + Framer Motion |
+| Backend    | NestJS + TypeORM + PostgreSQL                  |
+| Validation | Zod (shared FE ↔ BE)                           |
+| State      | TanStack Query v5                              |
+| Monorepo   | Nx                                             |
 
 ## Project Structure
 
