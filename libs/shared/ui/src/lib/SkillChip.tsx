@@ -13,15 +13,15 @@ export const SkillChip: React.FC<SkillChipProps> = ({ name, onRemove, className 
     >
       <span className="font-label-lg text-label-lg text-on-surface mr-2">{name}</span>
       {onRemove && (
-        <span 
-          className="material-symbols-outlined text-sm text-on-surface-variant cursor-pointer hover:text-error transition-colors" 
+        <button
+          type="button"
+          className="material-symbols-outlined text-sm text-on-surface-variant cursor-pointer hover:text-error transition-colors"
           style={{ fontSize: '16px' }}
           onClick={onRemove}
-          role="button"
           aria-label={`Remove ${name} skill`}
         >
-          close
-        </span>
+          <span aria-hidden="true">close</span>
+        </button>
       )}
     </div>
   );
