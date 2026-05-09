@@ -36,13 +36,15 @@ export const ExperienceSection: React.FC<ExperienceSectionProps> = ({
           <span className="material-symbols-outlined text-primary">work</span>
           Experience
         </h3>
-        <button
-          onClick={onAdd}
-          className="text-primary hover:bg-primary-fixed rounded-full p-2 transition-colors flex items-center"
-          aria-label="Add experience"
-        >
-          <span className="material-symbols-outlined">add</span>
-        </button>
+        {onAdd && (
+          <button
+            onClick={onAdd}
+            className="text-primary hover:bg-primary-fixed rounded-full p-2 transition-colors flex items-center"
+            aria-label="Add experience"
+          >
+            <span className="material-symbols-outlined">add</span>
+          </button>
+        )}
       </div>
 
       <div className="space-y-4">
