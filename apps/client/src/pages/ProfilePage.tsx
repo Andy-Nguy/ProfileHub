@@ -10,7 +10,7 @@ import {
   EndorsementButton,
   ProfileHeader,
   TimelineSection,
-} from '../../../../libs/shared/ui/src';
+} from '@profilehub/ui';
 
 // ─── Mock Data ───────────────────────────────────────────────────────────────
 const MOCK_PROFILES: Record<string, any> = {
