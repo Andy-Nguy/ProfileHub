@@ -107,10 +107,33 @@ const CURRENT_USER = 'jdoe';
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const resolvedUsername = username || CURRENT_USER;
-  const profile = MOCK_PROFILES[resolvedUsername] || MOCK_PROFILES[CURRENT_USER];
+  const profile = MOCK_PROFILES[resolvedUsername];
   const isOwnProfile = resolvedUsername === CURRENT_USER;
 
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  if (!profile) {
+    return (
+      <div className="bg-background text-on-background min-h-screen flex">
+        {/* Side Navigation */}
+        <SideNav />
+
+        {/* Main Content */}
+        <main className="flex-1 md:ml-72 flex flex-col">
+          <div className="flex-1 flex items-center justify-center p-6">
+            <M3Card className="w-full max-w-2xl p-8 text-center">
+              <h1 className="text-2xl font-bold mb-2">Profile not found</h1>
+              <p className="text-on-surface-variant">
+                The profile for @{resolvedUsername} does not exist.
+              </p>
+            </M3Card>
+          </div>
+          <AppFooter />
+        </main>
+      </div>
+    );
+  }
+
   const isNewProfile = !profile.bio && profile.skills.length === 0;
 
   return (
