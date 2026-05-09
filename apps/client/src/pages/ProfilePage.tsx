@@ -1,134 +1,358 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useProfile } from '../hooks/useApi';
-import { SkillChip } from '../components/SkillChip';
+import { SideNav } from '../components/layout/SideNav';
+import { AppFooter } from '../components/layout/AppFooter';
+import { ProfileEditDialog } from '../components/profile/ProfileEditDialog';
+import {
+  M3Card,
+  SkillChip,
+  EndorsementButton,
+  ProfileHeader,
+  TimelineSection,
+} from '@profilehub/ui';
 
+// ─── Mock Data ───────────────────────────────────────────────────────────────
+const MOCK_PROFILES: Record<string, any> = {
+  jdoe: {
+    username: 'jdoe',
+    displayName: 'John Doe',
+    headline: 'Senior Software Engineer | Cloud Architect',
+    bio: 'Passionate about building scalable cloud solutions and mentoring junior developers. 10+ years of experience in full-stack development with a focus on React and Node.js.',
+    avatarUrl: 'https://i.pravatar.cc/150?u=1',
+    coverUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop',
+    location: 'San Francisco, CA',
+    likesCount: 156,
+    completionPercent: 75,
+    skills: [
+      { id: '1', name: 'React', count: 45 },
+      { id: '2', name: 'TypeScript', count: 32 },
+      { id: '3', name: 'Node.js', count: 28 },
+      { id: '4', name: 'AWS', count: 56 },
+      { id: '5', name: 'Docker', count: 12 },
+    ],
+    experiences: [
+      {
+        id: 'exp1',
+        title: 'Senior Software Engineer',
+        subtitle: 'TechCorp Solutions',
+        dateRange: '2020 - Present',
+        description: 'Leading the core platform team, migrating monolithic services to microservices using AWS and Kubernetes.',
+        onEdit: () => console.log('Edit exp1'),
+      },
+      {
+        id: 'exp2',
+        title: 'Full Stack Developer',
+        subtitle: 'Startup Inc',
+        dateRange: '2016 - 2020',
+        description: 'Developed and maintained customer-facing web applications using the MERN stack.',
+        onEdit: () => console.log('Edit exp2'),
+      },
+    ],
+    educations: [
+      {
+        id: 'edu1',
+        title: 'B.S. in Computer Science',
+        subtitle: 'University of California, Berkeley',
+        dateRange: '2012 - 2016',
+      },
+    ],
+  },
+  asmith: {
+    username: 'asmith',
+    displayName: 'Alice Smith',
+    headline: 'UI/UX Designer | Branding Expert',
+    bio: 'Creating user-centered designs that drive engagement. Specializing in minimalist aesthetics and complex design systems for enterprise products.',
+    avatarUrl: 'https://i.pravatar.cc/150?u=2',
+    coverUrl: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2000&auto=format&fit=crop',
+    location: 'New York, NY',
+    likesCount: 89,
+    completionPercent: 60,
+    skills: [
+      { id: 's1', name: 'Figma', count: 92 },
+      { id: 's2', name: 'Branding', count: 41 },
+      { id: 's3', name: 'Interaction Design', count: 67 },
+    ],
+    experiences: [
+      {
+        id: 'e1',
+        title: 'Lead Designer',
+        subtitle: 'Creative Agency',
+        dateRange: '2019 - Present',
+        description: 'Directing design strategy for Fortune 500 clients, overseeing a team of 10 designers.',
+        onEdit: () => console.log('Edit e1'),
+      },
+    ],
+    educations: [
+      {
+        id: 'ed1',
+        title: 'M.A. in Visual Design',
+        subtitle: 'Rhode Island School of Design',
+        dateRange: '2017 - 2019',
+      },
+    ],
+  },
+};
+
+// ─── The "current user" — in a real app this comes from auth context ──────────
+const CURRENT_USER = 'jdoe';
+
+/**
+ * ProfilePage — unified single-page profile view.
+ *
+ * • Viewing own profile → shows "Edit Profile" button → opens ProfileEditDialog
+ * • Viewing someone else's profile → shows Endorse / Connect actions only
+ * • Route: /u/:username  (no username = own profile)
+ */
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  const { data: profile, isLoading, isError } = useProfile(username ?? '');
+  const resolvedUsername = username || CURRENT_USER;
+  const profile = MOCK_PROFILES[resolvedUsername];
+  const isOwnProfile = resolvedUsername === CURRENT_USER;
 
-  if (isLoading) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  if (!profile) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-12">
-        <div className="h-24 w-24 rounded-full bg-surface-container animate-pulse mx-auto" />
-        <div className="h-8 w-48 bg-surface-container animate-pulse mx-auto mt-4 rounded" />
-        <div className="h-4 w-64 bg-surface-container animate-pulse mx-auto mt-2 rounded" />
+      <div className="bg-background text-on-background min-h-screen flex">
+        {/* Side Navigation */}
+        <SideNav />
+
+        {/* Main Content */}
+        <main className="flex-1 md:ml-72 flex flex-col">
+          <div className="flex-1 flex items-center justify-center p-6">
+            <M3Card className="w-full max-w-2xl p-8 text-center">
+              <h1 className="text-2xl font-bold mb-2">Profile not found</h1>
+              <p className="text-on-surface-variant">
+                The profile for @{resolvedUsername} does not exist.
+              </p>
+            </M3Card>
+          </div>
+          <AppFooter />
+        </main>
       </div>
     );
   }
 
-  if (isError || !profile) {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <span className="material-symbols-outlined text-5xl text-on-surface-variant mb-4 block">person_off</span>
-        <p className="text-lg text-on-surface-variant">Profile not found</p>
-        <Link to="/discovery" className="mt-4 inline-block text-primary hover:underline text-sm">
-          ← Back to discovery
-        </Link>
-      </div>
-    );
-  }
+  const isNewProfile = !profile.bio && profile.skills.length === 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      {/* ── Header ──────────────────────── */}
-      <motion.section
-        className="text-center mb-10"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-      >
-        {profile.avatarUrl ? (
-          <img
-            src={profile.avatarUrl}
-            alt={profile.displayName}
-            className="w-24 h-24 rounded-full object-cover mx-auto ring-4 ring-white shadow-md"
-          />
-        ) : (
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto ring-4 ring-white shadow-md">
-            <span className="text-3xl font-bold text-white">
-              {profile.displayName?.[0]?.toUpperCase()}
-            </span>
-          </div>
-        )}
-        <h1 className="text-2xl font-bold text-on-surface mt-4">{profile.displayName}</h1>
-        <p className="text-on-surface-variant">@{profile.username}</p>
-        {profile.headline && (
-          <p className="text-on-surface-variant mt-1">{profile.headline}</p>
-        )}
-        {profile.bio && (
-          <p className="text-sm text-on-surface-variant mt-3 max-w-lg mx-auto leading-relaxed">
-            {profile.bio}
-          </p>
-        )}
-        <div className="flex items-center justify-center gap-1 mt-3 text-on-surface-variant">
-          <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
-            favorite
-          </span>
-          <span className="text-sm font-medium">{profile.likesCount ?? 0} likes</span>
-        </div>
-      </motion.section>
+    <div className="bg-background text-on-background min-h-screen flex">
+      {/* Side Navigation */}
+      <SideNav />
 
-      {/* ── Skills ──────────────────────── */}
-      {profile.skills?.length > 0 && (
-        <motion.section
-          className="mb-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15 }}
-        >
-          <h2 className="text-lg font-bold text-on-surface mb-3">Skills</h2>
-          <div className="flex flex-wrap gap-2">
-            {profile.skills.map((skill: any) => (
-              <SkillChip key={skill.id} name={skill.name} count={skill.endorsementCount} />
-            ))}
-          </div>
-        </motion.section>
-      )}
+      {/* ── Edit / Create Dialog ─────────────────────────────────── */}
+      <ProfileEditDialog
+        isOpen={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        isCreating={isNewProfile}
+        initialData={{
+          firstName: profile.displayName.split(' ')[0],
+          lastName: profile.displayName.split(' ')[1],
+          headline: profile.headline,
+          bio: profile.bio,
+          skills: profile.skills.map((s: any) => s.name),
+          completionPercent: profile.completionPercent,
+        }}
+        onSave={() => console.log('Profile saved')}
+      />
 
-      {/* ── Experience ──────────────────── */}
-      {profile.experiences?.length > 0 && (
-        <motion.section
-          className="mb-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25 }}
-        >
-          <h2 className="text-lg font-bold text-on-surface mb-3">Experience</h2>
-          <div className="space-y-4">
-            {profile.experiences.map((exp: any) => (
-              <div key={exp.id} className="p-4 rounded-xl bg-white border border-outline-variant/30">
-                <h3 className="font-semibold text-on-surface">{exp.title}</h3>
-                <p className="text-sm text-on-surface-variant">{exp.company}</p>
-                {exp.description && (
-                  <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">{exp.description}</p>
+      {/* Main Content */}
+      <main className="flex-1 md:ml-72 flex flex-col">
+        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter overflow-y-auto">
+          <div className="max-w-[1280px] mx-auto space-y-6">
+
+            {/* ── Profile Header ─────────────────────────────────── */}
+            <motion.section
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <ProfileHeader
+                displayName={profile.displayName}
+                headline={profile.headline}
+                location={profile.location}
+                avatarUrl={profile.avatarUrl}
+                coverUrl={profile.coverUrl}
+              />
+
+              {/* ── Action Row ─────────────────────────────────── */}
+              <div className="flex items-center justify-end gap-3 mt-4">
+                {isOwnProfile ? (
+                  <>
+                    {/* Own profile: Edit or Create */}
+                    <button
+                      onClick={() => setDialogOpen(true)}
+                      className="flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                        {isNewProfile ? 'add_circle' : 'edit'}
+                      </span>
+                      {isNewProfile ? 'Create Profile' : 'Edit Profile'}
+                    </button>
+
+                    <button className="flex items-center gap-2 border border-outline-variant text-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors">
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
+                      Share
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Viewing someone else's profile */}
+                    <button className="flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm">
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>person_add</span>
+                      Connect
+                    </button>
+                    <EndorsementButton count={profile.likesCount} isEndorsed={false} />
+                  </>
                 )}
               </div>
-            ))}
-          </div>
-        </motion.section>
-      )}
+            </motion.section>
 
-      {/* ── Education ───────────────────── */}
-      {profile.educations?.length > 0 && (
-        <motion.section
-          className="mb-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.35 }}
-        >
-          <h2 className="text-lg font-bold text-on-surface mb-3">Education</h2>
-          <div className="space-y-4">
-            {profile.educations.map((edu: any) => (
-              <div key={edu.id} className="p-4 rounded-xl bg-white border border-outline-variant/30">
-                <h3 className="font-semibold text-on-surface">{edu.degree} in {edu.fieldOfStudy}</h3>
-                <p className="text-sm text-on-surface-variant">{edu.institution}</p>
+            {/* ── Main Grid ──────────────────────────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* Left: About + Timeline */}
+              <div className="lg:col-span-2 space-y-6">
+                {profile.bio && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                    <M3Card>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-title-lg text-title-lg text-on-surface">About</h3>
+                        {isOwnProfile && (
+                          <button
+                            onClick={() => setDialogOpen(true)}
+                            className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full p-1.5 transition-colors"
+                            aria-label="Edit about"
+                          >
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                          </button>
+                        )}
+                      </div>
+                      <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                        {profile.bio}
+                      </p>
+                    </M3Card>
+                  </motion.div>
+                )}
+
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                  <TimelineSection
+                    title="Experience"
+                    icon="work"
+                    items={profile.experiences}
+                    onAdd={isOwnProfile ? () => setDialogOpen(true) : undefined}
+                  />
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                  <TimelineSection
+                    title="Education"
+                    icon="school"
+                    items={profile.educations}
+                    onAdd={isOwnProfile ? () => setDialogOpen(true) : undefined}
+                  />
+                </motion.div>
               </div>
-            ))}
+
+              {/* Right: Skills + Social */}
+              <div className="space-y-6">
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+                  <M3Card>
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">psychology</span>
+                        Skills
+                      </h3>
+                      {isOwnProfile && (
+                        <button
+                          onClick={() => setDialogOpen(true)}
+                          className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full p-1.5 transition-colors"
+                          aria-label="Edit skills"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mb-8">
+                      {profile.skills.map((skill: any) => (
+                        <SkillChip key={skill.id} name={skill.name} />
+                      ))}
+                    </div>
+
+                    <hr className="border-outline-variant mb-6" />
+
+                    <h3 className="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">verified</span>
+                      Endorsements
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <span className="font-body-lg text-body-lg text-on-surface-variant">Total</span>
+                      <EndorsementButton count={profile.likesCount} isEndorsed={isOwnProfile} />
+                    </div>
+                  </M3Card>
+                </motion.div>
+
+                {/* Social Presence */}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-primary-fixed rounded-[16px] p-6"
+                  style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.08)' }}
+                >
+                  <h3 className="font-title-lg text-title-lg text-on-primary-fixed mb-2 flex items-center gap-2">
+                    <span className="material-symbols-outlined">share</span>
+                    Social Presence
+                  </h3>
+                  <p className="font-body-lg text-body-lg text-on-primary-fixed-variant mb-4">
+                    {isOwnProfile
+                      ? 'Share your portfolio across platforms.'
+                      : `Connect with ${profile.displayName} on other platforms.`}
+                  </p>
+                  <div className="flex gap-3">
+                    <button className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed flex items-center justify-center hover:opacity-80 transition-opacity">
+                      <span className="material-symbols-outlined">link</span>
+                    </button>
+                    <button className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed flex items-center justify-center hover:opacity-80 transition-opacity">
+                      <span className="material-symbols-outlined">alternate_email</span>
+                    </button>
+                  </div>
+                </motion.div>
+
+                {/* Own profile: Quick visibility toggle reminder */}
+                {isOwnProfile && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="bg-surface-container-low rounded-[16px] p-5 border border-outline-variant"
+                  >
+                    <p className="font-label-lg text-label-lg text-on-surface-variant mb-3">
+                      Profile completion: <span className="text-primary font-bold">{profile.completionPercent}%</span>
+                    </p>
+                    <div className="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-primary h-2 rounded-full transition-all"
+                        style={{ width: `${profile.completionPercent}%` }}
+                      />
+                    </div>
+                    <button
+                      onClick={() => setDialogOpen(true)}
+                      className="mt-4 w-full text-center font-label-lg text-label-lg text-primary hover:underline"
+                    >
+                      Complete your profile →
+                    </button>
+                  </motion.div>
+                )}
+              </div>
+            </div>
           </div>
-        </motion.section>
-      )}
+        </div>
+
+        <AppFooter variant="compact" />
+      </main>
     </div>
   );
 };
