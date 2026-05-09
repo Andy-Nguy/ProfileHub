@@ -5,7 +5,7 @@ import {
   EndorsementButton, 
   ProfileHeader, 
   TimelineSection 
-} from '../../../../libs/shared/ui/src';
+} from '@profilehub/ui';
 
 export const MockTestPage: React.FC = () => {
   const mockSkills = [
