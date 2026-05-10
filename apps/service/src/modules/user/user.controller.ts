@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import type { CreateUserDto } from '../../../../../libs/shared/data-access/src';
 
+@ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -9,10 +11,5 @@ export class UserController {
   @Get(':username')
   getByUsername(@Param('username') username: string) {
     return this.userService.findByUsername(username);
-  }
-
-  @Post()
-  create(@Body() dto: CreateUserDto) {
-    return this.userService.create(dto);
   }
 }

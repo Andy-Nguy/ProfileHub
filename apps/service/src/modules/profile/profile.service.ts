@@ -6,13 +6,6 @@ import { UserEntity } from '../../entities/user.entity';
 import { ExperienceEntity } from '../../entities/experience.entity';
 import { EducationEntity } from '../../entities/education.entity';
 import { SkillEntity } from '../../entities/skill.entity';
-import type {
-  CreateProfileDto,
-  UpdateProfileDto,
-  CreateExperienceDto,
-  CreateEducationDto,
-  CreateSkillDto,
-} from '../../../../../libs/shared/data-access/src';
 
 @Injectable()
 export class ProfileService {
@@ -39,7 +32,7 @@ export class ProfileService {
     return { ...profile, username: user.username };
   }
 
-  async create(userId: string, dto: CreateProfileDto) {
+  async create(userId: string, dto: { displayName: string }) {
     const exists = await this.profileRepo.findOne({ where: { userId } });
     if (exists) throw new ConflictException('Profile already exists');
 
@@ -47,7 +40,7 @@ export class ProfileService {
     return this.profileRepo.save(profile);
   }
 
-  async update(id: string, dto: UpdateProfileDto) {
+  async update(id: string, dto: Partial<{ displayName: string; headline: string; avatarUrl: string }>) {
     const profile = await this.profileRepo.findOne({ where: { id } });
     if (!profile) throw new NotFoundException('Profile not found');
     Object.assign(profile, dto);
@@ -57,13 +50,14 @@ export class ProfileService {
   async toggleVisibility(id: string) {
     const profile = await this.profileRepo.findOne({ where: { id } });
     if (!profile) throw new NotFoundException('Profile not found');
-    profile.isPublic = !profile.isPublic;
+    // Toggle between public and private
+    profile.visibility = profile.visibility === 'public' ? 'private' as any : 'public' as any;
     return this.profileRepo.save(profile);
   }
 
   // ── Experience CRUD ───────────────────
 
-  async addExperience(profileId: string, dto: CreateExperienceDto) {
+  async addExperience(profileId: string, dto: any) {
     const exp = this.expRepo.create({ ...dto, profileId });
     return this.expRepo.save(exp);
   }
@@ -76,7 +70,7 @@ export class ProfileService {
 
   // ── Education CRUD ────────────────────
 
-  async addEducation(profileId: string, dto: CreateEducationDto) {
+  async addEducation(profileId: string, dto: any) {
     const edu = this.eduRepo.create({ ...dto, profileId });
     return this.eduRepo.save(edu);
   }
@@ -89,7 +83,7 @@ export class ProfileService {
 
   // ── Skills CRUD ───────────────────────
 
-  async addSkill(profileId: string, dto: CreateSkillDto) {
+  async addSkill(profileId: string, dto: any) {
     const skill = this.skillRepo.create({ ...dto, profileId });
     return this.skillRepo.save(skill);
   }
@@ -107,16 +101,16 @@ export class ProfileService {
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.user', 'u')
       .leftJoinAndSelect('p.skills', 's')
-      .where('p.isPublic = true');
+      .where('p.visibility = :vis', { vis: 'public' });
 
     if (search) {
       qb.andWhere(
-        '(p.displayName ILIKE :q OR p.headline ILIKE :q OR u.username ILIKE :q)',
+        '(p.display_name ILIKE :q OR p.headline ILIKE :q OR u.username ILIKE :q)',
         { q: `%${search}%` },
       );
     }
 
-    qb.orderBy('p.likesCount', 'DESC')
+    qb.orderBy('p.created_at', 'DESC')
       .skip((page - 1) * limit)
       .take(limit);
 
@@ -129,7 +123,6 @@ export class ProfileService {
         displayName: p.displayName,
         headline: p.headline,
         avatarUrl: p.avatarUrl,
-        likesCount: p.likesCount,
         skills: (p.skills ?? []).map((s) => s.name),
       })),
       total,
