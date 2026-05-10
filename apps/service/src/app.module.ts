@@ -1,20 +1,39 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+
 import { UserEntity } from './entities/user.entity';
 import { ProfileEntity } from './entities/profile.entity';
+import { OtpCodeEntity } from './entities/otp-code.entity';
+import { RefreshTokenEntity } from './entities/refresh-token.entity';
 import { SkillEntity } from './entities/skill.entity';
 import { ExperienceEntity } from './entities/experience.entity';
 import { EducationEntity } from './entities/education.entity';
 import { InteractionEntity } from './entities/interaction.entity';
+
+import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProfileModule } from './modules/profile/profile.module';
-import { InteractionModule } from './modules/interaction/interaction.module';
+
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
 
 @Module({
   imports: [
+    // ── Config ──────────────────────────────────────────────────────
     ConfigModule.forRoot({ isGlobal: true }),
 
+    // ── Rate Limiting ───────────────────────────────────────────────
+    // Global rate limit: 100 requests per 60 seconds per IP
+    // Individual routes can override this with @Throttle()
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
+
+    // ── Database ────────────────────────────────────────────────────
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -28,19 +47,41 @@ import { InteractionModule } from './modules/interaction/interaction.module';
         entities: [
           UserEntity,
           ProfileEntity,
+          OtpCodeEntity,
+          RefreshTokenEntity,
           SkillEntity,
           ExperienceEntity,
           EducationEntity,
           InteractionEntity,
         ],
-        synchronize: true, // dev only — use migrations in prod
+        // IMPORTANT: Set to false in production and use migrations instead
+        synchronize: false,
         logging: config.get('NODE_ENV') === 'development',
       }),
     }),
 
+    // ── Feature Modules ─────────────────────────────────────────────
+    AuthModule,
     UserModule,
     ProfileModule,
-    InteractionModule,
+  ],
+  providers: [
+    // ── Global Guards ───────────────────────────────────────────────
+    // JwtAuthGuard: protects ALL routes by default (use @Public() to opt out)
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // RolesGuard: enforces @Roles() decorator on protected routes
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    // ThrottlerGuard: enforces rate limiting globally
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

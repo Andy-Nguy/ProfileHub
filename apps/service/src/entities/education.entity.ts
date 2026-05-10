@@ -7,9 +7,11 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
+export type { IEducation } from '@profilehub/data-access';
+import { IEducation } from '@profilehub/data-access';
 
 @Entity('educations')
-export class EducationEntity {
+export class EducationEntity implements IEducation {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 

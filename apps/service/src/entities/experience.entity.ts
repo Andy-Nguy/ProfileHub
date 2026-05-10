@@ -7,10 +7,12 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
-import { EmploymentType } from '../../../../libs/shared/data-access/src';
+export { EmploymentType } from '@profilehub/data-access';
+export type { IExperience } from '@profilehub/data-access';
+import { EmploymentType, IExperience } from '@profilehub/data-access';
 
 @Entity('experiences')
-export class ExperienceEntity {
+export class ExperienceEntity implements IExperience {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
