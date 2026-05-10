@@ -7,10 +7,12 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
-import { SkillCategory } from '../../../../libs/shared/data-access/src';
+export { SkillCategory } from '../../../../libs/shared/types/types';
+export { ISkill } from '../../../../libs/shared/types/types';
+import { SkillCategory, ISkill } from '../../../../libs/shared/types/types';
 
 @Entity('skills')
-export class SkillEntity {
+export class SkillEntity implements ISkill {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 

@@ -21,6 +21,10 @@ export default defineConfig({
         __dirname,
         '../../libs/shared/data-access/src/index.ts',
       ),
+      '@profilehub/ui': path.resolve(
+        __dirname,
+        '../../libs/shared/ui/src/index.ts',
+      ),
     },
   },
 });

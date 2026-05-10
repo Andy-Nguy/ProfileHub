@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EmploymentType } from '../types';
+import { EmploymentType } from '../../../types/types';
 
 export const CreateExperienceSchema = z
   .object({
@@ -19,7 +19,7 @@ export const CreateExperienceSchema = z
       }
       return true;
     },
-    { message: 'Start date must be before end date', path: ['endDate'] }
+    { message: 'Start date must be before end date', path: ['endDate'] },
   );
 
 export const UpdateExperienceSchema = z.object({

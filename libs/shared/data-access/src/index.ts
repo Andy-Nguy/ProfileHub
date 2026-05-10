@@ -3,7 +3,6 @@
 // Zod Schemas + Types (the bridge between FE & BE)
 // ═══════════════════════════════════════════
 
-export * from './types';
 export * from './schemas/user.schema';
 export * from './schemas/profile.schema';
 export * from './schemas/skill.schema';
