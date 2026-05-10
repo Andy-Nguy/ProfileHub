@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { authAPI } from '../services/auth-login';
 
 const API = '/api';
 
@@ -6,6 +7,55 @@ async function fetchJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
   return res.json();
+}
+
+// ── Auth ────────────────────────────────
+export function useLogin() {
+  return useMutation({
+    mutationFn: async (credentials: any) => {
+      try {
+        return await authAPI.login(credentials);
+      } catch (err: any) {
+        throw new Error(err.message || 'Login failed');
+      }
+    },
+  });
+}
+
+export function useRegister() {
+  return useMutation({
+    mutationFn: async (userData: any) => {
+      try {
+        return await authAPI.register(userData);
+      } catch (err: any) {
+        throw new Error(err.message || 'Registration failed');
+      }
+    },
+  });
+}
+
+export function useVerifyEmail() {
+  return useMutation({
+    mutationFn: async (verificationData: any) => {
+      try {
+        return await authAPI.verifyEmail(verificationData);
+      } catch (err: any) {
+        throw new Error(err.message || 'Email verification failed');
+      }
+    },
+  });
+}
+
+export function useLogout() {
+  return useMutation({
+    mutationFn: async () => {
+      try {
+        return await authAPI.logout();
+      } catch (err: any) {
+        throw new Error(err.message || 'Logout failed');
+      }
+    },
+  });
 }
 
 // ── Discovery Feed ──────────────────────

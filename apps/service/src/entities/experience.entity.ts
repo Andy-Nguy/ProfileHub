@@ -7,9 +7,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
-export { EmploymentType } from '@profilehub/data-access';
-export type { IExperience } from '@profilehub/data-access';
-import { EmploymentType, IExperience } from '@profilehub/data-access';
+export { EmploymentType } from '../../../../libs/shared/types/types';
+export { IExperience } from '../../../../libs/shared/types/types';
+import { EmploymentType, IExperience } from '../../../../libs/shared/types/types';
 
 @Entity('experiences')
 export class ExperienceEntity implements IExperience {
