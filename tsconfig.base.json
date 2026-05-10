@@ -22,7 +22,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@profilehub/data-access": ["libs/shared/data-access/src/index.ts"]
+      "@profilehub/data-access": ["libs/shared/data-access/src/index.ts"],
+      "@profilehub/ui": ["libs/shared/ui/src/index.ts"] 
     }
   },
   "exclude": ["node_modules", "tmp"]
