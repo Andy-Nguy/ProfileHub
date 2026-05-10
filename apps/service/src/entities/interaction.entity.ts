@@ -1,11 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  Index,
-} from 'typeorm';
-import { InteractionTargetType, InteractionType } from '../../../../libs/shared/data-access/src';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
+import { InteractionTargetType, InteractionType } from '../../../../libs/shared/types/types';
 
 @Entity('interactions')
 @Index(['userId', 'targetType', 'targetId', 'interactionType'], { unique: true })

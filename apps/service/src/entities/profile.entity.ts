@@ -12,9 +12,9 @@ import { UserEntity } from './user.entity';
 import { SkillEntity } from './skill.entity';
 import { ExperienceEntity } from './experience.entity';
 import { EducationEntity } from './education.entity';
-export { VisibilityType } from '@profilehub/data-access';
-export type { IProfile } from '@profilehub/data-access';
-import { VisibilityType, IProfile } from '@profilehub/data-access';
+import { VisibilityType, IProfile } from '../../../../libs/shared/types/types';
+
+export { VisibilityType, IProfile } from '../../../../libs/shared/types/types';
 
 @Entity('profiles')
 export class ProfileEntity implements IProfile {

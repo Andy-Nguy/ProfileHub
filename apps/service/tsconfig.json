@@ -10,7 +10,8 @@
   },
   "include": [
     "src/**/*.ts",
-    "../../libs/shared/data-access/src/**/*.ts"
+    "../../libs/shared/data-access/src/**/*.ts",
+    "../../libs/shared/types/types.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

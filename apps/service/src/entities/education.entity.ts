@@ -7,8 +7,9 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
-export type { IEducation } from '@profilehub/data-access';
-import { IEducation } from '@profilehub/data-access';
+import { IEducation } from '../../../../libs/shared/types/types';
+
+export { IEducation } from '../../../../libs/shared/types/types';
 
 @Entity('educations')
 export class EducationEntity implements IEducation {

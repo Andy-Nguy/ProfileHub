@@ -40,7 +40,6 @@ export enum SocialPlatform {
   PERSONAL = 'personal',
 }
 
-
 export enum VisibilityType {
   PUBLIC = 'public',
   PRIVATE = 'private',
@@ -94,7 +93,7 @@ export interface IProfile {
   visibility: VisibilityType;
   createdAt: string | Date;
   updatedAt: string | Date;
-  
+
   // Relations (optional)
   skills?: ISkill[];
   experiences?: IExperience[];
