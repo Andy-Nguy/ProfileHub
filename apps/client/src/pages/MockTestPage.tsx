@@ -5,12 +5,12 @@ import {
   EndorsementButton, 
   ProfileHeader, 
   TimelineSection 
-} from '@profilehub/ui';
+} from '@profilehub/ui'
 
 export const MockTestPage: React.FC = () => {
   const mockSkills = [
     { id: '1', name: 'React 18', count: 12 },
-    { id: '2', name: 'TypeScript', count: 8 },
+    { id: '2', name: '  TypeScript', count: 8 },
     { id: '3', name: 'Tailwind CSS', count: 15 },
     { id: '4', name: 'Node.js', count: 5 },
     { id: '5', name: 'Material Design 3', count: 20 },
