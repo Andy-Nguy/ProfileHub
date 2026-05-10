@@ -1,3 +1,7 @@
+/* ── Fonts ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,14 +13,42 @@ html {
 
 body {
   background: #f8f9fa;
-  color: #1a1c1e;
+  color: #191c1d;
   margin: 0;
 }
 
+/* ── Material Symbols ──────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  user-select: none;
+}
+
+/* ── M3 Elevation ──────────────────────────────── */
+.elevation-1 {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.elevation-2 {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: #c4c6cf; border-radius: 3px; }
 
+/* ── Focus ring ────────────────────────────────── */
 *:focus-visible {
   outline: 2px solid #000666;
   outline-offset: 2px;
+}
+
+/* ── Floating label peer trick ─────────────────── */
+/* Ensures the label "floats" when input has a value (not just on focus) */
+input:not(:placeholder-shown) ~ label,
+textarea:not(:placeholder-shown) ~ label {
+  transform: translateY(-1rem) scale(0.75);
+  top: 1rem;
 }
