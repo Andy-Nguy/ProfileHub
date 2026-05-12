@@ -13,17 +13,35 @@ export class ApiError extends Error {
 class ApiClient {
   private baseUrl = '/api';
 
+  private getHeaders(customHeaders: Record<string, string> = {}): HeadersInit {
+    const headers: Record<string, string> = { ...customHeaders };
+    try {
+      const rawSession = window.localStorage.getItem('profilehub.auth');
+      if (rawSession) {
+        const session = JSON.parse(rawSession);
+        if (session.accessToken) {
+          headers['Authorization'] = `Bearer ${session.accessToken}`;
+        }
+      }
+    } catch {
+      // Ignore
+    }
+    return headers;
+  }
+
   async get<T = any>(url: string): Promise<{ data: T }> {
-    const response = await fetch(`${this.baseUrl}${url}`);
+    const response = await fetch(`${this.baseUrl}${url}`, {
+      headers: this.getHeaders(),
+    });
     return this.handleResponse<T>(response);
   }
 
   async post<T = any>(url: string, body?: any): Promise<{ data: T }> {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'POST',
-      headers: {
+      headers: this.getHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
       body: body ? JSON.stringify(body) : undefined,
     });
     return this.handleResponse<T>(response);
@@ -32,9 +50,9 @@ class ApiClient {
   async put<T = any>(url: string, body?: any): Promise<{ data: T }> {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'PUT',
-      headers: {
+      headers: this.getHeaders({
         'Content-Type': 'application/json',
-      },
+      }),
       body: body ? JSON.stringify(body) : undefined,
     });
     return this.handleResponse<T>(response);
@@ -43,6 +61,7 @@ class ApiClient {
   async delete<T = any>(url: string): Promise<{ data: T }> {
     const response = await fetch(`${this.baseUrl}${url}`, {
       method: 'DELETE',
+      headers: this.getHeaders(),
     });
     return this.handleResponse<T>(response);
   }

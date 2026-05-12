@@ -27,4 +27,12 @@ export const authAPI = {
     const response = await apiClient.post('/auth/logout');
     return response.data;
   },
+
+  getMe: async () => {
+    // Add authorization header if we have token, handled in apiClient? 
+    // Wait, the API needs JWT, apiClient doesn't inject it yet. 
+    // I should inject the token if possible, or `apiClient` needs to handle it.
+    const response = await apiClient.get('/auth/me');
+    return response.data;
+  },
 };

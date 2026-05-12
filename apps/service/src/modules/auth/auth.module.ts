@@ -15,6 +15,7 @@ import { UserModule } from '../user/user.module';
 import { OtpModule } from '../otp/otp.module';
 import { RefreshTokenModule } from '../refresh-token/refresh-token.module';
 import { MailModule } from '../mail/mail.module';
+import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MailModule } from '../mail/mail.module';
     OtpModule,
     RefreshTokenModule,
     MailModule,
+    ProfileModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
