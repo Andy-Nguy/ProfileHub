@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-  displayName?: string;
-}
-
-export interface AuthSession {
-  accessToken: string;
-  user: AuthUser;
-}
+import { AuthUser, AuthSession } from '../../../../libs/shared/types/auth.types';
 
 const AUTH_STORAGE_KEY = 'profilehub.auth';
 const AUTH_SESSION_EVENT = 'profilehub-auth-changed';

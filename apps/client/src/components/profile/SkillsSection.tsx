@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SkillTag } from '../ui/SkillTag';
+import { SkillTag } from '../shared/SkillTag';
 
 const DEFAULT_SKILLS = ['UI Design', 'UX Research', 'Figma', 'Design Systems'];
 

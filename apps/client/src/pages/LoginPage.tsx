@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLogin } from '../hooks/useApi';
-import { setStoredAuthSession } from '../services/auth-session';
+import { setStoredAuthSession } from '../services/auth-session.service';
+import { Button } from '../components/shared/Button';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -157,14 +158,14 @@ export const LoginPage: React.FC = () => {
                 </a>
               </div>
 
-              {/* Submit Button */}
-              <button
-                className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              <Button
                 type="submit"
-                disabled={loginMutation.isPending}
+                className="w-full justify-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200"
+                isLoading={loginMutation.isPending}
+                loadingText="Signing In..."
               >
-                {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
-              </button>
+                Sign In
+              </Button>
             </form>
 
             {/* Divider */}

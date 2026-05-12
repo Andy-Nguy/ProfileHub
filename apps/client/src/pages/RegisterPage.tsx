@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useRegister, useVerifyEmail } from '../hooks/useApi';
+import { Button } from '../components/shared/Button';
 
 export const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -63,13 +64,6 @@ export const RegisterPage: React.FC = () => {
     );
   };
 
-  const handleBackToRegister = () => {
-    setIsOtpStep(false);
-    setOtp('');
-    setVerificationEmail('');
-    setError('');
-    setSuccessMessage('');
-  };
 
   return (
     <div className="bg-surface text-on-surface h-screen w-screen overflow-hidden">
@@ -215,14 +209,14 @@ export const RegisterPage: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Submit Button */}
-                  <button
-                    className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                  <Button
                     type="submit"
-                    disabled={registerMutation.isPending}
+                    className="w-full justify-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200"
+                    isLoading={registerMutation.isPending}
+                    loadingText="Creating Account..."
                   >
-                    {registerMutation.isPending ? 'Creating Account...' : 'Create Account'}
-                  </button>
+                    Create Account
+                  </Button>
                 </>
               ) : (
                 <>
@@ -247,22 +241,15 @@ export const RegisterPage: React.FC = () => {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <button
-                      className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-                      type="submit"
-                      disabled={verifyEmailMutation.isPending || otp.length !== 6}
-                    >
-                      {verifyEmailMutation.isPending ? 'Verifying...' : 'Verify Email'}
-                    </button>
-                    <button
-                      className="w-full border border-outline bg-surface text-on-surface font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-container-high transition-colors"
-                      type="button"
-                      onClick={handleBackToRegister}
-                    >
-                      Edit Details
-                    </button>
-                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full justify-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200"
+                    disabled={otp.length !== 6}
+                    isLoading={verifyEmailMutation.isPending}
+                    loadingText="Verifying..."
+                  >
+                    Verify Email
+                  </Button>
                 </>
               )}
             </form>
@@ -271,8 +258,7 @@ export const RegisterPage: React.FC = () => {
               <div className="rounded-2xl border border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
                 <p className="font-medium text-on-surface">Need a new code?</p>
                 <p className="mt-1">
-                  Go back, register again if needed, or check your inbox and spam folder for the
-                  latest OTP.
+                  Check your inbox and spam folder for the latest OTP.
                 </p>
               </div>
             )}

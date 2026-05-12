@@ -56,7 +56,11 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      throw new ApiError(data?.message || response.statusText || 'Request failed', {
+      const errorMessage = Array.isArray(data?.message)
+        ? data.message.join(', ')
+        : data?.message || response.statusText || 'Request failed';
+
+      throw new ApiError(errorMessage, {
         status: response.status,
         data,
       });
