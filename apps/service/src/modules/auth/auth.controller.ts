@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Req,
   Res,
@@ -8,13 +9,13 @@ import {
   HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
-import { RegisterDto, VerifyEmailDto, LoginDto } from './dto';
+import { RegisterDto, VerifyEmailDto, LoginDto, AuthMeResponseDto } from './dto';
 import { Public } from './decorators/public.decorator';
 import {
   getRefreshCookieOptions,
@@ -77,11 +78,7 @@ export class AuthController {
 
     // Set refresh token in httpOnly cookie
     const nodeEnv = this.config.get<string>('NODE_ENV', 'development');
-    res.cookie(
-      getRefreshCookieName(),
-      result.refreshToken,
-      getRefreshCookieOptions(nodeEnv),
-    );
+    res.cookie(getRefreshCookieName(), result.refreshToken, getRefreshCookieOptions(nodeEnv));
 
     // Return access token in JSON body — NOT the refresh token
     return {
@@ -98,10 +95,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
   @ApiResponse({ status: 200, description: 'Tokens refreshed' })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawRefreshToken = req.cookies?.[getRefreshCookieName()];
 
     if (!rawRefreshToken) {
@@ -115,11 +109,7 @@ export class AuthController {
 
     // Set new refresh token cookie (rotation)
     const nodeEnv = this.config.get<string>('NODE_ENV', 'development');
-    res.cookie(
-      getRefreshCookieName(),
-      result.refreshToken,
-      getRefreshCookieOptions(nodeEnv),
-    );
+    res.cookie(getRefreshCookieName(), result.refreshToken, getRefreshCookieOptions(nodeEnv));
 
     return {
       accessToken: result.accessToken,
@@ -133,21 +123,37 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout and revoke refresh token' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawRefreshToken = req.cookies?.[getRefreshCookieName()];
 
     const result = await this.authService.logout(rawRefreshToken);
 
     // Clear the refresh token cookie
     const nodeEnv = this.config.get<string>('NODE_ENV', 'development');
-    res.clearCookie(
-      getRefreshCookieName(),
-      getClearRefreshCookieOptions(nodeEnv),
-    );
+    res.clearCookie(getRefreshCookieName(), getClearRefreshCookieOptions(nodeEnv));
 
     return result;
+  }
+
+  // ── GET ME ──────────────────────────────────────────────────────────
+
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get current user session data',
+    description: 'Retrieve authenticated user session bootstrap data including profile',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User data retrieved successfully',
+    type: AuthMeResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or missing access token, or user is inactive/deleted',
+  })
+  async getMe(@Req() req: Request): Promise<AuthMeResponseDto> {
+    const user = req.user as any;
+    return this.authService.getUserProfile(user.id);
   }
 }

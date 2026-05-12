@@ -7,6 +7,7 @@ import { EducationEntity } from '../../entities/education.entity';
 import { SkillEntity } from '../../entities/skill.entity';
 import { ProfileService } from './profile.service';
 import { ProfileController } from './profile.controller';
+import { ProfileRepository } from './profile.repository';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { ProfileController } from './profile.controller';
     ]),
   ],
   controllers: [ProfileController],
-  providers: [ProfileService],
-  exports: [ProfileService],
+  providers: [ProfileService, ProfileRepository],
+  exports: [ProfileService, ProfileRepository],
 })
 export class ProfileModule {}

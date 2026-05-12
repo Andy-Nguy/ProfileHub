@@ -316,3 +316,44 @@ Client              AuthController       RefreshTokenService
 | Token reuse (stolen) | Phát hiện reuse → revoke ALL sessions của user |
 | Privilege escalation | RolesGuard kiểm tra `@Roles()` trên từng endpoint |
 | Account chưa xác thực | `is_active = false` block toàn bộ login attempt |
+
+---
+
+## 10. Luồng Khởi Động & Hydration (GET /auth/me)
+
+Đây là luồng cực kỳ quan trọng được gọi duy nhất 1 lần khi người dùng tải lại trang (F5) hoặc mở ứng dụng mới, giúp đồng bộ (Hydrate) trạng thái đăng nhập cho toàn bộ ứng dụng Frontend thông qua `AuthContext`.
+
+### 10.1 Sơ đồ luồng Frontend (AuthContext.tsx)
+
+```
+Client (AuthContext.init)       AuthController      AuthService / Repositories
+   │                                  │                   │
+   │─ Lần đầu mở app / F5             │                   │
+   │                                  │                   │
+   │─ 1. POST /auth/refresh ─────────▶│                   │
+   │   (Tự động mang Cookie)          │─ (rotation) ─────▶│
+   │◀── 200 { accessToken } ──────────│                   │
+   │                                  │                   │
+   │─ 2. Cập nhật header cho ApiClient│                   │
+   │                                  │                   │
+   │─ 3. GET /auth/me ────────────────▶                   │
+   │   (Gửi kèm AccessToken mới)      │                   │
+   │                                  │─ getMe(userId) ──▶│
+   │                                  │                   │ 1. findActiveUserById()
+   │                                  │                   │ 2. findProfileByUserId()
+   │                                  │                   │ 3. Check isActive, deletedAt
+   │◀── 200 { authenticated, user } ──│                   │
+   │                                  │                   │
+   │─ 4. Lưu vào AuthSession          │                   │
+   │     (React Context Provider)     │                   │
+   │                                  │                   │
+   ▼
+ Render App (Header, Guards, Route...)
+```
+
+### 10.2 Mục đích của việc tách /auth/me
+
+1. **Hydration (Phục hồi trạng thái):** Đảm bảo mỗi khi tải lại ứng dụng, Frontend biết chính xác người dùng hiện tại là ai, role gì, và thông tin profile mới nhất.
+2. **Layered Architecture:** Backend gọi qua các Repositories (`UsersRepository`, `ProfileRepository`) để lấy cả thông tin định danh (`email`, `username`, `role`) và thông tin hiển thị (`displayName`, `avatarUrl`, `headline`).
+3. **Chặn sớm User bị Ban:** Dù Refresh Token còn hạn, nhưng ở bước gọi `/auth/me`, Backend sẽ truy vấn trực tiếp bảng `users` để kiểm tra cờ `is_active = true` và `deleted_at IS NULL`. Nếu user bị khóa, họ sẽ lập tức nhận lỗi `401 Unauthorized` và bị Frontend đăng xuất (Clear Session) ngay lập tức.
+4. **Chia sẻ State toàn cục:** Thay vì mọi Component (TopAppBar, RouteGuards) phải gọi API độc lập, `AuthContext` quản lý dữ liệu này ở mức gốc, giúp tối ưu hiệu suất và giảm thiểu các Request thừa.

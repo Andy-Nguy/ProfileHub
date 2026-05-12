@@ -1,5 +1,5 @@
 import React from 'react';
-import { FloatingField, FloatingTextarea } from '../ui/FloatingField';
+import { FloatingField, FloatingTextarea } from '../shared/FloatingField';
 
 interface PersonalInfoSectionProps {
   firstName?: string;
