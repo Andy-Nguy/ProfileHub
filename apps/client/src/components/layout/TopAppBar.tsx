@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthSession } from '../../services/auth-session';
+import { useAuthSession } from '../../services/auth-session.service';
 import { useLogout } from '../../hooks/useApi';
+import { Button } from '../shared/Button';
 
 export const TopAppBar: React.FC = () => {
   const navigate = useNavigate();
@@ -125,15 +126,16 @@ export const TopAppBar: React.FC = () => {
                     <p className="font-label-lg text-label-lg text-on-surface">{displayName}</p>
                     <p className="text-sm text-on-surface-variant">{user?.email}</p>
                   </div>
-                  <button
+                  <Button
                     type="button"
                     onClick={handleLogout}
-                    disabled={logoutMutation.isPending}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left font-label-lg text-label-lg text-on-surface hover:bg-error-container hover:text-on-error-container transition-colors"
+                    isLoading={logoutMutation.isPending}
+                    loadingText="Logging out..."
+                    icon={<span className="material-symbols-outlined">logout</span>}
+                    className="w-full gap-3 px-4 py-3 text-left font-label-lg text-label-lg text-on-surface hover:bg-error-container hover:text-on-error-container transition-colors"
                   >
-                    <span className="material-symbols-outlined">logout</span>
-                    {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
-                  </button>
+                    Logout
+                  </Button>
                 </div>
               )}
             </div>

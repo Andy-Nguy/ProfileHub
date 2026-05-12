@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -12,11 +7,13 @@ import { UserEntity } from '../../entities/user.entity';
 import { ProfileEntity } from '../../entities/profile.entity';
 import { OtpPurpose } from '../../entities/otp-code.entity';
 import { UserService } from '../user/user.service';
+import { UsersRepository } from '../user/repositories/users.repository';
 import { OtpService } from '../otp/otp.service';
 import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import { MailService } from '../mail/mail.service';
 
 import { hashPassword, verifyPassword } from '../../shared/helpers';
+import { ProfileRepository } from '../profile/profile.repository';
 
 import { RegisterDto } from './dto/register.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -33,8 +30,8 @@ export class AuthService {
     private readonly mailService: MailService,
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
-    @InjectRepository(ProfileEntity)
-    private readonly profileRepo: Repository<ProfileEntity>,
+    private readonly profileRepository: ProfileRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   // ── REGISTER ────────────────────────────────────────────────────────
@@ -65,10 +62,7 @@ export class AuthService {
     });
 
     // 4. Generate + save OTP
-    const rawOtp = await this.otpService.createOtp(
-      dto.email,
-      OtpPurpose.REGISTER,
-    );
+    const rawOtp = await this.otpService.createOtp(dto.email, OtpPurpose.REGISTER);
 
     // 5. Send OTP email
     await this.mailService.sendVerificationOtp(dto.email, rawOtp);
@@ -90,11 +84,7 @@ export class AuthService {
    */
   async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string }> {
     // Verify OTP (handles expiry, attempts, brute-force protection)
-    await this.otpService.verifyAndConsumeOtp(
-      dto.email,
-      dto.code,
-      OtpPurpose.REGISTER,
-    );
+    await this.otpService.verifyAndConsumeOtp(dto.email, dto.code, OtpPurpose.REGISTER);
 
     // Use transaction for atomicity: activate user + create profile
     await this.dataSource.transaction(async (manager) => {
@@ -156,26 +146,18 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException(
-        'Account is not activated. Please verify your email first.',
-      );
+      throw new UnauthorizedException('Account is not activated. Please verify your email first.');
     }
 
     // Constant-time password comparison via bcrypt
-    const isPasswordValid = await verifyPassword(
-      dto.password,
-      user.passwordHash,
-    );
+    const isPasswordValid = await verifyPassword(dto.password, user.passwordHash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
     // Generate token pair
-    const tokenPair = await this.refreshTokenService.generateTokenPair(
-      user.id,
-      user.role,
-    );
+    const tokenPair = await this.refreshTokenService.generateTokenPair(user.id, user.role);
 
     // Save hashed refresh token to DB
     await this.refreshTokenService.saveRefreshToken({
@@ -244,8 +226,7 @@ export class AuthService {
    */
   async logout(rawRefreshToken: string): Promise<{ message: string }> {
     try {
-      const { tokenRecord } =
-        await this.refreshTokenService.validateRefreshToken(rawRefreshToken);
+      const { tokenRecord } = await this.refreshTokenService.validateRefreshToken(rawRefreshToken);
       await this.refreshTokenService.revokeByJti(tokenRecord.jti);
     } catch {
       // Silently handle invalid tokens during logout
@@ -254,5 +235,49 @@ export class AuthService {
     }
 
     return { message: 'Logged out successfully' };
+  }
+
+  // ── GET ME ──────────────────────────────────────────────────────────
+
+  /**
+   * Get authenticated user's session bootstrap data.
+   */
+  async getUserProfile(userId: string) {
+    // 1. Fetch user using repository
+    const user = await this.usersRepository.findActiveUserById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.deletedAt !== null) {
+      throw new UnauthorizedException('Account has been deleted');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is not active');
+    }
+
+    // 2. Fetch profile using repository
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+
+    return {
+      authenticated: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        profile: profile
+          ? {
+              id: profile.id,
+              displayName: profile.displayName,
+              headline: profile.headline,
+              avatarUrl: profile.avatarUrl,
+              visibility: profile.visibility,
+            }
+          : null,
+      },
+    };
   }
 }

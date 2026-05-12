@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ToggleSwitch } from '../ui/ToggleSwitch';
+import { ToggleSwitch } from '../shared/ToggleSwitch';
 
 interface VisibilityCardProps {
   defaultPublic?: boolean;

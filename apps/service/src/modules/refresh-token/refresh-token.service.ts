@@ -33,10 +33,7 @@ export class RefreshTokenService {
    * - Both tokens embed the same JTI for correlation
    * - Only the hashed refresh token is stored in DB
    */
-  async generateTokenPair(
-    userId: string,
-    role: string,
-  ): Promise<TokenPair> {
+  async generateTokenPair(userId: string, role: string): Promise<TokenPair> {
     const jti = generateJti();
 
     const payload: JwtPayload = { sub: userId, role, jti };
@@ -149,19 +146,37 @@ export class RefreshTokenService {
     userAgent?: string;
     ipAddress?: string;
   }): Promise<TokenPair> {
-    // 1. Revoke the old refresh token
-    await this.refreshRepo.update(params.oldTokenRecord.id, { isRevoked: true });
-
-    // 2. Generate new token pair
+    // 1. Generate new token pair and hash
     const tokenPair = await this.generateTokenPair(params.userId, params.role);
+    const tokenHash = await hashToken(tokenPair.refreshToken);
 
-    // 3. Save the new refresh token (hashed)
-    await this.saveRefreshToken({
-      userId: params.userId,
-      jti: tokenPair.jti,
-      rawToken: tokenPair.refreshToken,
-      userAgent: params.userAgent,
-      ipAddress: params.ipAddress,
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    // 2. Execute atomic database transaction
+    await this.refreshRepo.manager.transaction(async (manager) => {
+      // Step 1: Lock the user row to prevent concurrent race conditions
+      // This forces any concurrent refresh requests for the same user to wait in line.
+      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [params.userId]);
+
+      // Step 2: Mark ALL existing active tokens for this user as revoked
+      await manager.update(
+        RefreshTokenEntity,
+        { userId: params.userId, isRevoked: false },
+        { isRevoked: true },
+      );
+
+      // Step 3: Create and save the new refresh token
+      const record = manager.create(RefreshTokenEntity, {
+        userId: params.userId,
+        jti: tokenPair.jti,
+        tokenHash,
+        expiresAt,
+        userAgent: params.userAgent ?? null,
+        ipAddress: params.ipAddress ?? null,
+      });
+
+      await manager.save(record);
     });
 
     return tokenPair;
@@ -179,9 +194,6 @@ export class RefreshTokenService {
    * Used for security events (password change, account compromise, etc.)
    */
   async revokeAllUserTokens(userId: string): Promise<void> {
-    await this.refreshRepo.update(
-      { userId, isRevoked: false },
-      { isRevoked: true },
-    );
+    await this.refreshRepo.update({ userId, isRevoked: false }, { isRevoked: true });
   }
 }
