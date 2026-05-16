@@ -144,7 +144,7 @@ export class ProfileService {
     const profileCompletion = this.calculateProfileCompletion(profile);
 
     return {
-      needsOnboarding: profileCompletion < 100,
+      needsOnboarding: profileCompletion < 70,
       profileCompletion,
       profile: this.toOnboardingProfileDto(profile),
     };
@@ -168,7 +168,7 @@ export class ProfileService {
     const profileCompletion = this.calculateProfileCompletion(updatedProfile);
 
     return {
-      needsOnboarding: profileCompletion < 100,
+      needsOnboarding: profileCompletion < 70,
       profileCompletion,
       profile: this.toOnboardingProfileDto(updatedProfile),
     };
