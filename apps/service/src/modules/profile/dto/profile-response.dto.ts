@@ -1,9 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VisibilityType } from '../../../entities';
-import { EducationResponseDto } from './education.dto';
-import { ExperienceResponseDto } from './experience.dto';
-import { SkillResponseDto } from './skill.dto';
-import { SocialLinkResponseDto } from './social-link.dto';
+import { VisibilityTypeEnum } from '../../../entities';
 
 export class ProfileResponseDto {
   @ApiProperty()
@@ -36,8 +32,8 @@ export class ProfileResponseDto {
   @ApiProperty({ nullable: true })
   industry!: string | null;
 
-  @ApiProperty({ enum: VisibilityType })
-  visibility!: VisibilityType;
+  @ApiProperty({ enum: VisibilityTypeEnum })
+  visibility!: VisibilityTypeEnum;
 
   @ApiProperty()
   completionPercent!: number;
@@ -54,17 +50,7 @@ export class ProfileResponseDto {
   @ApiProperty()
   updatedAt!: string;
 
-  @ApiProperty({ type: [ExperienceResponseDto] })
-  experiences!: ExperienceResponseDto[];
-
-  @ApiProperty({ type: [EducationResponseDto] })
-  educations!: EducationResponseDto[];
-
-  @ApiProperty({ type: [SkillResponseDto] })
-  skills!: SkillResponseDto[];
-
-  @ApiProperty({ type: [SocialLinkResponseDto] })
-  socialLinks!: SocialLinkResponseDto[];
+ 
 }
 
 export class DiscoveryProfileDto {
@@ -92,8 +78,6 @@ export class DiscoveryProfileDto {
   @ApiProperty()
   likesCount!: number;
 
-  @ApiProperty({ type: [SkillResponseDto] })
-  skills!: SkillResponseDto[];
 }
 
 export class DiscoveryFeedResponseDto {
@@ -108,4 +92,55 @@ export class DiscoveryFeedResponseDto {
 
   @ApiProperty()
   totalPages!: number;
+}
+
+export class EducationResponseDto {
+  id!: string;
+  profileId!: string;
+  institution!: string;
+  degree!: string | null;
+  fieldOfStudy!: string | null;
+  startDate!: string;
+  endDate!: string | null;
+  isCurrent!: boolean;
+  description!: string | null;
+  displayOrder!: number;
+  createdAt!: string;
+  updatedAt!: string;
+}
+
+export class ExperienceResponseDto {
+  id!: string;
+  profileId!: string;
+  title!: string;
+  company!: string;
+  location!: string | null;
+  employmentType!: string;
+  startDate!: string;
+  endDate!: string | null;
+  isCurrent!: boolean;
+  description!: string | null;
+  displayOrder!: number;
+  createdAt!: string;
+  updatedAt!: string;
+}
+
+export class SkillResponseDto {
+  id!: string;
+  profileId!: string;
+  name!: string;
+  category!: string;
+  endorsementCount!: number;
+  displayOrder!: number;
+  createdAt!: string;
+  updatedAt!: string;
+}
+
+export class SocialLinkResponseDto {
+  id!: string;
+  profileId!: string;
+  platform!: string;
+  url!: string;
+  createdAt!: string;
+  updatedAt!: string;
 }

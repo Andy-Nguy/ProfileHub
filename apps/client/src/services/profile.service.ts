@@ -1,13 +1,6 @@
 import { apiClient, ApiError } from './api.service';
 import { toast } from 'sonner';
 
-export interface UpdateOnboardingDto {
-  displayName?: string;
-  headline?: string | null;
-  avatarUrl?: string | null;
-  visibility?: 'public' | 'private';
-}
-
 export interface UpdateProfileDto {
   displayName?: string;
   headline?: string | null;
@@ -19,9 +12,9 @@ export interface UpdateProfileDto {
 }
 
 export const profileAPI = {
-  updateOnboarding: async (dto: UpdateOnboardingDto) => {
+  updateOnboarding: async (dto: UpdateProfileDto) => {
     try {
-      const response = await apiClient.patch('/profiles/onboarding', dto);
+      const response = await apiClient.patch('/profiles/me', dto);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -69,7 +62,7 @@ export const profileAPI = {
 
   updateProfile: async (dto: UpdateProfileDto) => {
     try {
-      const response = await apiClient.patch('/profiles/mine', dto);
+      const response = await apiClient.patch('/profiles/me', dto);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -107,7 +100,7 @@ export const profileAPI = {
   // ── Experiences ───────────────────────────────────────────────────
   getExperiences: async () => {
     try {
-      const response = await apiClient.get('/profiles/mine/experiences');
+      const response = await apiClient.get('/profiles/me/experiences');
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -122,7 +115,7 @@ export const profileAPI = {
   },
   addExperience: async (data: any) => {
     try {
-      const response = await apiClient.post('/profiles/mine/experiences', data);
+      const response = await apiClient.post('/profiles/me/experiences', data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -139,7 +132,7 @@ export const profileAPI = {
   // ── Educations ────────────────────────────────────────────────────
   getEducations: async () => {
     try {
-      const response = await apiClient.get('/profiles/mine/educations');
+      const response = await apiClient.get('/profiles/me/educations');
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -154,7 +147,7 @@ export const profileAPI = {
   },
   addEducation: async (data: any) => {
     try {
-      const response = await apiClient.post('/profiles/mine/educations', data);
+      const response = await apiClient.post('/profiles/me/educations', data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -171,7 +164,7 @@ export const profileAPI = {
   // ── Skills ────────────────────────────────────────────────────────
   getSkills: async () => {
     try {
-      const response = await apiClient.get('/profiles/mine/skills');
+      const response = await apiClient.get('/profiles/me/skills');
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -186,7 +179,7 @@ export const profileAPI = {
   },
   addSkill: async (data: any) => {
     try {
-      const response = await apiClient.post('/profiles/mine/skills', data);
+      const response = await apiClient.post('/profiles/me/skills', data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -203,7 +196,7 @@ export const profileAPI = {
   // ── Social Links ──────────────────────────────────────────────────
   getSocialLinks: async () => {
     try {
-      const response = await apiClient.get('/profiles/mine/social-links');
+      const response = await apiClient.get('/profiles/me/social-links');
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {
@@ -218,7 +211,7 @@ export const profileAPI = {
   },
   addSocialLink: async (data: any) => {
     try {
-      const response = await apiClient.post('/profiles/mine/social-links', data);
+      const response = await apiClient.post('/profiles/me/social-links', data);
       return response.data;
     } catch (error) {
       if (error instanceof ApiError) {

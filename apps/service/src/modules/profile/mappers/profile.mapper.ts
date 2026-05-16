@@ -3,8 +3,6 @@ import { ProfileEntity } from '../../../entities/profile.entity';
 import {
   DiscoveryFeedResponseDto,
   DiscoveryProfileDto,
-  OnboardingProfileDto,
-  OnboardingStatusDto,
   ProfileResponseDto,
 } from '../dto';
 import { EducationMapper } from './education.mapper';
@@ -21,23 +19,7 @@ export class ProfileMapper {
     private readonly socialLinkMapper: SocialLinkMapper,
   ) {}
 
-  toOnboardingProfileDto(profile: ProfileEntity): OnboardingProfileDto {
-    return {
-      id: profile.id,
-      displayName: profile.displayName,
-      headline: profile.headline,
-      avatarUrl: profile.avatarUrl,
-      visibility: profile.visibility,
-    };
-  }
 
-  toOnboardingStatusDto(profile: ProfileEntity, profileCompletion: number): OnboardingStatusDto {
-    return {
-      needsOnboarding: profileCompletion < 100,
-      profileCompletion,
-      profile: this.toOnboardingProfileDto(profile),
-    };
-  }
 
   toProfileResponseDto(
     profile: ProfileEntity,
@@ -65,16 +47,6 @@ export class ProfileMapper {
       likesCount: options.likesCount ?? 0,
       createdAt: profile.createdAt.toISOString(),
       updatedAt: profile.updatedAt.toISOString(),
-      experiences: (profile.experiences ?? []).map((item) =>
-        this.experienceMapper.toResponseDto(item),
-      ),
-      educations: (profile.educations ?? []).map((item) =>
-        this.educationMapper.toResponseDto(item),
-      ),
-      skills: (profile.skills ?? []).map((item) => this.skillMapper.toResponseDto(item)),
-      socialLinks: (profile.socialLinks ?? []).map((item) =>
-        this.socialLinkMapper.toResponseDto(item),
-      ),
     };
   }
 
@@ -102,7 +74,6 @@ export class ProfileMapper {
       location: profile.location,
       industry: profile.industry,
       likesCount: 0,
-      skills: (profile.skills ?? []).map((item) => this.skillMapper.toResponseDto(item)),
     };
   }
 }

@@ -3,7 +3,11 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
-import { ProfileEditDialog } from '../components/profile/ProfileEditDialog';
+import { BasicInfoDialog } from '../components/profile/dialogs/BasicInfoDialog';
+import { AboutDialog } from '../components/profile/dialogs/AboutDialog';
+import { SkillsDialog } from '../components/profile/dialogs/SkillsDialog';
+import { ExperienceDialog } from '../components/profile/dialogs/ExperienceDialog';
+import { EducationDialog } from '../components/profile/dialogs/EducationDialog';
 import { profileAPI } from '../services/profile.service';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -29,29 +33,34 @@ export const ProfilePage: React.FC = () => {
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false); // Legacy, can remove
+  const [basicInfoOpen, setBasicInfoOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [skillsOpen, setSkillsOpen] = useState(false);
+  const [expState, setExpState] = useState<{ isOpen: boolean; id?: string; data?: any }>({ isOpen: false });
+  const [eduState, setEduState] = useState<{ isOpen: boolean; id?: string; data?: any }>({ isOpen: false });
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    try {
+      if (username) {
+        const data = await profileAPI.getPublicProfile(username);
+        setProfile(data);
+      } else {
+        const data = await profileAPI.getMyProfile();
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      setProfile(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const isOwnProfile = !username || user?.username === username;
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      try {
-        if (username) {
-          const data = await profileAPI.getPublicProfile(username);
-          setProfile(data);
-        } else {
-          const data = await profileAPI.getMyProfile();
-          setProfile(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-        setProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
   }, [username, user]);
 
@@ -90,21 +99,28 @@ export const ProfilePage: React.FC = () => {
   return (
     <>
 
-      {/* ── Edit / Create Dialog ─────────────────────────────────── */}
-      <ProfileEditDialog
-        isOpen={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        isCreating={isNewProfile}
-        initialData={{
-          firstName: profile.displayName.split(' ')[0],
-          lastName: profile.displayName.split(' ')[1],
-          headline: profile.headline,
-          bio: profile.bio,
-          skills: profile.skills.map((s: any) => s.name),
-          completionPercent: profile.completionPercent,
-        }}
-        onSave={() => console.log('Profile saved')}
-      />
+      {/* ── Dialogs ─────────────────────────────────── */}
+      {isOwnProfile && profile && (
+        <>
+          <BasicInfoDialog isOpen={basicInfoOpen} onClose={() => setBasicInfoOpen(false)} profile={profile} onSuccess={fetchProfile} />
+          <AboutDialog isOpen={aboutOpen} onClose={() => setAboutOpen(false)} profile={profile} onSuccess={fetchProfile} />
+          <SkillsDialog isOpen={skillsOpen} onClose={() => setSkillsOpen(false)} profile={profile} onSuccess={fetchProfile} />
+          <ExperienceDialog 
+            isOpen={expState.isOpen} 
+            onClose={() => setExpState({ isOpen: false })} 
+            experienceId={expState.id} 
+            initialData={expState.data} 
+            onSuccess={fetchProfile} 
+          />
+          <EducationDialog 
+            isOpen={eduState.isOpen} 
+            onClose={() => setEduState({ isOpen: false })} 
+            educationId={eduState.id} 
+            initialData={eduState.data} 
+            onSuccess={fetchProfile} 
+          />
+        </>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 md:ml-72 flex flex-col">
@@ -132,7 +148,7 @@ export const ProfilePage: React.FC = () => {
                   <>
                     {/* Own profile: Edit or Create */}
                     <button
-                      onClick={() => setDialogOpen(true)}
+                      onClick={() => setBasicInfoOpen(true)}
                       className="flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm"
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
@@ -171,7 +187,7 @@ export const ProfilePage: React.FC = () => {
                         <h3 className="font-title-lg text-title-lg text-on-surface">About</h3>
                         {isOwnProfile && (
                           <button
-                            onClick={() => setDialogOpen(true)}
+                            onClick={() => setAboutOpen(true)}
                             className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full p-1.5 transition-colors"
                             aria-label="Edit about"
                           >
@@ -196,9 +212,9 @@ export const ProfilePage: React.FC = () => {
                       subtitle: exp.company,
                       dateRange: `${new Date(exp.startDate).getFullYear()} - ${exp.isCurrent ? 'Present' : exp.endDate ? new Date(exp.endDate).getFullYear() : ''}`,
                       description: exp.description,
-                      onEdit: isOwnProfile ? () => console.log('Edit', exp.id) : undefined,
+                      onEdit: isOwnProfile ? () => setExpState({ isOpen: true, id: exp.id, data: exp }) : undefined,
                     })) || []}
-                    onAdd={isOwnProfile ? () => setDialogOpen(true) : undefined}
+                    onAdd={isOwnProfile ? () => setExpState({ isOpen: true }) : undefined}
                   />
                 </motion.div>
 
@@ -212,9 +228,9 @@ export const ProfilePage: React.FC = () => {
                       subtitle: `${edu.degree || ''} ${edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}`,
                       dateRange: `${new Date(edu.startDate).getFullYear()} - ${edu.isCurrent ? 'Present' : edu.endDate ? new Date(edu.endDate).getFullYear() : ''}`,
                       description: edu.description,
-                      onEdit: isOwnProfile ? () => console.log('Edit', edu.id) : undefined,
+                      onEdit: isOwnProfile ? () => setEduState({ isOpen: true, id: edu.id, data: edu }) : undefined,
                     })) || []}
-                    onAdd={isOwnProfile ? () => setDialogOpen(true) : undefined}
+                    onAdd={isOwnProfile ? () => setEduState({ isOpen: true }) : undefined}
                   />
                 </motion.div>
               </div>
@@ -230,7 +246,7 @@ export const ProfilePage: React.FC = () => {
                       </h3>
                       {isOwnProfile && (
                         <button
-                          onClick={() => setDialogOpen(true)}
+                          onClick={() => setSkillsOpen(true)}
                           className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full p-1.5 transition-colors"
                           aria-label="Edit skills"
                         >
@@ -316,7 +332,7 @@ export const ProfilePage: React.FC = () => {
                       />
                     </div>
                     <button
-                      onClick={() => setDialogOpen(true)}
+                      onClick={() => setBasicInfoOpen(true)}
                       className="mt-4 w-full text-center font-label-lg text-label-lg text-primary hover:underline"
                     >
                       Complete your profile →

@@ -8,14 +8,14 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { User } from './user.entity';
 import { SkillEntity } from './skill.entity';
 import { ExperienceEntity } from './experience.entity';
 import { EducationEntity } from './education.entity';
 import { SocialLinkEntity } from './social-link.entity';
-import { VisibilityType, IProfile } from '../../../../libs/shared/types/types';
+import { VisibilityTypeEnum, IProfile } from '../../../../libs/shared/types/types';
 
-export { VisibilityType, IProfile } from '../../../../libs/shared/types/types';
+export { VisibilityTypeEnum, IProfile } from '../../../../libs/shared/types/types';
 
 @Entity('profiles')
 export class ProfileEntity implements IProfile {
@@ -48,10 +48,10 @@ export class ProfileEntity implements IProfile {
 
   @Column({
     type: 'enum',
-    enum: VisibilityType,
-    default: VisibilityType.PUBLIC,
+    enum: VisibilityTypeEnum,
+    default: VisibilityTypeEnum.PUBLIC,
   })
-  visibility!: VisibilityType;
+  visibility!: VisibilityTypeEnum;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
@@ -60,9 +60,9 @@ export class ProfileEntity implements IProfile {
   updatedAt!: Date;
 
   // ── Relations ─────────────────────────────────────────────────────────
-  @OneToOne(() => UserEntity, (u) => u.profile, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (u) => u.profile, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user?: UserEntity;
+  user?: User;
 
   @OneToMany(() => SkillEntity, (s) => s.profile, { cascade: true })
   skills?: SkillEntity[];

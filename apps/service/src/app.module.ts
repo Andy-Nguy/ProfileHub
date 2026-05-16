@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
-import { UserEntity } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { ProfileEntity } from './entities/profile.entity';
 import { OtpCodeEntity } from './entities/otp-code.entity';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
@@ -46,7 +46,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'profilehub'),
         entities: [
-          UserEntity,
+          User,
           ProfileEntity,
           OtpCodeEntity,
           RefreshTokenEntity,

@@ -3,7 +3,7 @@ import { IExperience } from './experience.types';
 import { IEducation } from './education.types';
 import { ISocialLink } from './social.types';
 
-export enum VisibilityType {
+export enum VisibilityTypeEnum {
   PUBLIC = 'public',
   PRIVATE = 'private',
   CONNECTIONS_ONLY = 'connections_only',
@@ -19,7 +19,7 @@ export interface IProfile {
   coverUrl: string | null;
   location: string | null;
   industry: string | null;
-  visibility: VisibilityType;
+  visibility: VisibilityTypeEnum;
   createdAt: string | Date;
   updatedAt: string | Date;
 
