@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
 import { ProfileEditDialog } from '../components/profile/ProfileEditDialog';
+import { profileAPI } from '../services/profile.service';
+import { useAuth } from '../contexts/AuthContext';
 import {
   M3Card,
   SkillChip,
@@ -12,90 +14,7 @@ import {
   TimelineSection,
 } from '@profilehub/ui';
 
-// ─── Mock Data ───────────────────────────────────────────────────────────────
-const MOCK_PROFILES: Record<string, any> = {
-  jdoe: {
-    username: 'jdoe',
-    displayName: 'John Doe',
-    headline: 'Senior Software Engineer | Cloud Architect',
-    bio: 'Passionate about building scalable cloud solutions and mentoring junior developers. 10+ years of experience in full-stack development with a focus on React and Node.js.',
-    avatarUrl: 'https://i.pravatar.cc/150?u=1',
-    coverUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2029&auto=format&fit=crop',
-    location: 'San Francisco, CA',
-    likesCount: 156,
-    completionPercent: 75,
-    skills: [
-      { id: '1', name: 'React', count: 45 },
-      { id: '2', name: 'TypeScript', count: 32 },
-      { id: '3', name: 'Node.js', count: 28 },
-      { id: '4', name: 'AWS', count: 56 },
-      { id: '5', name: 'Docker', count: 12 },
-    ],
-    experiences: [
-      {
-        id: 'exp1',
-        title: 'Senior Software Engineer',
-        subtitle: 'TechCorp Solutions',
-        dateRange: '2020 - Present',
-        description: 'Leading the core platform team, migrating monolithic services to microservices using AWS and Kubernetes.',
-        onEdit: () => console.log('Edit exp1'),
-      },
-      {
-        id: 'exp2',
-        title: 'Full Stack Developer',
-        subtitle: 'Startup Inc',
-        dateRange: '2016 - 2020',
-        description: 'Developed and maintained customer-facing web applications using the MERN stack.',
-        onEdit: () => console.log('Edit exp2'),
-      },
-    ],
-    educations: [
-      {
-        id: 'edu1',
-        title: 'B.S. in Computer Science',
-        subtitle: 'University of California, Berkeley',
-        dateRange: '2012 - 2016',
-      },
-    ],
-  },
-  asmith: {
-    username: 'asmith',
-    displayName: 'Alice Smith',
-    headline: 'UI/UX Designer | Branding Expert',
-    bio: 'Creating user-centered designs that drive engagement. Specializing in minimalist aesthetics and complex design systems for enterprise products.',
-    avatarUrl: 'https://i.pravatar.cc/150?u=2',
-    coverUrl: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2000&auto=format&fit=crop',
-    location: 'New York, NY',
-    likesCount: 89,
-    completionPercent: 60,
-    skills: [
-      { id: 's1', name: 'Figma', count: 92 },
-      { id: 's2', name: 'Branding', count: 41 },
-      { id: 's3', name: 'Interaction Design', count: 67 },
-    ],
-    experiences: [
-      {
-        id: 'e1',
-        title: 'Lead Designer',
-        subtitle: 'Creative Agency',
-        dateRange: '2019 - Present',
-        description: 'Directing design strategy for Fortune 500 clients, overseeing a team of 10 designers.',
-        onEdit: () => console.log('Edit e1'),
-      },
-    ],
-    educations: [
-      {
-        id: 'ed1',
-        title: 'M.A. in Visual Design',
-        subtitle: 'Rhode Island School of Design',
-        dateRange: '2017 - 2019',
-      },
-    ],
-  },
-};
 
-// ─── The "current user" — in a real app this comes from auth context ──────────
-const CURRENT_USER = 'jdoe';
 
 /**
  * ProfilePage — unified single-page profile view.
@@ -106,11 +25,43 @@ const CURRENT_USER = 'jdoe';
  */
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  const resolvedUsername = username || CURRENT_USER;
-  const profile = MOCK_PROFILES[resolvedUsername];
-  const isOwnProfile = resolvedUsername === CURRENT_USER;
-
+  const { user } = useAuth();
+  
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const isOwnProfile = !username || user?.username === username;
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        if (username) {
+          const data = await profileAPI.getPublicProfile(username);
+          setProfile(data);
+        } else {
+          const data = await profileAPI.getMyProfile();
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [username, user]);
+
+  if (loading) {
+    return (
+      <div className="bg-background text-on-background min-h-screen flex items-center justify-center">
+        <div className="text-xl">Loading profile...</div>
+      </div>
+    );
+  }
 
   if (!profile) {
     return (
@@ -124,7 +75,7 @@ export const ProfilePage: React.FC = () => {
             <M3Card className="w-full max-w-2xl p-8 text-center">
               <h1 className="text-2xl font-bold mb-2">Profile not found</h1>
               <p className="text-on-surface-variant">
-                The profile for @{resolvedUsername} does not exist.
+                The profile for @{username || 'you'} does not exist.
               </p>
             </M3Card>
           </div>
@@ -137,9 +88,7 @@ export const ProfilePage: React.FC = () => {
   const isNewProfile = !profile.bio && profile.skills.length === 0;
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex">
-      {/* Side Navigation */}
-      <SideNav />
+    <>
 
       {/* ── Edit / Create Dialog ─────────────────────────────────── */}
       <ProfileEditDialog
@@ -174,6 +123,7 @@ export const ProfilePage: React.FC = () => {
                 location={profile.location}
                 avatarUrl={profile.avatarUrl}
                 coverUrl={profile.coverUrl}
+                showActions={!isOwnProfile}
               />
 
               {/* ── Action Row ─────────────────────────────────── */}
@@ -186,9 +136,9 @@ export const ProfilePage: React.FC = () => {
                       className="flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm"
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
-                        {isNewProfile ? 'add_circle' : 'edit'}
+                        {isNewProfile ? 'bolt' : 'edit'}
                       </span>
-                      {isNewProfile ? 'Create Profile' : 'Edit Profile'}
+                      {isNewProfile ? 'Complete Profile' : 'Edit Profile'}
                     </button>
 
                     <button className="flex items-center gap-2 border border-outline-variant text-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors">
@@ -240,7 +190,14 @@ export const ProfilePage: React.FC = () => {
                   <TimelineSection
                     title="Experience"
                     icon="work"
-                    items={profile.experiences}
+                    items={profile.experiences?.map((exp: any) => ({
+                      id: exp.id,
+                      title: exp.title,
+                      subtitle: exp.company,
+                      dateRange: `${new Date(exp.startDate).getFullYear()} - ${exp.isCurrent ? 'Present' : exp.endDate ? new Date(exp.endDate).getFullYear() : ''}`,
+                      description: exp.description,
+                      onEdit: isOwnProfile ? () => console.log('Edit', exp.id) : undefined,
+                    })) || []}
                     onAdd={isOwnProfile ? () => setDialogOpen(true) : undefined}
                   />
                 </motion.div>
@@ -249,7 +206,14 @@ export const ProfilePage: React.FC = () => {
                   <TimelineSection
                     title="Education"
                     icon="school"
-                    items={profile.educations}
+                    items={profile.educations?.map((edu: any) => ({
+                      id: edu.id,
+                      title: edu.institution,
+                      subtitle: `${edu.degree || ''} ${edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}`,
+                      dateRange: `${new Date(edu.startDate).getFullYear()} - ${edu.isCurrent ? 'Present' : edu.endDate ? new Date(edu.endDate).getFullYear() : ''}`,
+                      description: edu.description,
+                      onEdit: isOwnProfile ? () => console.log('Edit', edu.id) : undefined,
+                    })) || []}
                     onAdd={isOwnProfile ? () => setDialogOpen(true) : undefined}
                   />
                 </motion.div>
@@ -311,13 +275,26 @@ export const ProfilePage: React.FC = () => {
                       ? 'Share your portfolio across platforms.'
                       : `Connect with ${profile.displayName} on other platforms.`}
                   </p>
-                  <div className="flex gap-3">
-                    <button className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed flex items-center justify-center hover:opacity-80 transition-opacity">
-                      <span className="material-symbols-outlined">link</span>
-                    </button>
-                    <button className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed flex items-center justify-center hover:opacity-80 transition-opacity">
-                      <span className="material-symbols-outlined">alternate_email</span>
-                    </button>
+                  <div className="flex gap-3 flex-wrap">
+                    {profile.socialLinks?.map((link: any) => (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed flex items-center justify-center hover:opacity-80 transition-opacity"
+                        title={link.platform}
+                      >
+                        <span className="material-symbols-outlined">
+                          {link.platform === 'github' ? 'code' : 
+                           link.platform === 'linkedin' ? 'work' : 
+                           link.platform === 'twitter' ? 'chat' : 'link'}
+                        </span>
+                      </a>
+                    ))}
+                    {(!profile.socialLinks || profile.socialLinks.length === 0) && (
+                      <p className="text-on-primary-fixed-variant text-body-md">No social links added yet.</p>
+                    )}
                   </div>
                 </motion.div>
 
@@ -353,6 +330,6 @@ export const ProfilePage: React.FC = () => {
 
         <AppFooter variant="compact" />
       </main>
-    </div>
+    </>
   );
 };

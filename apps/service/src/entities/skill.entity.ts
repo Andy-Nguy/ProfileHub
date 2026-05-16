@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -16,22 +17,28 @@ export class SkillEntity implements ISkill {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ name: 'profile_id', type: 'uuid' })
   profileId!: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 100 })
   name!: string;
 
-  @Column({ type: 'varchar', length: 20, default: SkillCategory.OTHER })
+  @Column({ type: 'varchar', length: 50, default: SkillCategory.OTHER })
   category!: SkillCategory;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ name: 'endorsement_count', type: 'int', default: 0 })
   endorsementCount!: number;
 
-  @CreateDateColumn()
+  @Column({ name: 'display_order', type: 'smallint', default: 0 })
+  displayOrder!: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt!: Date;
+
   @ManyToOne(() => ProfileEntity, (p) => p.skills, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'profileId' })
+  @JoinColumn({ name: 'profile_id' })
   profile?: ProfileEntity;
 }

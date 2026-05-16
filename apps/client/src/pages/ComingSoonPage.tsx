@@ -19,10 +19,7 @@ export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
   description = "We're currently building this feature to provide you with the best professional experience. Stay tuned for updates!" 
 }) => {
   return (
-    <div className="bg-background text-on-background min-h-screen flex">
-      {/* Side Navigation */}
-      <SideNav />
-
+    <>
       {/* Main Content */}
       <main className="flex-1 md:ml-72 flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center bg-surface py-[32px] px-[16px] md:px-gutter">
@@ -65,6 +62,6 @@ export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({
 
         <AppFooter variant="compact" />
       </main>
-    </div>
+    </>
   );
 };

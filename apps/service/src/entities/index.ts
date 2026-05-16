@@ -7,3 +7,4 @@ export { SkillEntity } from './skill.entity';
 export { ExperienceEntity } from './experience.entity';
 export { EducationEntity } from './education.entity';
 export { InteractionEntity } from './interaction.entity';
+export { SocialLinkEntity } from './social-link.entity';
