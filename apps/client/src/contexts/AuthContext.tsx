@@ -7,6 +7,8 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: AuthUser | null;
+  needsOnboarding: boolean;
+  profileCompletion: number;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -14,6 +16,8 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { session, setSession, clearSession } = useAuthSession();
   const [isLoading, setIsLoading] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [profileCompletion, setProfileCompletion] = useState(0);
 
   useEffect(() => {
     const init = async () => {
@@ -27,39 +31,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           try {
             meRes = await authAPI.getMe();
           } catch (err: any) {
-            // If the token is expired, we will get a 401. We will catch it and proceed to refresh.
             if (err?.response?.status !== 401) {
-              // If it's another error (e.g. 500, network error), we might still want to clear or throw,
-              // but let's assume we need to refresh or clear.
+              // Handle other errors if needed
             }
           }
         }
 
-        // Step 2: If we don't have user data (no token, or token expired), try to refresh
+        // Step 2: If we don't have user data, try to refresh
         if (!meRes?.user) {
-          const refreshRes = await authAPI.refresh();
-
-          if (refreshRes?.accessToken) {
-            token = refreshRes.accessToken;
-            // Temporarily save token so ApiClient uses it for the next request
-            setSession({ accessToken: token, user: session?.user ?? (null as any) });
-
-            // Step 3: Get user data with the fresh token
-            meRes = await authAPI.getMe();
+          try {
+            const refreshRes = await authAPI.refresh();
+            if (refreshRes?.accessToken) {
+              token = refreshRes.accessToken;
+              // We need to set the session temporarily so getMe uses the new token
+              // Or better, pass the token to getMe if it supported it.
+              // For now, let's just rely on the fact that we'll set it at the end.
+              // But apiClient reads from localStorage, so we MUST save it.
+              setSession({ accessToken: token, user: session?.user ?? (null as any) });
+              meRes = await authAPI.getMe();
+            }
+          } catch (refreshErr) {
+            // Refresh failed, clear everything
+            clearSession();
+            return;
           }
         }
 
-        // Step 4: Finalize session state
+        // Step 3: Finalize session state
         if (meRes?.user && token) {
           setSession({
             accessToken: token,
             user: meRes.user,
           });
+          setNeedsOnboarding(meRes.needsOnboarding);
+          setProfileCompletion(meRes.profileCompletion);
         } else {
           clearSession();
+          setNeedsOnboarding(false);
+          setProfileCompletion(0);
         }
       } catch (err) {
-        // Silently clear session if completely fails
         clearSession();
       } finally {
         setIsLoading(false);
@@ -67,12 +78,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, []);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated: !!session?.user, isLoading, user: session?.user ?? null }}
+      value={{
+        isAuthenticated: !!session?.user,
+        isLoading,
+        user: session?.user ?? null,
+        needsOnboarding,
+        profileCompletion
+      }}
     >
       {children}
     </AuthContext.Provider>
