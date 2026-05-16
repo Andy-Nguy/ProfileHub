@@ -72,10 +72,7 @@ export const DiscoveryPage: React.FC = () => {
   );
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex">
-      {/* Side Navigation */}
-      <SideNav />
-
+    <>
       {/* Main Content */}
       <main className="flex-1 md:ml-72 flex flex-col">
         <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter overflow-y-auto">
@@ -190,6 +187,6 @@ export const DiscoveryPage: React.FC = () => {
 
         <AppFooter variant="compact" />
       </main>
-    </div>
+    </>
   );
 };
