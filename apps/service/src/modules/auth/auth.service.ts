@@ -203,13 +203,11 @@ export class AuthService {
     accessToken: string;
     refreshToken: string;
   }> {
-    const { userId, role, tokenRecord } =
-      await this.refreshTokenService.validateRefreshToken(rawRefreshToken);
-
-    const tokenPair = await this.refreshTokenService.rotateRefreshToken({
-      oldTokenRecord: tokenRecord,
-      userId,
-      role,
+    // Atomically validates the old token and issues a new pair in one transaction.
+    // This eliminates the race condition window that existed when validate and
+    // rotate were two separate operations.
+    const tokenPair = await this.refreshTokenService.validateAndRotate({
+      rawToken: rawRefreshToken,
       userAgent: meta.userAgent,
       ipAddress: meta.ipAddress,
     });
@@ -228,8 +226,8 @@ export class AuthService {
    */
   async logout(rawRefreshToken: string): Promise<{ message: string }> {
     try {
-      const { tokenRecord } = await this.refreshTokenService.validateRefreshToken(rawRefreshToken);
-      await this.refreshTokenService.revokeByJti(tokenRecord.jti);
+      const { jti } = await this.refreshTokenService.findValidTokenRecord(rawRefreshToken);
+      await this.refreshTokenService.revokeByJti(jti);
     } catch {
       // Silently handle invalid tokens during logout
       // The user is logging out regardless — don't error

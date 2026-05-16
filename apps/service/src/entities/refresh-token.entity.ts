@@ -10,7 +10,7 @@ import { UserEntity } from './user.entity';
 
 /**
  * Maps to the `refresh_tokens` table.
- * Refresh tokens are stored as bcrypt hashes — never raw.
+ * Refresh tokens are stored as SHA-256 hashes — never raw.
  * Each token has a unique JTI (JWT ID) embedded in the JWT payload.
  */
 @Entity('refresh_tokens')

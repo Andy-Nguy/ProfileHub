@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { authAPI } from '../services/auth-login.service';
 import { profileAPI } from '../services/profile.service';
 import { FloatingField } from '../components/shared/FloatingField';
 import { Button } from '../components/shared/Button';
 
 export const OnboardingPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authenticate } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,11 +27,21 @@ export const OnboardingPage: React.FC = () => {
 
     try {
       await profileAPI.updateOnboarding(formData);
-      // Success - redirect to dashboard or profile
+
+      // Re-fetch the user profile to get updated needsOnboarding = false.
+      // Note: authAPI.getMe() returns { user, needsOnboarding, profileCompletion }
+      // — no accessToken. We read the current token from localStorage directly.
+      const meRes = await authAPI.getMe();
+      if (meRes?.user) {
+        const storedSession = JSON.parse(
+          window.localStorage.getItem('profilehub.auth') || '{}',
+        );
+        if (storedSession.accessToken) {
+          await authenticate(storedSession.accessToken, meRes.user);
+        }
+      }
+
       navigate('/discovery');
-      // Refresh the page or state to update needsOnboarding? 
-      // Ideally AuthContext should handle this, or we just window.location.href
-      window.location.reload(); 
     } catch (err: any) {
       setError(err.message || 'Failed to complete onboarding. Please try again.');
     } finally {
@@ -97,7 +108,6 @@ export const OnboardingPage: React.FC = () => {
               label="Professional Headline (e.g. Fullstack Developer)" 
               value={formData.headline}
               onChange={(e) => setFormData({...formData, headline: e.target.value})}
-              required
             />
 
             <div className="space-y-3">

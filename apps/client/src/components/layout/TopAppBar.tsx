@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthSession } from '../../services/auth-session.service';
+import { useAuth } from '../../contexts/AuthContext';
 import { useLogout } from '../../hooks/useApi';
 import { Button } from '../shared/Button';
 
 export const TopAppBar: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, clearSession } = useAuthSession();
+  const { user, isAuthenticated } = useAuthSession();
+  const { deauthenticate } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement | null>(null);
   const logoutMutation = useLogout();
@@ -29,7 +31,7 @@ export const TopAppBar: React.FC = () => {
     try {
       await logoutMutation.mutateAsync();
     } finally {
-      clearSession();
+      deauthenticate();
       setIsMenuOpen(false);
       navigate('/');
     }

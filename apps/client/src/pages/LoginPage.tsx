@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLogin } from '../hooks/useApi';
-import { setStoredAuthSession } from '../services/auth-session.service';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/shared/Button';
 
 export const LoginPage: React.FC = () => {
@@ -13,6 +13,7 @@ export const LoginPage: React.FC = () => {
 
   const navigate = useNavigate();
   const loginMutation = useLogin();
+  const { authenticate } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,22 +21,19 @@ export const LoginPage: React.FC = () => {
     loginMutation.mutate(
       { email, password },
       {
-        onSuccess: (data) => {
-          setStoredAuthSession({
-            accessToken: data.accessToken,
-            user: {
-              ...data.user,
-              displayName: data.user?.displayName ?? data.user?.username,
-            },
+        onSuccess: async (data) => {
+          // authenticate() saves the token, fetches /auth/me, and updates
+          // context state reactively — no page reload needed.
+          await authenticate(data.accessToken, {
+            ...data.user,
+            displayName: data.user?.displayName ?? data.user?.username,
           });
-          
+
           if (data.needsOnboarding) {
             navigate('/onboarding');
           } else {
             navigate('/');
           }
-          // Force a reload to ensure AuthContext picks up the new state properly
-          window.location.reload();
         },
         onError: (err: any) => {
           setError(err.message || 'Login failed. Please try again.');
