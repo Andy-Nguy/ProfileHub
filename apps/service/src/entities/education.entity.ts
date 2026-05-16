@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -16,34 +17,40 @@ export class EducationEntity implements IEducation {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ name: 'profile_id', type: 'uuid' })
   profileId!: string;
 
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ name: 'institution_name', type: 'varchar', length: 255 })
   institution!: string;
 
-  @Column({ type: 'varchar', length: 150 })
-  degree!: string;
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  degree!: string | null;
 
-  @Column({ type: 'varchar', length: 150 })
-  fieldOfStudy!: string;
+  @Column({ name: 'field_of_study', type: 'varchar', length: 255, nullable: true })
+  fieldOfStudy!: string | null;
 
-  @Column({ type: 'date' })
+  @Column({ name: 'start_date', type: 'date' })
   startDate!: Date;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ name: 'end_date', type: 'date', nullable: true })
   endDate!: Date | null;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ name: 'is_current', type: 'boolean', default: false })
   isCurrent!: boolean;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @CreateDateColumn()
+  @Column({ name: 'display_order', type: 'smallint', default: 0 })
+  displayOrder!: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+  updatedAt!: Date;
+
   @ManyToOne(() => ProfileEntity, (p) => p.educations, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'profileId' })
+  @JoinColumn({ name: 'profile_id' })
   profile?: ProfileEntity;
 }
