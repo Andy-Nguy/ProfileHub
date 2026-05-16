@@ -8,27 +8,20 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { TopAppBar } from './components/layout/TopAppBar';
 
+import { OnboardingPage } from './pages/OnboardingPage';
+import { ProtectedRoute } from './components/shared/ProtectedRoute';
+
 /**
- * App root — global TopAppBar is rendered on every page except auth pages.
- *
- * Routes:
- *   /              → LandingPage  (public)
- *   /login         → LoginPage
- *   /register      → RegisterPage
- *   /discovery     → DiscoveryPage
- *   /profile       → ProfilePage  (own profile — current user)
- *   /u/:username   → ProfilePage  (any user's public portfolio)
- *   /messages      → ComingSoonPage
- *   /analytics     → ComingSoonPage
- *   /settings      → ComingSoonPage
+ * App root — global TopAppBar is rendered on every page except auth and onboarding pages.
  */
 const App: React.FC = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isOnboardingPage = location.pathname === '/onboarding';
 
   return (
     <div className="min-h-screen flex flex-col">
-      {!isAuthPage && <TopAppBar />}
+      {!isAuthPage && !isOnboardingPage && <TopAppBar />}
       <div className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -36,26 +29,35 @@ const App: React.FC = () => {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/discovery" element={<DiscoveryPage />} />
 
-          {/* Own profile shortcut (no username → defaults to current user) */}
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute requireOnboarding={false}>
+                <OnboardingPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Own profile shortcut */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Any user's public portfolio */}
           <Route path="/u/:username" element={<ProfilePage />} />
 
           {/* ── Coming Soon ─────────────────────────────────── */}
-          <Route path="/messages"  element={<ComingSoonPage title="Messages"           icon="mail"        description="Your professional messaging hub is being built. Soon you'll be able to connect directly with experts." />} />
-          <Route path="/network"   element={<ComingSoonPage title="Professional Network" icon="group"     description="Expand your reach. We are designing a powerful way for you to discover and connect with peers." />} />
-          <Route path="/resources" element={<ComingSoonPage title="Resources"           icon="folder_open" description="A curated library of professional resources is coming your way. Expand your knowledge base." />} />
-          <Route path="/analytics" element={<ComingSoonPage title="Analytics"           icon="insights"    description="Gain deep insights into your profile reach and professional impact. Detailed metrics coming soon." />} />
-          <Route path="/settings"  element={<ComingSoonPage title="Settings"            icon="settings"    description="Personalize your ProHub experience. Advanced account and privacy controls are being finalized." />} />
+          <Route path="/messages"  element={<ProtectedRoute><ComingSoonPage title="Messages" icon="mail" /></ProtectedRoute>} />
+          <Route path="/network"   element={<ProtectedRoute><ComingSoonPage title="Network" icon="group" /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><ComingSoonPage title="Analytics" icon="insights" /></ProtectedRoute>} />
+          <Route path="/settings"  element={<ProtectedRoute><ComingSoonPage title="Settings" icon="settings" /></ProtectedRoute>} />
 
-          <Route path="*" element={
-            <ComingSoonPage
-              title="Page Not Found"
-              icon="search_off"
-              description="The page you are looking for doesn't exist or has been moved."
-            />
-          } />
+          <Route path="*" element={<ComingSoonPage title="Page Not Found" icon="search_off" />} />
         </Routes>
       </div>
     </div>

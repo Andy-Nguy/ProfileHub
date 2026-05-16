@@ -8,10 +8,11 @@ import {
   Body,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { OnboardingStatusDto, UpdateOnboardingDto } from './dto';
 
 @ApiTags('Profiles')
 @Controller('profiles')
@@ -43,6 +44,21 @@ export class ProfileController {
   }
 
   // ── Protected Routes ────────────────────────────────────────────────
+
+  @Patch('onboarding')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update the authenticated user onboarding profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Onboarding profile updated successfully',
+    type: OnboardingStatusDto,
+  })
+  updateOnboarding(
+    @CurrentUser('id') userId: string,
+    @Body() dto: UpdateOnboardingDto,
+  ) {
+    return this.profileService.updateOnboardingProfile(userId, dto);
+  }
 
   @Patch(':id')
   @ApiBearerAuth()

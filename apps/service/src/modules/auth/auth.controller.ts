@@ -84,6 +84,7 @@ export class AuthController {
     return {
       accessToken: result.accessToken,
       user: result.user,
+      needsOnboarding: result.needsOnboarding,
     };
   }
 

@@ -8,9 +8,11 @@ import { SkillEntity } from '../../entities/skill.entity';
 import { ProfileService } from './profile.service';
 import { ProfileController } from './profile.controller';
 import { ProfileRepository } from './profile.repository';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
+    UserModule,
     TypeOrmModule.forFeature([
       ProfileEntity,
       UserEntity,

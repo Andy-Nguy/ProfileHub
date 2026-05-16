@@ -1,7 +1,5 @@
 import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 import { UserEntity } from '../../entities/user.entity';
 import { ProfileEntity } from '../../entities/profile.entity';
@@ -13,7 +11,7 @@ import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import { MailService } from '../mail/mail.service';
 
 import { hashPassword, verifyPassword } from '../../shared/helpers';
-import { ProfileRepository } from '../profile/profile.repository';
+import { ProfileService } from '../profile/profile.service';
 
 import { RegisterDto } from './dto/register.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -28,9 +26,8 @@ export class AuthService {
     private readonly otpService: OtpService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly mailService: MailService,
-    private readonly config: ConfigService,
     private readonly dataSource: DataSource,
-    private readonly profileRepository: ProfileRepository,
+    private readonly profileService: ProfileService,
     private readonly usersRepository: UsersRepository,
   ) {}
 
@@ -136,7 +133,8 @@ export class AuthService {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: { id: string; email: string; username: string; role: string };
+    user: { id: string; email: string; username: string; role: string; profile: any };
+    needsOnboarding: boolean;
   }> {
     const user = await this.userService.findByEmail(dto.email);
 
@@ -171,6 +169,8 @@ export class AuthService {
     // Update last login timestamp
     await this.userService.updateLastLogin(user.id);
 
+    const onboardingStatus = await this.profileService.getOnboardingStatus(user.id);
+
     return {
       accessToken: tokenPair.accessToken,
       refreshToken: tokenPair.refreshToken,
@@ -179,7 +179,9 @@ export class AuthService {
         email: user.email,
         username: user.username,
         role: user.role,
+        profile: onboardingStatus.profile,
       },
+      needsOnboarding: onboardingStatus.needsOnboarding,
     };
   }
 
@@ -243,7 +245,6 @@ export class AuthService {
    * Get authenticated user's session bootstrap data.
    */
   async getUserProfile(userId: string) {
-    // 1. Fetch user using repository
     const user = await this.usersRepository.findActiveUserById(userId);
 
     if (!user) {
@@ -258,25 +259,18 @@ export class AuthService {
       throw new UnauthorizedException('Account is not active');
     }
 
-    // 2. Fetch profile using repository
-    const profile = await this.profileRepository.findProfileByUserId(userId);
+    const onboardingStatus = await this.profileService.getOnboardingStatus(userId);
 
     return {
       authenticated: true,
+      needsOnboarding: onboardingStatus.needsOnboarding,
+      profileCompletion: onboardingStatus.profileCompletion,
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
         role: user.role,
-        profile: profile
-          ? {
-              id: profile.id,
-              displayName: profile.displayName,
-              headline: profile.headline,
-              avatarUrl: profile.avatarUrl,
-              visibility: profile.visibility,
-            }
-          : null,
+        profile: onboardingStatus.profile,
       },
     };
   }
