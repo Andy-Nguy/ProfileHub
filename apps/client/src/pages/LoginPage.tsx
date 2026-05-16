@@ -28,7 +28,14 @@ export const LoginPage: React.FC = () => {
               displayName: data.user?.displayName ?? data.user?.username,
             },
           });
-          navigate('/');
+          
+          if (data.needsOnboarding) {
+            navigate('/onboarding');
+          } else {
+            navigate('/');
+          }
+          // Force a reload to ensure AuthContext picks up the new state properly
+          window.location.reload();
         },
         onError: (err: any) => {
           setError(err.message || 'Login failed. Please try again.');
