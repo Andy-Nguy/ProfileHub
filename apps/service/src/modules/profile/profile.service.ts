@@ -1,105 +1,41 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ExperienceEntity } from '../../entities/experience.entity';
-import { EducationEntity } from '../../entities/education.entity';
-import { SkillEntity } from '../../entities/skill.entity';
-import { ProfileEntity } from '../../entities/profile.entity';
-import { VisibilityType } from '../../entities';
-import { ProfileRepository } from './profile.repository';
-import { UsersRepository } from '../user/repositories/users.repository';
-import { OnboardingProfileDto, UpdateOnboardingDto } from './dto';
-
-export interface OnboardingStatus {
-  needsOnboarding: boolean;
-  profileCompletion: number;
-  profile: OnboardingProfileDto | null;
-}
+import { Injectable } from '@nestjs/common';
+import {
+  DiscoveryFeedResponseDto,
+  OnboardingStatusDto,
+  ProfileResponseDto,
+  UpdateOnboardingDto,
+  UpdateProfileDto,
+} from './dto';
+import { ProfileAggregateService } from './profile-aggregate.service';
+import { ProfileDiscoveryService } from './profile-discovery.service';
+import { ProfileOnboardingService } from './profile-onboarding.service';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    private readonly profileRepository: ProfileRepository,
-    private readonly usersRepository: UsersRepository,
-    @InjectRepository(ProfileEntity)
-    private readonly profileRepo: Repository<ProfileEntity>,
-    @InjectRepository(ExperienceEntity)
-    private readonly expRepo: Repository<ExperienceEntity>,
-    @InjectRepository(EducationEntity)
-    private readonly eduRepo: Repository<EducationEntity>,
-    @InjectRepository(SkillEntity)
-    private readonly skillRepo: Repository<SkillEntity>,
-  ) {}
+    private readonly profileAggregateService: ProfileAggregateService,
+    private readonly profileDiscoveryService: ProfileDiscoveryService,
+    private readonly profileOnboardingService: ProfileOnboardingService,
+  ) { }
 
-  // ── Profile CRUD ──────────────────────
-
-  async findByUsername(username: string) {
-    const profile = await this.profileRepository.findPublicProfileByUsername(username);
-    if (!profile) throw new NotFoundException('Profile not found');
-
-    return {
-      id: profile.id,
-      userId: profile.userId,
-      displayName: profile.displayName,
-      headline: profile.headline,
-      avatarUrl: profile.avatarUrl,
-      visibility: profile.visibility,
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-      skills: profile.skills,
-      experiences: profile.experiences,
-      educations: profile.educations,
-      username: profile.user?.username,
-    };
+  getDiscoveryFeed(page = 1, limit = 20, search?: string): Promise<DiscoveryFeedResponseDto> {
+    return this.profileDiscoveryService.getDiscoveryFeed(page, limit, search);
   }
 
-  // ── Discovery Feed ────────────────────
-
-  async getDiscoveryFeed(page = 1, limit = 20, search?: string) {
-    const [items, total] = await this.profileRepository.findDiscoverableProfiles(
-      page,
-      limit,
-      search,
-    );
-
-    return {
-      data: items.map((p) => ({
-        id: p.id,
-        username: p.user?.username,
-        displayName: p.displayName,
-        headline: p.headline,
-        avatarUrl: p.avatarUrl,
-        skills: (p.skills ?? []).map((s) => s.name),
-      })),
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    };
+  findByUsername(username: string): Promise<ProfileResponseDto> {
+    return this.profileDiscoveryService.getPublicProfileByUsername(username);
   }
 
-  async update(
-    id: string,
-    dto: Partial<{ displayName: string; headline: string; avatarUrl: string }>,
-  ) {
-    const profile = await this.profileRepo.findOne({ where: { id } });
-    if (!profile) throw new NotFoundException('Profile not found');
-    Object.assign(profile, dto);
-    return this.profileRepo.save(profile);
+  getMyProfile(userId: string): Promise<ProfileResponseDto> {
+    return this.profileAggregateService.getMyProfile(userId);
   }
 
-  async toggleVisibility(id: string) {
-    const profile = await this.profileRepo.findOne({ where: { id } });
-    if (!profile) throw new NotFoundException('Profile not found');
-    profile.visibility =
-      profile.visibility === 'public'
-        ? ('private' as VisibilityType)
-        : ('public' as VisibilityType);
-    return this.profileRepo.save(profile);
+  updateMyProfile(userId: string, dto: UpdateProfileDto): Promise<ProfileResponseDto> {
+    return this.profileAggregateService.updateMyProfile(userId, dto);
   }
 
-  async addExperience(profileId: string, dto: any) {
-    const exp = this.expRepo.create({ ...dto, profileId });
-    return this.expRepo.save(exp);
+  getOnboardingStatus(userId: string): Promise<OnboardingStatusDto> {
+    return this.profileOnboardingService.getOnboardingStatus(userId);
   }
 
   async removeExperience(id: string) {

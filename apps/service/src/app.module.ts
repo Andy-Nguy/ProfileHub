@@ -12,6 +12,7 @@ import { SkillEntity } from './entities/skill.entity';
 import { ExperienceEntity } from './entities/experience.entity';
 import { EducationEntity } from './entities/education.entity';
 import { InteractionEntity } from './entities/interaction.entity';
+import { SocialLinkEntity } from './entities/social-link.entity';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -53,6 +54,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
           ExperienceEntity,
           EducationEntity,
           InteractionEntity,
+          SocialLinkEntity,
         ],
         // IMPORTANT: Set to false in production and use migrations instead
         synchronize: false,

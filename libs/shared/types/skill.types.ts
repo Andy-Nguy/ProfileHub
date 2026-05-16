@@ -15,5 +15,7 @@ export interface ISkill {
   name: string;
   category: SkillCategory;
   endorsementCount: number;
+  displayOrder: number;
   createdAt: string | Date;
+  updatedAt: string | Date;
 }

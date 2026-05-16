@@ -7,23 +7,41 @@ import {
   Param,
   Body,
   Query,
+  ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { OnboardingStatusDto, UpdateOnboardingDto } from './dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { DiscoveryFeedResponseDto, ProfileResponseDto } from './dto';
 
 @ApiTags('Profiles')
 @Controller('profiles')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  // ── Public Routes ───────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────
+  // PUBLIC ROUTES
+  // ─────────────────────────────────────────────────────────────────────
 
   @Public()
   @Get('discover')
-  @ApiOperation({ summary: 'Get public profiles discovery feed' })
+  @ApiOperation({ summary: 'Discovery feed — browse public profiles' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiResponse({ status: 200, type: DiscoveryFeedResponseDto })
   discover(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -37,82 +55,45 @@ export class ProfileController {
   }
 
   @Public()
-  @Get(':username')
-  @ApiOperation({ summary: 'Get a profile by username' })
+  @Get('u/:username')
+  @ApiOperation({ summary: 'Get a public profile by username' })
+  @ApiParam({ name: 'username', description: 'The username slug' })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
   getByUsername(@Param('username') username: string) {
     return this.profileService.findByUsername(username);
   }
 
-  // ── Protected Routes ────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────────────
+  // AUTHENTICATED — OWN PROFILE
+  // ─────────────────────────────────────────────────────────────────────
+
+  @Get('mine')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get the authenticated user\'s own profile with all CV sections' })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  getMyProfile(@CurrentUser('id') userId: string) {
+    return this.profileService.getMyProfile(userId);
+  }
+
+  @Patch('mine')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update the authenticated user\'s profile fields' })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  updateMyProfile(
+    @CurrentUser('id') userId: string,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    return this.profileService.updateMyProfile(userId, dto);
+  }
 
   @Patch('onboarding')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update the authenticated user onboarding profile' })
-  @ApiResponse({
-    status: 200,
-    description: 'Onboarding profile updated successfully',
-    type: OnboardingStatusDto,
-  })
+  @ApiOperation({ summary: 'Update the authenticated user\'s onboarding profile' })
+  @ApiResponse({ status: 200, type: OnboardingStatusDto })
   updateOnboarding(
     @CurrentUser('id') userId: string,
     @Body() dto: UpdateOnboardingDto,
   ) {
     return this.profileService.updateOnboardingProfile(userId, dto);
-  }
-
-  @Patch(':id')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a profile' })
-  update(@Param('id') id: string, @Body() dto: any) {
-    return this.profileService.update(id, dto);
-  }
-
-  @Patch(':id/visibility')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Toggle profile visibility' })
-  toggleVisibility(@Param('id') id: string) {
-    return this.profileService.toggleVisibility(id);
-  }
-
-  // ── Experience ──────────────────────────────────────────────────────
-
-  @Post(':profileId/experiences')
-  @ApiBearerAuth()
-  addExperience(@Param('profileId') profileId: string, @Body() dto: any) {
-    return this.profileService.addExperience(profileId, dto);
-  }
-
-  @Delete('experiences/:id')
-  @ApiBearerAuth()
-  removeExperience(@Param('id') id: string) {
-    return this.profileService.removeExperience(id);
-  }
-
-  // ── Education ───────────────────────────────────────────────────────
-
-  @Post(':profileId/educations')
-  @ApiBearerAuth()
-  addEducation(@Param('profileId') profileId: string, @Body() dto: any) {
-    return this.profileService.addEducation(profileId, dto);
-  }
-
-  @Delete('educations/:id')
-  @ApiBearerAuth()
-  removeEducation(@Param('id') id: string) {
-    return this.profileService.removeEducation(id);
-  }
-
-  // ── Skills ──────────────────────────────────────────────────────────
-
-  @Post(':profileId/skills')
-  @ApiBearerAuth()
-  addSkill(@Param('profileId') profileId: string, @Body() dto: any) {
-    return this.profileService.addSkill(profileId, dto);
-  }
-
-  @Delete('skills/:id')
-  @ApiBearerAuth()
-  removeSkill(@Param('id') id: string) {
-    return this.profileService.removeSkill(id);
   }
 }

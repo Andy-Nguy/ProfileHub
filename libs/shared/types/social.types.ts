@@ -5,3 +5,12 @@ export enum SocialPlatform {
   DRIBBBLE = 'dribbble',
   PERSONAL = 'personal',
 }
+
+export interface ISocialLink {
+  id: string;
+  profileId: string;
+  platform: string | SocialPlatform;
+  url: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+}
