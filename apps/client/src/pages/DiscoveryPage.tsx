@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
@@ -65,6 +66,7 @@ const MOCK_PROFILES = [
 export const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const { t } = useTranslation('profile');
 
   const { data, isLoading, error } = useDiscoveryFeed(1, 100);
 
@@ -93,10 +95,10 @@ export const DiscoveryPage: React.FC = () => {
             >
               <div>
                 <h1 className="font-headline-lg text-headline-lg text-on-background">
-                  Community Discovery
+                  {t('discovery.title')}
                 </h1>
                 <p className="font-body-lg text-body-lg text-on-surface-variant mt-1">
-                  Connect with industry leaders and browse curated portfolios.
+                  {t('discovery.subtitle')}
                 </p>
               </div>
 
@@ -106,7 +108,7 @@ export const DiscoveryPage: React.FC = () => {
                 </span>
                 <input
                   type="text"
-                  placeholder="Search profiles..."
+                  placeholder={t('discovery.searchPlaceholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-full border border-outline-variant bg-surface-container-lowest text-body-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -118,11 +120,11 @@ export const DiscoveryPage: React.FC = () => {
             {/* ── Profile Grid ────────────────── */}
             {isLoading ? (
               <div className="text-center py-24">
-                <div className="text-xl">Loading profiles...</div>
+                <div className="text-xl">{t('discovery.loading')}</div>
               </div>
             ) : error ? (
               <div className="text-center py-24 text-error">
-                <div className="text-xl">Error loading profiles</div>
+                <div className="text-xl">{t('discovery.errorLoading')}</div>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -179,7 +181,7 @@ export const DiscoveryPage: React.FC = () => {
                         favorite
                       </span>
                       <span className="font-label-lg text-label-lg">
-                        {profile.likesCount} endorsements
+                        {profile.likesCount} {t('discovery.endorsements')}
                       </span>
                     </div>
                   </motion.div>
@@ -194,7 +196,7 @@ export const DiscoveryPage: React.FC = () => {
                   search_off
                 </span>
                 <p className="text-on-surface-variant font-headline-lg text-headline-lg">
-                  No professionals found matching your search.
+                  {t('discovery.noResults')}
                 </p>
               </div>
             )}

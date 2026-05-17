@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthSession } from '../../services/auth-session.service';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLogout } from '../../hooks/useApi';
 import { Button } from '../shared/Button';
+import { LanguageSwitcher } from '../shared/LanguageSwitcher';
 
 export const TopAppBar: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ export const TopAppBar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement | null>(null);
   const logoutMutation = useLogout();
+  const { t } = useTranslation('common');
 
   React.useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -59,24 +62,27 @@ export const TopAppBar: React.FC = () => {
             to="/discovery"
             className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors py-4"
           >
-            Discover
+            {t('nav.discover')}
           </Link>
           <Link
             to="/network"
             className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors py-4"
           >
-            Network
+            {t('nav.network')}
           </Link>
           <Link
             to="/resources"
             className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors py-4"
           >
-            Resources
+            {t('nav.resources')}
           </Link>
         </nav>
 
         {/* Auth Actions */}
         <div className="flex items-center gap-2 ml-auto">
+          {/* Language Switcher — always visible */}
+          <LanguageSwitcher className="hidden sm:flex" />
+
           {!isAuthenticated ? (
             <>
               <div className="hidden md:flex items-center gap-2">
@@ -84,13 +90,13 @@ export const TopAppBar: React.FC = () => {
                   onClick={() => navigate('/login')}
                   className="text-primary font-label-lg text-label-lg px-6 py-2 rounded-full hover:bg-surface-container-low transition-colors"
                 >
-                  Sign In
+                  {t('nav.signIn')}
                 </button>
                 <button
                   onClick={() => navigate('/register')}
                   className="bg-primary text-on-primary font-label-lg text-label-lg px-6 py-2 rounded-full hover:bg-surface-tint transition-colors shadow-sm"
                 >
-                  Join Now
+                  {t('nav.joinNow')}
                 </button>
               </div>
               {/* Mobile login icon for space saving */}
@@ -115,7 +121,7 @@ export const TopAppBar: React.FC = () => {
                   <span className="block font-label-lg text-label-lg text-on-surface">
                     {displayName}
                   </span>
-                  <span className="block text-xs text-on-surface-variant">Account</span>
+                  <span className="block text-xs text-on-surface-variant">{t('nav.account')}</span>
                 </span>
                 <span className="material-symbols-outlined text-on-surface-variant">
                   {isMenuOpen ? 'expand_less' : 'expand_more'}
@@ -128,15 +134,20 @@ export const TopAppBar: React.FC = () => {
                     <p className="font-label-lg text-label-lg text-on-surface">{displayName}</p>
                     <p className="text-sm text-on-surface-variant">{user?.email}</p>
                   </div>
+                  {/* Language switcher inside the dropdown for mobile */}
+                  <div className="border-b border-outline-variant px-4 py-3 flex items-center justify-between sm:hidden">
+                    <span className="text-sm text-on-surface-variant">{t('language.label')}</span>
+                    <LanguageSwitcher />
+                  </div>
                   <Button
                     type="button"
                     onClick={handleLogout}
                     isLoading={logoutMutation.isPending}
-                    loadingText="Logging out..."
+                    loadingText={t('nav.loggingOut')}
                     icon={<span className="material-symbols-outlined">logout</span>}
                     className="w-full gap-3 px-4 py-3 text-left font-label-lg text-label-lg text-on-surface hover:bg-error-container hover:text-on-error-container transition-colors"
                   >
-                    Logout
+                    {t('nav.logout')}
                   </Button>
                 </div>
               )}

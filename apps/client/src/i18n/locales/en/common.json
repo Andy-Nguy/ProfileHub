@@ -1,0 +1,45 @@
+{
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "delete": "Delete",
+  "add": "Add",
+  "close": "Close",
+  "confirm": "Confirm",
+  "back": "Back",
+  "next": "Next",
+  "submit": "Submit",
+  "share": "Share",
+  "connect": "Connect",
+  "or": "or",
+  "orContinueWith": "or continue with",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "nav": {
+    "discover": "Discover",
+    "network": "Network",
+    "resources": "Resources",
+    "messages": "Messages",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "myProfile": "My Profile",
+    "signIn": "Sign In",
+    "joinNow": "Join Now",
+    "account": "Account",
+    "logout": "Logout",
+    "loggingOut": "Logging out...",
+    "sharePortfolio": "Share Portfolio"
+  },
+  "footer": {
+    "copyright": "© {{year}} ProHub Community Hub. Professional Growth through Collective Expertise.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "communityGuidelines": "Community Guidelines",
+    "contactSupport": "Contact Support"
+  },
+  "language": {
+    "label": "Language",
+    "en": "EN",
+    "vi": "VI"
+  }
+}
