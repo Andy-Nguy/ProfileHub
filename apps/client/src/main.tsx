@@ -5,6 +5,9 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 
+// i18n must be imported before <App /> so all translations are ready on first render
+import './i18n';
+
 import { AuthProvider } from './contexts/AuthContext';
 
 const queryClient = new QueryClient({

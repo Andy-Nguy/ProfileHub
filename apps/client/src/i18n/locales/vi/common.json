@@ -1,0 +1,45 @@
+{
+  "loading": "Đang tải...",
+  "save": "Lưu",
+  "cancel": "Hủy",
+  "edit": "Chỉnh sửa",
+  "delete": "Xóa",
+  "add": "Thêm",
+  "close": "Đóng",
+  "confirm": "Xác nhận",
+  "back": "Quay lại",
+  "next": "Tiếp theo",
+  "submit": "Gửi",
+  "share": "Chia sẻ",
+  "connect": "Kết nối",
+  "or": "hoặc",
+  "orContinueWith": "hoặc tiếp tục với",
+  "errorGeneric": "Có lỗi xảy ra. Vui lòng thử lại.",
+  "nav": {
+    "discover": "Khám phá",
+    "network": "Mạng lưới",
+    "resources": "Tài nguyên",
+    "messages": "Tin nhắn",
+    "analytics": "Phân tích",
+    "settings": "Cài đặt",
+    "myProfile": "Hồ sơ của tôi",
+    "signIn": "Đăng nhập",
+    "joinNow": "Tham gia ngay",
+    "account": "Tài khoản",
+    "logout": "Đăng xuất",
+    "loggingOut": "Đang đăng xuất...",
+    "sharePortfolio": "Chia sẻ Portfolio"
+  },
+  "footer": {
+    "copyright": "© {{year}} ProHub Community Hub. Phát triển nghề nghiệp thông qua chuyên môn tập thể.",
+    "privacyPolicy": "Chính sách Bảo mật",
+    "termsOfService": "Điều khoản Dịch vụ",
+    "communityGuidelines": "Nguyên tắc Cộng đồng",
+    "contactSupport": "Liên hệ Hỗ trợ"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "en": "EN",
+    "vi": "VI"
+  }
+}

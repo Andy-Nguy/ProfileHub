@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useLogin } from '../hooks/useApi';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/shared/Button';
+import { LanguageSwitcher } from '../components/shared/LanguageSwitcher';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +16,7 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const loginMutation = useLogin();
   const { authenticate } = useAuth();
+  const { t } = useTranslation(['auth', 'common']);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +39,7 @@ export const LoginPage: React.FC = () => {
           }
         },
         onError: (err: any) => {
-          setError(err.message || 'Login failed. Please try again.');
+          setError(err.message || t('common:errorGeneric'));
         },
       },
     );
@@ -67,11 +70,10 @@ export const LoginPage: React.FC = () => {
               hub
             </span>
             <h1 className="font-display-lg text-display-lg text-on-primary font-bold">
-              Welcome to ProHub
+              {t('auth:login.brandingHeading')}
             </h1>
             <p className="font-body-lg text-body-lg text-on-primary opacity-80 leading-relaxed">
-              Log in to access your professional dashboard, connect with experts, and showcase your
-              growth.
+              {t('auth:login.brandingSubtitle')}
             </p>
           </motion.div>
           <div className="absolute bottom-margin-desktop left-margin-desktop">
@@ -89,13 +91,18 @@ export const LoginPage: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
+            {/* Language switcher (top-right of form area) */}
+            <div className="flex justify-end">
+              <LanguageSwitcher />
+            </div>
+
             {/* Header */}
             <div className="space-y-unit text-center lg:text-left">
               <h2 className="font-headline-lg text-headline-lg font-bold text-on-surface">
-                Sign In
+                {t('auth:login.title')}
               </h2>
               <p className="font-body-lg text-body-lg text-on-surface-variant">
-                Enter your credentials to continue your journey.
+                {t('auth:login.subtitle')}
               </p>
             </div>
 
@@ -113,12 +120,12 @@ export const LoginPage: React.FC = () => {
                   className="absolute -top-2.5 left-3 bg-surface px-1 font-label-lg text-label-lg text-primary transition-all group-focus-within:text-primary"
                   htmlFor="email"
                 >
-                  Email Address
+                  {t('auth:login.emailLabel')}
                 </label>
                 <input
                   className="w-full bg-surface border-2 border-primary rounded-lg px-4 py-3 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                   id="email"
-                  placeholder="name@company.com"
+                  placeholder={t('auth:login.emailPlaceholder')}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -132,7 +139,7 @@ export const LoginPage: React.FC = () => {
                   className="absolute -top-2.5 left-3 bg-surface px-1 font-label-lg text-label-lg text-on-surface-variant group-focus-within:text-primary transition-all"
                   htmlFor="password"
                 >
-                  Password
+                  {t('auth:login.passwordLabel')}
                 </label>
                 <input
                   className="w-full bg-surface border border-outline rounded-lg px-4 py-3 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:border-2 transition-all pr-12"
@@ -159,7 +166,7 @@ export const LoginPage: React.FC = () => {
                   className="font-label-lg text-label-lg text-primary hover:underline transition-colors"
                   href="#"
                 >
-                  Forgot password?
+                  {t('auth:login.forgotPassword')}
                 </a>
               </div>
 
@@ -167,9 +174,9 @@ export const LoginPage: React.FC = () => {
                 type="submit"
                 className="w-full justify-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg py-4 px-6 rounded-full hover:bg-surface-tint shadow-sm elevation-1 hover:shadow-md transition-all duration-200"
                 isLoading={loginMutation.isPending}
-                loadingText="Signing In..."
+                loadingText={t('auth:login.submittingButton')}
               >
-                Sign In
+                {t('auth:login.submitButton')}
               </Button>
             </form>
 
@@ -177,7 +184,7 @@ export const LoginPage: React.FC = () => {
             <div className="flex items-center space-x-4 my-8">
               <div className="flex-1 border-t border-outline-variant"></div>
               <span className="font-label-lg text-label-lg text-on-surface-variant">
-                or continue with
+                {t('common:orContinueWith')}
               </span>
               <div className="flex-1 border-t border-outline-variant"></div>
             </div>
@@ -210,9 +217,9 @@ export const LoginPage: React.FC = () => {
 
             {/* Registration Link */}
             <p className="text-center font-body-lg text-body-lg text-on-surface-variant mt-8">
-              New to ProHub?{' '}
+              {t('auth:login.noAccount')}{' '}
               <Link className="text-primary hover:underline font-bold" to="/register">
-                Create an account
+                {t('auth:login.createAccount')}
               </Link>
             </p>
           </motion.div>

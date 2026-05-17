@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
 import { BasicInfoDialog } from '../components/profile/dialogs/BasicInfoDialog';
@@ -30,6 +31,7 @@ import {
 export const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+  const { t } = useTranslation('profile');
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ export const ProfilePage: React.FC = () => {
   if (loading) {
     return (
       <div className="bg-background text-on-background min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading profile...</div>
+        <div className="text-xl">{t('page.loading')}</div>
       </div>
     );
   }
@@ -82,9 +84,9 @@ export const ProfilePage: React.FC = () => {
         <main className="flex-1 md:ml-72 flex flex-col">
           <div className="flex-1 flex items-center justify-center p-6">
             <M3Card className="w-full max-w-2xl p-8 text-center">
-              <h1 className="text-2xl font-bold mb-2">Profile not found</h1>
+              <h1 className="text-2xl font-bold mb-2">{t('page.notFound')}</h1>
               <p className="text-on-surface-variant">
-                The profile for @{username || 'you'} does not exist.
+                {t('page.notFoundMessage', { username: username || 'you' })}
               </p>
             </M3Card>
           </div>
@@ -154,12 +156,12 @@ export const ProfilePage: React.FC = () => {
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                         {isNewProfile ? 'bolt' : 'edit'}
                       </span>
-                      {isNewProfile ? 'Complete Profile' : 'Edit Profile'}
+                      {isNewProfile ? t('page.completeProfile') : t('page.editProfile')}
                     </button>
 
                     <button className="flex items-center gap-2 border border-outline-variant text-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors">
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
-                      Share
+                      {t('page.share')}
                     </button>
                   </>
                 ) : (
@@ -167,7 +169,7 @@ export const ProfilePage: React.FC = () => {
                     {/* Viewing someone else's profile */}
                     <button className="flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm">
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>person_add</span>
-                      Connect
+                      {t('page.connect')}
                     </button>
                     <EndorsementButton count={profile.likesCount} isEndorsed={false} />
                   </>
@@ -184,7 +186,7 @@ export const ProfilePage: React.FC = () => {
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
                     <M3Card>
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-title-lg text-title-lg text-on-surface">About</h3>
+                        <h3 className="font-title-lg text-title-lg text-on-surface">{t('page.about')}</h3>
                         {isOwnProfile && (
                           <button
                             onClick={() => setAboutOpen(true)}
@@ -204,7 +206,7 @@ export const ProfilePage: React.FC = () => {
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
                   <TimelineSection
-                    title="Experience"
+                    title={t('page.experience')}
                     icon="work"
                     items={profile.experiences?.map((exp: any) => ({
                       id: exp.id,
@@ -220,7 +222,7 @@ export const ProfilePage: React.FC = () => {
 
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
                   <TimelineSection
-                    title="Education"
+                    title={t('page.education')}
                     icon="school"
                     items={profile.educations?.map((edu: any) => ({
                       id: edu.id,
@@ -242,7 +244,7 @@ export const ProfilePage: React.FC = () => {
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
                         <span className="material-symbols-outlined text-primary">psychology</span>
-                        Skills
+                        {t('page.skills')}
                       </h3>
                       {isOwnProfile && (
                         <button
@@ -265,10 +267,10 @@ export const ProfilePage: React.FC = () => {
 
                     <h3 className="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-primary">verified</span>
-                      Endorsements
+                      {t('page.endorsements')}
                     </h3>
                     <div className="flex items-center justify-between">
-                      <span className="font-body-lg text-body-lg text-on-surface-variant">Total</span>
+                      <span className="font-body-lg text-body-lg text-on-surface-variant">{t('page.total')}</span>
                       <EndorsementButton count={profile.likesCount} isEndorsed={isOwnProfile} />
                     </div>
                   </M3Card>
@@ -284,12 +286,12 @@ export const ProfilePage: React.FC = () => {
                 >
                   <h3 className="font-title-lg text-title-lg text-on-primary-fixed mb-2 flex items-center gap-2">
                     <span className="material-symbols-outlined">share</span>
-                    Social Presence
+                    {t('page.socialPresence')}
                   </h3>
                   <p className="font-body-lg text-body-lg text-on-primary-fixed-variant mb-4">
                     {isOwnProfile
-                      ? 'Share your portfolio across platforms.'
-                      : `Connect with ${profile.displayName} on other platforms.`}
+                      ? t('page.socialPresenceOwn')
+                      : t('page.socialPresenceOther', { name: profile.displayName })}
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     {profile.socialLinks?.map((link: any) => (
@@ -309,7 +311,7 @@ export const ProfilePage: React.FC = () => {
                       </a>
                     ))}
                     {(!profile.socialLinks || profile.socialLinks.length === 0) && (
-                      <p className="text-on-primary-fixed-variant text-body-md">No social links added yet.</p>
+                      <p className="text-on-primary-fixed-variant text-body-md">{t('page.noSocialLinks')}</p>
                     )}
                   </div>
                 </motion.div>
@@ -323,7 +325,7 @@ export const ProfilePage: React.FC = () => {
                     className="bg-surface-container-low rounded-[16px] p-5 border border-outline-variant"
                   >
                     <p className="font-label-lg text-label-lg text-on-surface-variant mb-3">
-                      Profile completion: <span className="text-primary font-bold">{profile.completionPercent}%</span>
+                      {t('page.profileCompletion')} <span className="text-primary font-bold">{profile.completionPercent}%</span>
                     </p>
                     <div className="w-full bg-surface-variant rounded-full h-2 overflow-hidden">
                       <div
@@ -335,7 +337,7 @@ export const ProfilePage: React.FC = () => {
                       onClick={() => setBasicInfoOpen(true)}
                       className="mt-4 w-full text-center font-label-lg text-label-lg text-primary hover:underline"
                     >
-                      Complete your profile →
+                      {t('page.completeProfileCta')}
                     </button>
                   </motion.div>
                 )}

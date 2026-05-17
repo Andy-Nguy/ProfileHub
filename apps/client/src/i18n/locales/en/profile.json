@@ -1,0 +1,52 @@
+{
+  "onboarding": {
+    "title": "Welcome to ProfileHub!",
+    "subtitle": "Let's set up your professional identity. Fill in the basics to get started.",
+    "avatarHint": "Click to randomize your avatar",
+    "displayNameLabel": "Display Name",
+    "headlineLabel": "Professional Headline (e.g. Fullstack Developer)",
+    "visibilityLabel": "Profile Visibility *",
+    "visibilityPublic": "Public",
+    "visibilityPublicHint": "Visible to everyone",
+    "visibilityPrivate": "Private",
+    "visibilityPrivateHint": "Only you can see",
+    "optionalToggleShow": "Add optional details (Location, Industry, Bio)",
+    "optionalToggleHide": "Hide optional details (Location, Industry, Bio)",
+    "locationLabel": "Location (Optional)",
+    "industryLabel": "Industry (Optional)",
+    "bioLabel": "Bio (Optional)",
+    "bioPlaceholder": "Tell us a little bit about yourself...",
+    "submitButton": "Complete Onboarding",
+    "submittingButton": "Saving..."
+  },
+  "page": {
+    "loading": "Loading profile...",
+    "notFound": "Profile not found",
+    "notFoundMessage": "The profile for @{{username}} does not exist.",
+    "editProfile": "Edit Profile",
+    "completeProfile": "Complete Profile",
+    "share": "Share",
+    "connect": "Connect",
+    "about": "About",
+    "skills": "Skills",
+    "endorsements": "Endorsements",
+    "total": "Total",
+    "socialPresence": "Social Presence",
+    "socialPresenceOwn": "Share your portfolio across platforms.",
+    "socialPresenceOther": "Connect with {{name}} on other platforms.",
+    "noSocialLinks": "No social links added yet.",
+    "profileCompletion": "Profile completion:",
+    "completeProfileCta": "Complete your profile →",
+    "experience": "Experience",
+    "education": "Education"
+  },
+  "discovery": {
+    "title": "Community Discovery",
+    "subtitle": "Connect with industry leaders and browse curated portfolios.",
+    "searchPlaceholder": "Search profiles...",
+    "loading": "Loading profiles...",
+    "errorLoading": "Error loading profiles",
+    "endorsements": "endorsements",
+    "noResults": "No professionals found matching your search."
+  }
+}
