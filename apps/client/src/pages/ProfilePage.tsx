@@ -9,6 +9,7 @@ import { AboutDialog } from '../components/profile/dialogs/AboutDialog';
 import { SkillsDialog } from '../components/profile/dialogs/SkillsDialog';
 import { ExperienceDialog } from '../components/profile/dialogs/ExperienceDialog';
 import { EducationDialog } from '../components/profile/dialogs/EducationDialog';
+import { AvatarEditDialog } from '../components/profile/dialogs/AvatarEditDialog';
 import { profileAPI } from '../services/profile.service';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -35,6 +36,8 @@ export const ProfilePage: React.FC = () => {
   
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false); // Legacy, can remove
   const [basicInfoOpen, setBasicInfoOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -61,6 +64,20 @@ export const ProfilePage: React.FC = () => {
   };
 
   const isOwnProfile = !username || user?.username === username;
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!isOwnProfile) return;
+    setAvatarUploading(true);
+    try {
+      const res = await profileAPI.uploadAvatar(file);
+      // Update local profile state directly so UI responds instantly
+      setProfile((prev: any) => ({ ...prev, avatarUrl: res.avatarUrl }));
+    } catch (error) {
+      console.error('Avatar upload failed', error);
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -104,6 +121,13 @@ export const ProfilePage: React.FC = () => {
       {/* ── Dialogs ─────────────────────────────────── */}
       {isOwnProfile && profile && (
         <>
+          <AvatarEditDialog 
+            isOpen={avatarDialogOpen} 
+            onClose={() => setAvatarDialogOpen(false)} 
+            currentAvatarUrl={profile.avatarUrl} 
+            onUpload={handleAvatarUpload}
+            isUploading={avatarUploading}
+          />
           <BasicInfoDialog isOpen={basicInfoOpen} onClose={() => setBasicInfoOpen(false)} profile={profile} onSuccess={fetchProfile} />
           <AboutDialog isOpen={aboutOpen} onClose={() => setAboutOpen(false)} profile={profile} onSuccess={fetchProfile} />
           <SkillsDialog isOpen={skillsOpen} onClose={() => setSkillsOpen(false)} profile={profile} onSuccess={fetchProfile} />
@@ -142,6 +166,9 @@ export const ProfilePage: React.FC = () => {
                 avatarUrl={profile.avatarUrl}
                 coverUrl={profile.coverUrl}
                 showActions={!isOwnProfile}
+                isOwnProfile={isOwnProfile}
+                onAvatarClick={() => setAvatarDialogOpen(true)}
+                avatarUploading={avatarUploading}
               />
 
               {/* ── Action Row ─────────────────────────────────── */}

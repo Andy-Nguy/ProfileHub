@@ -8,6 +8,9 @@ export interface ProfileHeaderProps {
   location?: string | null;
   className?: string;
   showActions?: boolean;
+  isOwnProfile?: boolean;
+  onAvatarClick?: () => void;
+  avatarUploading?: boolean;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ 
@@ -18,6 +21,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   location,
   className = '',
   showActions = true,
+  isOwnProfile = false,
+  onAvatarClick,
+  avatarUploading = false,
 }) => {
   return (
     <div className={`bg-surface-container-lowest rounded-[16px] shadow-sm elevation-1 border border-surface-variant overflow-hidden ${className}`}>
@@ -33,12 +39,25 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       {/* Profile Info */}
       <div className="px-6 pb-6 relative">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between -mt-12 sm:-mt-16 mb-4 gap-4">
-          <div className="relative">
+          <div 
+            className={`relative ${isOwnProfile && !avatarUploading ? 'cursor-pointer group' : ''}`}
+            onClick={onAvatarClick}
+          >
             <img 
               src={avatarUrl || 'https://via.placeholder.com/150'} 
               alt={displayName} 
-              className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-surface-container-lowest bg-surface-container-lowest shadow-sm"
+              className={`w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-surface-container-lowest bg-surface-container-lowest shadow-sm ${avatarUploading ? 'opacity-50' : ''}`}
             />
+            {avatarUploading && (
+              <div className="absolute inset-0 flex items-center justify-center rounded-full">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+            {isOwnProfile && !avatarUploading && (
+              <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border-4 border-transparent">
+                <span className="material-symbols-outlined text-white" style={{ fontSize: '32px' }}>photo_camera</span>
+              </div>
+            )}
           </div>
           {showActions && (
             <div className="flex gap-3 mt-4 sm:mt-0">
