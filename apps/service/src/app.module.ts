@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
-import { UserEntity } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { ProfileEntity } from './entities/profile.entity';
 import { OtpCodeEntity } from './entities/otp-code.entity';
 import { RefreshTokenEntity } from './entities/refresh-token.entity';
@@ -12,6 +12,7 @@ import { SkillEntity } from './entities/skill.entity';
 import { ExperienceEntity } from './entities/experience.entity';
 import { EducationEntity } from './entities/education.entity';
 import { InteractionEntity } from './entities/interaction.entity';
+import { SocialLinkEntity } from './entities/social-link.entity';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -45,7 +46,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
         password: config.get<string>('DB_PASS', 'postgres'),
         database: config.get<string>('DB_NAME', 'profilehub'),
         entities: [
-          UserEntity,
+          User,
           ProfileEntity,
           OtpCodeEntity,
           RefreshTokenEntity,
@@ -53,6 +54,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
           ExperienceEntity,
           EducationEntity,
           InteractionEntity,
+          SocialLinkEntity,
         ],
         // IMPORTANT: Set to false in production and use migrations instead
         synchronize: false,

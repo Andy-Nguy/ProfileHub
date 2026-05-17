@@ -1,8 +1,9 @@
 import { ISkill } from './skill.types';
 import { IExperience } from './experience.types';
 import { IEducation } from './education.types';
+import { ISocialLink } from './social.types';
 
-export enum VisibilityType {
+export enum VisibilityTypeEnum {
   PUBLIC = 'public',
   PRIVATE = 'private',
   CONNECTIONS_ONLY = 'connections_only',
@@ -13,8 +14,12 @@ export interface IProfile {
   userId: string;
   displayName: string;
   headline: string | null;
+  bio: string | null;
   avatarUrl: string | null;
-  visibility: VisibilityType;
+  coverUrl: string | null;
+  location: string | null;
+  industry: string | null;
+  visibility: VisibilityTypeEnum;
   createdAt: string | Date;
   updatedAt: string | Date;
 
@@ -22,4 +27,5 @@ export interface IProfile {
   skills?: ISkill[];
   experiences?: IExperience[];
   educations?: IEducation[];
+  socialLinks?: ISocialLink[];
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
+import { useDiscoveryFeed } from '../hooks/useApi';
 
 const MOCK_PROFILES = [
   {
@@ -65,11 +66,16 @@ export const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
 
-  const filtered = MOCK_PROFILES.filter(
-    (p) =>
+  const { data, isLoading, error } = useDiscoveryFeed(1, 100);
+
+  const profiles = data?.data || [];
+
+  const filtered = profiles.filter(
+    (p: any) =>
       p.displayName.toLowerCase().includes(search.toLowerCase()) ||
-      p.skills.some((s) => s.name.toLowerCase().includes(search.toLowerCase()))
+      p.skills?.some((s: any) => s.name.toLowerCase().includes(search.toLowerCase()))
   );
+
 
   return (
     <>
@@ -110,66 +116,76 @@ export const DiscoveryPage: React.FC = () => {
             </motion.div>
 
             {/* ── Profile Grid ────────────────── */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((profile, i) => (
-                <motion.div
-                  key={profile.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                  onClick={() => navigate(`/u/${profile.username}`)}
-                  className="cursor-pointer bg-surface-container-lowest rounded-xl border border-surface-variant p-6 hover:border-primary hover:shadow-md transition-all duration-300 flex flex-col gap-4"
-                  style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.06)' }}
-                >
-                  {/* Avatar + Name */}
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={profile.avatarUrl}
-                      alt={profile.displayName}
-                      className="w-16 h-16 rounded-full object-cover shadow-sm"
-                    />
-                    <div>
-                      <h3 className="font-title-lg text-title-lg text-on-background font-bold">
-                        {profile.displayName}
-                      </h3>
-                      <p className="font-label-lg text-label-lg text-on-surface-variant">
-                        @{profile.username}
-                      </p>
+            {isLoading ? (
+              <div className="text-center py-24">
+                <div className="text-xl">Loading profiles...</div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-24 text-error">
+                <div className="text-xl">Error loading profiles</div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filtered.map((profile: any, i: number) => (
+                  <motion.div
+                    key={profile.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => navigate(`/u/${profile.username}`)}
+                    className="cursor-pointer bg-surface-container-lowest rounded-xl border border-surface-variant p-6 hover:border-primary hover:shadow-md transition-all duration-300 flex flex-col gap-4"
+                    style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.06)' }}
+                  >
+                    {/* Avatar + Name */}
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={profile.avatarUrl}
+                        alt={profile.displayName}
+                        className="w-16 h-16 rounded-full object-cover shadow-sm"
+                      />
+                      <div>
+                        <h3 className="font-title-lg text-title-lg text-on-background font-bold">
+                          {profile.displayName}
+                        </h3>
+                        <p className="font-label-lg text-label-lg text-on-surface-variant">
+                          @{profile.username}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Headline */}
-                  <p className="font-body-lg text-body-lg text-on-surface-variant line-clamp-2">
-                    {profile.headline}
-                  </p>
+                    {/* Headline */}
+                    <p className="font-body-lg text-body-lg text-on-surface-variant line-clamp-2">
+                      {profile.headline}
+                    </p>
 
-                  {/* Skills */}
-                  <div className="flex flex-wrap gap-2 mt-auto pt-2">
-                    {profile.skills.map((skill) => (
+                    {/* Skills */}
+                    <div className="flex flex-wrap gap-2 mt-auto pt-2">
+                      {profile.skills?.map((skill: any) => (
+                        <span
+                          key={skill.name}
+                          className="inline-flex items-center bg-surface-container border border-outline-variant rounded-lg px-3 py-1 font-label-lg text-label-lg text-on-surface"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Endorsements */}
+                    <div className="flex items-center gap-1.5 text-primary pt-2 border-t border-outline-variant/30">
                       <span
-                        key={skill.name}
-                        className="inline-flex items-center bg-surface-container border border-outline-variant rounded-lg px-3 py-1 font-label-lg text-label-lg text-on-surface"
+                        className="material-symbols-outlined text-sm"
+                        style={{ fontVariationSettings: "'FILL' 1", fontSize: '18px' }}
                       >
-                        {skill.name}
+                        favorite
                       </span>
-                    ))}
-                  </div>
-
-                  {/* Endorsements */}
-                  <div className="flex items-center gap-1.5 text-primary pt-2 border-t border-outline-variant/30">
-                    <span
-                      className="material-symbols-outlined text-sm"
-                      style={{ fontVariationSettings: "'FILL' 1", fontSize: '18px' }}
-                    >
-                      favorite
-                    </span>
-                    <span className="font-label-lg text-label-lg">
-                      {profile.likesCount} endorsements
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                      <span className="font-label-lg text-label-lg">
+                        {profile.likesCount} endorsements
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
 
             {/* Empty state */}
             {filtered.length === 0 && (

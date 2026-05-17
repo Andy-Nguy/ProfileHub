@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
-import { UserEntity } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { ProfileEntity } from '../../entities/profile.entity';
 import { OtpPurpose } from '../../entities/otp-code.entity';
 import { UserService } from '../user/user.service';
@@ -86,7 +86,7 @@ export class AuthService {
     // Use transaction for atomicity: activate user + create profile
     await this.dataSource.transaction(async (manager) => {
       // Activate user
-      const user = await manager.findOne(UserEntity, {
+      const user = await manager.findOne(User, {
         where: { email: dto.email },
       });
 
@@ -133,7 +133,7 @@ export class AuthService {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: { id: string; email: string; username: string; role: string; profile: any };
+    user: { id: string; email: string; username: string; role: string; profile?: any };
     needsOnboarding: boolean;
   }> {
     const user = await this.userService.findByEmail(dto.email);

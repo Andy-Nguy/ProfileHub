@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { User } from './user.entity';
 
 /**
  * Maps to the `refresh_tokens` table.
@@ -44,7 +44,7 @@ export class RefreshTokenEntity {
   ipAddress!: string | null;
 
   // ── Relations ─────────────────────────────────────────────────────────
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user?: UserEntity;
+  user?: User;
 }

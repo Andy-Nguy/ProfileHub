@@ -1,118 +1,176 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  Query,
-} from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ProfileService } from './profile.service';
-import { Public } from '../auth/decorators/public.decorator';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { OnboardingStatusDto, UpdateOnboardingDto } from './dto';
+// profile.controller.ts
 
-@ApiTags('Profiles')
+import {
+  Controller, Get, Post, Body, HttpCode, HttpStatus, Patch, Put, Delete, Param, ParseUUIDPipe,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth, ApiOperation, ApiResponse, ApiTags,
+} from '@nestjs/swagger';
+import { ProfileService } from './profile.service';
+import { ProfileEntity } from '../../entities';
+import { UpdateProfileDto, UpsertProfileDto, ProfileResponseDto, ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
+import { ExperienceMapper, EducationMapper, SkillMapper, SocialLinkMapper, ProfileMapper } from './mappers';
+
+@ApiTags('Profile')
+@ApiBearerAuth()
 @Controller('profiles')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
 
-  // ── Public Routes ───────────────────────────────────────────────────
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly experienceMapper: ExperienceMapper,
+    private readonly educationMapper: EducationMapper,
+    private readonly skillMapper: SkillMapper,
+    private readonly socialLinkMapper: SocialLinkMapper,
+    private readonly profileMapper: ProfileMapper,
+  ) { }
 
+  // GET /profiles/mine → full profile of logged-in user
+  @Get('mine')
+  @ApiOperation({ summary: "Get the authenticated user's own profile with all CV sections" })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  async getMyProfile(@CurrentUser('id') userId: string) {
+    const user = await this.profileService.getUserFullProfile(userId);
+    const status = await this.profileService.getOnboardingStatus(userId);
+    return user.profile;
+  }
+
+  // GET /profiles/discover → get discovery feed
   @Public()
   @Get('discover')
-  @ApiOperation({ summary: 'Get public profiles discovery feed' })
-  discover(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-    @Query('search') search?: string,
-  ) {
-    return this.profileService.getDiscoveryFeed(
-      Number(page) || 1,
-      Number(limit) || 20,
-      search,
-    );
+  @ApiOperation({ summary: 'Get discovery feed' })
+  async getDiscoveryFeed() {
+    const users = await this.profileService.getAllUsersFullProfile();
+    const profiles = users.map(u => {
+      if (u.profile) {
+        u.profile.user = u; // Attach user to profile for mapping
+      }
+      return u.profile;
+    }).filter((p): p is ProfileEntity => p !== null);
+    return this.profileMapper.toDiscoveryFeedResponseDto(profiles, profiles.length, 1, profiles.length || 1);
   }
 
+  // GET /profiles/u/:username → get full profile by username
   @Public()
-  @Get(':username')
-  @ApiOperation({ summary: 'Get a profile by username' })
-  getByUsername(@Param('username') username: string) {
-    return this.profileService.findByUsername(username);
+  @Get('u/:username')
+  @ApiOperation({ summary: 'Get full profile by username' })
+
+  async getProfileByUsername(@Param('username') username: string) {
+    const user = await this.profileService.getProfileByUsername(username);
+    return user.profile;
   }
 
-  // ── Protected Routes ────────────────────────────────────────────────
+  // GET /profiles/:id → get profile details by profile ID
+  @Get(':id')
 
-  @Patch('onboarding')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update the authenticated user onboarding profile' })
-  @ApiResponse({
-    status: 200,
-    description: 'Onboarding profile updated successfully',
-    type: OnboardingStatusDto,
-  })
-  updateOnboarding(
+  @ApiOperation({ summary: 'Get profile details by profile ID' })
+  async getProfileById(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.profileService.getProfileByProfileId(id);
+    return user.profile;
+  }
+
+
+  // PATCH /profiles/me → update basic profile
+  @Patch('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Create or update authenticated user profile' })
+  async updateProfile(
     @CurrentUser('id') userId: string,
-    @Body() dto: UpdateOnboardingDto,
+    @Body() dto: UpdateProfileDto,
   ) {
-    return this.profileService.updateOnboardingProfile(userId, dto);
+    // Create or update authenticated user profile
+    const profile = await this.profileService.upsertProfile(userId, dto);
+    return profile;
   }
 
-  @Patch(':id')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update a profile' })
-  update(@Param('id') id: string, @Body() dto: any) {
-    return this.profileService.update(id, dto);
+  // ── CV SECTION CRUD: SKILL ────────────────────────────────────────
+
+  @Post('me/skills')
+  @HttpCode(HttpStatus.CREATED)
+  async createSkill(@CurrentUser('id') userId: string, @Body() dto: SkillDto) {
+    const skill = await this.profileService.createSkill(userId, dto);
+    return this.skillMapper.toResponseDto(skill);
   }
 
-  @Patch(':id/visibility')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Toggle profile visibility' })
-  toggleVisibility(@Param('id') id: string) {
-    return this.profileService.toggleVisibility(id);
+  @Put('me/skills/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateSkill(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: SkillDto) {
+    const skill = await this.profileService.updateSkill(userId, id, dto);
+    return this.skillMapper.toResponseDto(skill);
   }
 
-  // ── Experience ──────────────────────────────────────────────────────
-
-  @Post(':profileId/experiences')
-  @ApiBearerAuth()
-  addExperience(@Param('profileId') profileId: string, @Body() dto: any) {
-    return this.profileService.addExperience(profileId, dto);
+  @Delete('me/skills/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteSkill(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.profileService.deleteSkill(userId, id);
   }
 
-  @Delete('experiences/:id')
-  @ApiBearerAuth()
-  removeExperience(@Param('id') id: string) {
-    return this.profileService.removeExperience(id);
+  // ── CV SECTION CRUD: EXPERIENCE ───────────────────────────────────
+
+  @Post('me/experiences')
+  @HttpCode(HttpStatus.CREATED)
+  async createExperience(@CurrentUser('id') userId: string, @Body() dto: ExperienceDto) {
+    const exp = await this.profileService.createExperience(userId, dto);
+    return this.experienceMapper.toResponseDto(exp);
   }
 
-  // ── Education ───────────────────────────────────────────────────────
-
-  @Post(':profileId/educations')
-  @ApiBearerAuth()
-  addEducation(@Param('profileId') profileId: string, @Body() dto: any) {
-    return this.profileService.addEducation(profileId, dto);
+  @Put('me/experiences/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateExperience(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: ExperienceDto) {
+    const exp = await this.profileService.updateExperience(userId, id, dto);
+    return this.experienceMapper.toResponseDto(exp);
   }
 
-  @Delete('educations/:id')
-  @ApiBearerAuth()
-  removeEducation(@Param('id') id: string) {
-    return this.profileService.removeEducation(id);
+  @Delete('me/experiences/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteExperience(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.profileService.deleteExperience(userId, id);
   }
 
-  // ── Skills ──────────────────────────────────────────────────────────
+  // ── CV SECTION CRUD: EDUCATION ────────────────────────────────────
 
-  @Post(':profileId/skills')
-  @ApiBearerAuth()
-  addSkill(@Param('profileId') profileId: string, @Body() dto: any) {
-    return this.profileService.addSkill(profileId, dto);
+  @Post('me/educations')
+  @HttpCode(HttpStatus.CREATED)
+  async createEducation(@CurrentUser('id') userId: string, @Body() dto: EducationDto) {
+    const edu = await this.profileService.createEducation(userId, dto);
+    return this.educationMapper.toResponseDto(edu);
   }
 
-  @Delete('skills/:id')
-  @ApiBearerAuth()
-  removeSkill(@Param('id') id: string) {
-    return this.profileService.removeSkill(id);
+  @Put('me/educations/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateEducation(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: EducationDto) {
+    const edu = await this.profileService.updateEducation(userId, id, dto);
+    return this.educationMapper.toResponseDto(edu);
+  }
+
+  @Delete('me/educations/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteEducation(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.profileService.deleteEducation(userId, id);
+  }
+
+  // ── CV SECTION CRUD: SOCIAL LINK ──────────────────────────────────
+
+  @Post('me/social-links')
+  @HttpCode(HttpStatus.CREATED)
+  async createSocialLink(@CurrentUser('id') userId: string, @Body() dto: SocialLinkDto) {
+    const sl = await this.profileService.createSocialLink(userId, dto);
+    return this.socialLinkMapper.toResponseDto(sl);
+  }
+
+  @Put('me/social-links/:id')
+  @HttpCode(HttpStatus.OK)
+  async updateSocialLink(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: SocialLinkDto) {
+    const sl = await this.profileService.updateSocialLink(userId, id, dto);
+    return this.socialLinkMapper.toResponseDto(sl);
+  }
+
+  @Delete('me/social-links/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  deleteSocialLink(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.profileService.deleteSocialLink(userId, id);
   }
 }
+

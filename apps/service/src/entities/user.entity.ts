@@ -11,7 +11,7 @@ import { ProfileEntity } from './profile.entity';
 import { UserRole, IUser } from '../../../../libs/shared/types/types';
 
 @Entity('users')
-export class UserEntity implements IUser {
+export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
