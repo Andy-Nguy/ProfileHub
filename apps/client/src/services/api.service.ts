@@ -53,40 +53,22 @@ async function doRefresh(): Promise<string> {
 class ApiClient {
   private baseUrl = '/api';
 
-  /**
-   * Tracks whether a token refresh is currently in-flight.
-   * If true, subsequent 401s queue up rather than each firing their own refresh.
-   */
-  private isRefreshing = false;
-
-  /**
-   * Queue of resolve/reject callbacks for requests waiting on a refresh.
-   */
-  private pendingRefreshQueue: Array<{
-    resolve: (token: string) => void;
-    reject: (error: unknown) => void;
-  }> = [];
-
   // ── Token Management ──────────────────────────────────────────────────
 
   private getAccessToken(): string | null {
     try {
       const session = getStoredAuthSession();
-      if (session?.accessToken) {
-        headers['Authorization'] = `Bearer ${session.accessToken}`;
-      }
+      return session?.accessToken ?? null;
     } catch {
-      // Ignore
+      return null;
     }
   }
 
   // ── Request Headers ───────────────────────────────────────────────────
 
-  private getHeaders(
-    token: string | null,
-    customHeaders: Record<string, string> = {},
-  ): HeadersInit {
+  private getHeaders(customHeaders: Record<string, string> = {}): HeadersInit {
     const headers: Record<string, string> = { ...customHeaders };
+    const token = this.getAccessToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -94,26 +76,22 @@ class ApiClient {
   }
 
   private buildFetchOptions(method: string, body?: any): RequestInit {
-    const headers: Record<string, string> = {};
+    const customHeaders: Record<string, string> = {};
     if (body) {
-      headers['Content-Type'] = 'application/json';
+      customHeaders['Content-Type'] = 'application/json';
     }
     return {
       method,
-      headers: this.getHeaders(headers),
+      headers: this.getHeaders(customHeaders),
       credentials: 'include',
       body: body ? JSON.stringify(body) : undefined,
     };
   }
 
-  async get<T = any>(url: string): Promise<{ data: T }> {
-    return this.requestWithRetry<T>(url, 'GET');
-  }
-
   // ── Public HTTP Methods ───────────────────────────────────────────────
 
   async get<T = any>(url: string): Promise<{ data: T }> {
-    return this.request<T>(url, { method: 'GET' });
+    return this.requestWithRetry<T>(url, 'GET');
   }
 
   async post<T = any>(url: string, body?: any): Promise<{ data: T }> {
@@ -137,7 +115,7 @@ class ApiClient {
    *
    * Flow:
    *  1. Make the request.
-   *  2. If response is 401 AND this is not the refresh endpoint itself:
+   *  2. If response is 401 AND this is not the refresh/login endpoint:
    *     a. If a refresh is already in-flight, queue this request behind it.
    *     b. Otherwise start a refresh, notify all waiting requests on success,
    *        clear the session on failure, and redirect to /login.
@@ -148,33 +126,29 @@ class ApiClient {
     method: string,
     body?: any,
   ): Promise<{ data: T }> {
-    const isRefreshEndpoint = url.includes('/auth/refresh') || url.includes('/auth/login');
+    const isAuthEndpoint = url.includes('/auth/refresh') || url.includes('/auth/login');
 
     const makeRequest = () =>
       fetch(`${this.baseUrl}${url}`, this.buildFetchOptions(method, body));
 
     let response = await makeRequest();
 
-    if (response.status === 401 && !isRefreshEndpoint) {
-      // ── Refresh logic ──────────────────────────────────────────────
+    if (response.status === 401 && !isAuthEndpoint) {
       if (isRefreshing) {
-        // Wait for the ongoing refresh, then retry
-        const newToken = await new Promise<string>((resolve, reject) => {
+        // Wait for the ongoing refresh, then retry with the new token
+        await new Promise<string>((resolve, reject) => {
           subscribeToTokenRefresh((token) => {
             if (token) resolve(token);
             else reject(new Error('Refresh failed'));
           });
         });
-
-        if (newToken) {
-          response = await makeRequest(); // headers re-read from localStorage automatically
-        }
+        response = await makeRequest();
       } else {
         isRefreshing = true;
         try {
           const newToken = await doRefresh();
           notifyRefreshSubscribers(newToken);
-          response = await makeRequest(); // retry with new token
+          response = await makeRequest(); // retry with new token in localStorage
         } catch {
           notifyRefreshSubscribers(''); // unblock waiting requests
           removeStoredAuthSession();
