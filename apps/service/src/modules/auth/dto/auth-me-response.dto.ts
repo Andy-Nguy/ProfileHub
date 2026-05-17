@@ -30,19 +30,13 @@ export class AuthMeUserDto {
   @ApiProperty()
   role!: string;
 
-  @ApiProperty({ type: () => AuthMeProfileDto, nullable: true })
-  profile!: AuthMeProfileDto | null;
+
 }
 
 export class AuthMeResponseDto {
   @ApiProperty()
   authenticated!: boolean;
 
-  @ApiProperty()
-  needsOnboarding!: boolean;
-
-  @ApiProperty({ minimum: 0, maximum: 100 })
-  profileCompletion!: number;
 
   @ApiProperty({ type: () => AuthMeUserDto })
   user!: AuthMeUserDto;

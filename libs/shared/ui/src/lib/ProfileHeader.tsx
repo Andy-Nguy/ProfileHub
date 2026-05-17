@@ -7,6 +7,7 @@ export interface ProfileHeaderProps {
   headline?: string | null;
   location?: string | null;
   className?: string;
+  showActions?: boolean;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ 
@@ -15,7 +16,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   displayName, 
   headline, 
   location,
-  className = ''
+  className = '',
+  showActions = true,
 }) => {
   return (
     <div className={`bg-surface-container-lowest rounded-[16px] shadow-sm elevation-1 border border-surface-variant overflow-hidden ${className}`}>
@@ -38,14 +40,16 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-surface-container-lowest bg-surface-container-lowest shadow-sm"
             />
           </div>
-          <div className="flex gap-3 mt-4 sm:mt-0">
-            <button className="bg-primary text-on-primary font-label-lg text-label-lg py-2 px-6 rounded-full hover:bg-primary-container transition-colors shadow-sm elevation-1">
-              Connect
-            </button>
-            <button className="border border-outline-variant text-primary font-label-lg text-label-lg py-2 px-6 rounded-full hover:bg-surface-container-low transition-colors">
-              Message
-            </button>
-          </div>
+          {showActions && (
+            <div className="flex gap-3 mt-4 sm:mt-0">
+              <button className="bg-primary text-on-primary font-label-lg text-label-lg py-2 px-6 rounded-full hover:bg-primary-container transition-colors shadow-sm elevation-1">
+                Connect
+              </button>
+              <button className="border border-outline-variant text-primary font-label-lg text-label-lg py-2 px-6 rounded-full hover:bg-surface-container-low transition-colors">
+                Message
+              </button>
+            </div>
+          )}
         </div>
         
         <div>

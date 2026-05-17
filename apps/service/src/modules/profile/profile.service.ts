@@ -1,210 +1,182 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { ExperienceEntity } from '../../entities/experience.entity';
-import { EducationEntity } from '../../entities/education.entity';
-import { SkillEntity } from '../../entities/skill.entity';
-import { ProfileEntity } from '../../entities/profile.entity';
-import { VisibilityType } from '../../entities';
-import { ProfileRepository } from './profile.repository';
-import { UsersRepository } from '../user/repositories/users.repository';
-import { OnboardingProfileDto, UpdateOnboardingDto } from './dto';
 
-export interface OnboardingStatus {
-  needsOnboarding: boolean;
-  profileCompletion: number;
-  profile: OnboardingProfileDto | null;
-}
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { User } from '../../entities/user.entity';
+import { UpdateProfileDto, UpsertProfileDto, ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
+import { ProfileRepository } from './profile.repository';
+import { ProfileEntity, ExperienceEntity, EducationEntity, SkillEntity, SocialLinkEntity } from '../../entities';
 
 @Injectable()
 export class ProfileService {
-  constructor(
-    private readonly profileRepository: ProfileRepository,
-    private readonly usersRepository: UsersRepository,
-    @InjectRepository(ProfileEntity)
-    private readonly profileRepo: Repository<ProfileEntity>,
-    @InjectRepository(ExperienceEntity)
-    private readonly expRepo: Repository<ExperienceEntity>,
-    @InjectRepository(EducationEntity)
-    private readonly eduRepo: Repository<EducationEntity>,
-    @InjectRepository(SkillEntity)
-    private readonly skillRepo: Repository<SkillEntity>,
-  ) {}
 
-  // ── Profile CRUD ──────────────────────
+  constructor(private readonly profileRepository: ProfileRepository) { }
 
-  async findByUsername(username: string) {
-    const profile = await this.profileRepository.findPublicProfileByUsername(username);
-    if (!profile) throw new NotFoundException('Profile not found');
+  async getUserFullProfile(userId: string): Promise<User> {
+    const user = await this.profileRepository.getUserFullProfile(userId);
+
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
+    return user;
+  }
+
+  async getProfileByProfileId(profileId: string): Promise<User> {
+    const user = await this.profileRepository.getFullProfileByProfileId(profileId);
+
+    if (!user) {
+      throw new NotFoundException(`Profile ${profileId} not found`);
+    }
+
+    return user;
+  }
+
+  async getProfileByUsername(username: string): Promise<User> {
+    const user = await this.profileRepository.getFullProfileByUsername(username);
+
+    if (!user) {
+      throw new NotFoundException(`Profile for user @${username} not found`);
+    }
+
+    return user;
+  }
+
+
+
+  async getAllUsersFullProfile(): Promise<User[]> {
+    return this.profileRepository.getAllUsersFullProfile();
+  }
+
+  async getOnboardingStatus(userId: string) {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    // User needs onboarding if they haven't set a headline yet
+    const needsOnboarding = !profile || !profile.headline;
+
+    // Very basic profile completion calculation
+    let completion = 0;
+    if (profile) {
+      if (profile.displayName) completion += 25;
+      if (profile.headline) completion += 25;
+      if (profile.bio) completion += 25;
+      if (profile.location) completion += 25;
+    }
 
     return {
-      id: profile.id,
-      userId: profile.userId,
-      displayName: profile.displayName,
-      headline: profile.headline,
-      avatarUrl: profile.avatarUrl,
-      visibility: profile.visibility,
-      createdAt: profile.createdAt,
-      updatedAt: profile.updatedAt,
-      skills: profile.skills,
-      experiences: profile.experiences,
-      educations: profile.educations,
-      username: profile.user?.username,
+      needsOnboarding,
+      profileCompletion: completion,
+      profile,
     };
   }
 
-  // ── Discovery Feed ────────────────────
-
-  async getDiscoveryFeed(page = 1, limit = 20, search?: string) {
-    const [items, total] = await this.profileRepository.findDiscoverableProfiles(
-      page,
-      limit,
-      search,
+  // ── BASIC PROFILE UPDATE ──────────────────────────────────────────
+  async upsertProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+  ): Promise<ProfileEntity> {
+    const payload = Object.fromEntries(
+      Object.entries({
+        displayName: dto.displayName,
+        headline: dto.headline,
+        bio: dto.bio,
+        avatarUrl: dto.avatarUrl,
+        coverUrl: dto.coverUrl,
+        location: dto.location,
+        industry: dto.industry,
+        visibility: dto.visibility,
+      }).filter(([, value]) => value !== undefined),
     );
 
-    return {
-      data: items.map((p) => ({
-        id: p.id,
-        username: p.user?.username,
-        displayName: p.displayName,
-        headline: p.headline,
-        avatarUrl: p.avatarUrl,
-        skills: (p.skills ?? []).map((s) => s.name),
-      })),
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    };
+    return this.profileRepository.upsertProfileFields(userId, payload);
   }
 
-  async update(
-    id: string,
-    dto: Partial<{ displayName: string; headline: string; avatarUrl: string }>,
-  ) {
-    const profile = await this.profileRepo.findOne({ where: { id } });
+  // ── CV SECTION CRUD: SKILL ────────────────────────────────────────
+
+  async createSkill(userId: string, dto: SkillDto): Promise<SkillEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
     if (!profile) throw new NotFoundException('Profile not found');
-    Object.assign(profile, dto);
-    return this.profileRepo.save(profile);
+    return this.profileRepository.createSkill(profile.id, dto);
   }
 
-  async toggleVisibility(id: string) {
-    const profile = await this.profileRepo.findOne({ where: { id } });
+  async updateSkill(userId: string, skillId: string, dto: SkillDto): Promise<SkillEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
     if (!profile) throw new NotFoundException('Profile not found');
-    profile.visibility =
-      profile.visibility === 'public'
-        ? ('private' as VisibilityType)
-        : ('public' as VisibilityType);
-    return this.profileRepo.save(profile);
-  }
-
-  async addExperience(profileId: string, dto: any) {
-    const exp = this.expRepo.create({ ...dto, profileId });
-    return this.expRepo.save(exp);
-  }
-
-  async removeExperience(id: string) {
-    const exp = await this.expRepo.findOne({ where: { id } });
-    if (!exp) throw new NotFoundException('Experience not found');
-    return this.expRepo.remove(exp);
-  }
-
-  async addEducation(profileId: string, dto: any) {
-    const edu = this.eduRepo.create({ ...dto, profileId });
-    return this.eduRepo.save(edu);
-  }
-
-  async removeEducation(id: string) {
-    const edu = await this.eduRepo.findOne({ where: { id } });
-    if (!edu) throw new NotFoundException('Education not found');
-    return this.eduRepo.remove(edu);
-  }
-
-  async addSkill(profileId: string, dto: any) {
-    const skill = this.skillRepo.create({ ...dto, profileId });
-    return this.skillRepo.save(skill);
-  }
-
-  async removeSkill(id: string) {
-    const skill = await this.skillRepo.findOne({ where: { id } });
+    const skill = await this.profileRepository.updateSkill(profile.id, skillId, dto);
     if (!skill) throw new NotFoundException('Skill not found');
-    return this.skillRepo.remove(skill);
+    return skill;
   }
 
-  async getOnboardingStatus(userId: string): Promise<OnboardingStatus> {
-    const user = await this.usersRepository.findActiveUserById(userId);
-    if (!user || user.deletedAt !== null || !user.isActive) {
-      throw new NotFoundException('User not found');
-    }
-
-    const profile = await this.profileRepository.findByUserIdOrFail(userId);
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    const profileCompletion = this.calculateProfileCompletion(profile);
-
-    return {
-      needsOnboarding: profileCompletion < 70,
-      profileCompletion,
-      profile: this.toOnboardingProfileDto(profile),
-    };
+  async deleteSkill(userId: string, skillId: string): Promise<void> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const deleted = await this.profileRepository.deleteSkill(profile.id, skillId);
+    if (!deleted) throw new NotFoundException('Skill not found');
   }
 
-  async updateOnboardingProfile(
-    userId: string,
-    dto: UpdateOnboardingDto,
-  ): Promise<OnboardingStatus> {
-    const user = await this.usersRepository.findActiveUserById(userId);
-    if (!user || user.deletedAt !== null || !user.isActive) {
-      throw new NotFoundException('User not found');
-    }
+  // ── CV SECTION CRUD: EXPERIENCE ───────────────────────────────────
 
-    const existingProfile = await this.profileRepository.findByUserIdOrFail(userId);
-    if (!existingProfile) {
-      throw new NotFoundException('Profile not found');
-    }
-
-    const updatedProfile = await this.profileRepository.saveOnboardingProfile(existingProfile, dto);
-    const profileCompletion = this.calculateProfileCompletion(updatedProfile);
-
-    return {
-      needsOnboarding: profileCompletion < 70,
-      profileCompletion,
-      profile: this.toOnboardingProfileDto(updatedProfile),
-    };
+  async createExperience(userId: string, dto: ExperienceDto): Promise<ExperienceEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    return this.profileRepository.createExperience(profile.id, dto);
   }
 
-  private calculateProfileCompletion(profile: OnboardingProfileDto): number {
-    let completion = 0;
-
-    if (profile.displayName.trim().length > 0) {
-      completion += 40;
-    }
-
-    if (profile.headline && profile.headline.trim().length > 0) {
-      completion += 30;
-    }
-
-    if (profile.avatarUrl && profile.avatarUrl.trim().length > 0) {
-      completion += 30;
-    }
-
-    return completion;
+  async updateExperience(userId: string, expId: string, dto: ExperienceDto): Promise<ExperienceEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const exp = await this.profileRepository.updateExperience(profile.id, expId, dto);
+    if (!exp) throw new NotFoundException('Experience not found');
+    return exp;
   }
 
-  private toOnboardingProfileDto(profile: {
-    id: string;
-    displayName: string;
-    headline: string | null;
-    avatarUrl: string | null;
-    visibility: VisibilityType;
-  }): OnboardingProfileDto {
-    return {
-      id: profile.id,
-      displayName: profile.displayName,
-      headline: profile.headline,
-      avatarUrl: profile.avatarUrl,
-      visibility: profile.visibility,
-    };
+  async deleteExperience(userId: string, expId: string): Promise<void> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const deleted = await this.profileRepository.deleteExperience(profile.id, expId);
+    if (!deleted) throw new NotFoundException('Experience not found');
+  }
+
+  // ── CV SECTION CRUD: EDUCATION ────────────────────────────────────
+
+  async createEducation(userId: string, dto: EducationDto): Promise<EducationEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    return this.profileRepository.createEducation(profile.id, dto);
+  }
+
+  async updateEducation(userId: string, eduId: string, dto: EducationDto): Promise<EducationEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const edu = await this.profileRepository.updateEducation(profile.id, eduId, dto);
+    if (!edu) throw new NotFoundException('Education not found');
+    return edu;
+  }
+
+  async deleteEducation(userId: string, eduId: string): Promise<void> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const deleted = await this.profileRepository.deleteEducation(profile.id, eduId);
+    if (!deleted) throw new NotFoundException('Education not found');
+  }
+
+  // ── CV SECTION CRUD: SOCIAL LINK ──────────────────────────────────
+
+  async createSocialLink(userId: string, dto: SocialLinkDto): Promise<SocialLinkEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    return this.profileRepository.createSocialLink(profile.id, dto);
+  }
+
+  async updateSocialLink(userId: string, linkId: string, dto: SocialLinkDto): Promise<SocialLinkEntity> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const sl = await this.profileRepository.updateSocialLink(profile.id, linkId, dto);
+    if (!sl) throw new NotFoundException('Social link not found');
+    return sl;
+  }
+
+  async deleteSocialLink(userId: string, linkId: string): Promise<void> {
+    const profile = await this.profileRepository.findProfileByUserId(userId);
+    if (!profile) throw new NotFoundException('Profile not found');
+    const deleted = await this.profileRepository.deleteSocialLink(profile.id, linkId);
+    if (!deleted) throw new NotFoundException('Social link not found');
   }
 }

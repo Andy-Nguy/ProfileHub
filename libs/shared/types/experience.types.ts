@@ -4,6 +4,7 @@ export enum EmploymentType {
   CONTRACT = 'contract',
   FREELANCE = 'freelance',
   INTERNSHIP = 'internship',
+  VOLUNTEER = 'volunteer',
 }
 
 export interface IExperience {
@@ -16,6 +17,8 @@ export interface IExperience {
   startDate: string | Date;
   endDate: string | Date | null;
   isCurrent: boolean;
-  description: string;
+  description: string | null;
+  displayOrder: number;
   createdAt: string | Date;
+  updatedAt: string | Date;
 }

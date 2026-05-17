@@ -8,13 +8,14 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { User } from './user.entity';
 import { SkillEntity } from './skill.entity';
 import { ExperienceEntity } from './experience.entity';
 import { EducationEntity } from './education.entity';
-import { VisibilityType, IProfile } from '../../../../libs/shared/types/types';
+import { SocialLinkEntity } from './social-link.entity';
+import { VisibilityTypeEnum, IProfile } from '../../../../libs/shared/types/types';
 
-export { VisibilityType, IProfile } from '../../../../libs/shared/types/types';
+export { VisibilityTypeEnum, IProfile } from '../../../../libs/shared/types/types';
 
 @Entity('profiles')
 export class ProfileEntity implements IProfile {
@@ -30,15 +31,27 @@ export class ProfileEntity implements IProfile {
   @Column({ type: 'varchar', length: 220, nullable: true })
   headline!: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  bio!: string | null;
+
   @Column({ name: 'avatar_url', type: 'varchar', length: 2048, nullable: true })
   avatarUrl!: string | null;
 
+  @Column({ name: 'cover_url', type: 'varchar', length: 2048, nullable: true })
+  coverUrl!: string | null;
+
+  @Column({ type: 'varchar', length: 150, nullable: true })
+  location!: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  industry!: string | null;
+
   @Column({
     type: 'enum',
-    enum: VisibilityType,
-    default: VisibilityType.PUBLIC,
+    enum: VisibilityTypeEnum,
+    default: VisibilityTypeEnum.PUBLIC,
   })
-  visibility!: VisibilityType;
+  visibility!: VisibilityTypeEnum;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
@@ -47,9 +60,9 @@ export class ProfileEntity implements IProfile {
   updatedAt!: Date;
 
   // ── Relations ─────────────────────────────────────────────────────────
-  @OneToOne(() => UserEntity, (u) => u.profile, { onDelete: 'CASCADE' })
+  @OneToOne(() => User, (u) => u.profile, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user?: UserEntity;
+  user?: User;
 
   @OneToMany(() => SkillEntity, (s) => s.profile, { cascade: true })
   skills?: SkillEntity[];
@@ -59,4 +72,7 @@ export class ProfileEntity implements IProfile {
 
   @OneToMany(() => EducationEntity, (e) => e.profile, { cascade: true })
   educations?: EducationEntity[];
+
+  @OneToMany(() => SocialLinkEntity, (s) => s.profile, { cascade: true })
+  socialLinks?: SocialLinkEntity[];
 }

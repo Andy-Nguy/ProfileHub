@@ -9,6 +9,7 @@ interface FloatingFieldProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   className?: string;
   bgClass?: string;
+  required?: boolean;
 }
 
 /**
@@ -23,6 +24,7 @@ export const FloatingField: React.FC<FloatingFieldProps> = ({
   onChange,
   className = '',
   bgClass = 'bg-surface-container-lowest',
+  required,
 }) => {
   return (
     <div className={`relative ${className}`}>
@@ -33,6 +35,7 @@ export const FloatingField: React.FC<FloatingFieldProps> = ({
         value={value}
         defaultValue={defaultValue}
         onChange={onChange}
+        required={required}
         className={`block px-4 pb-2.5 pt-5 w-full text-body-lg text-on-surface bg-transparent rounded-lg border border-outline appearance-none focus:outline-none focus:ring-0 focus:border-primary peer`}
       />
       <label
@@ -57,6 +60,7 @@ interface FloatingTextareaProps {
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   className?: string;
   bgClass?: string;
+  required?: boolean;
 }
 
 export const FloatingTextarea: React.FC<FloatingTextareaProps> = ({
@@ -68,6 +72,7 @@ export const FloatingTextarea: React.FC<FloatingTextareaProps> = ({
   onChange,
   className = '',
   bgClass = 'bg-surface-container-lowest',
+  required,
 }) => {
   return (
     <div className={`relative ${className}`}>
@@ -78,6 +83,7 @@ export const FloatingTextarea: React.FC<FloatingTextareaProps> = ({
         value={value}
         defaultValue={defaultValue}
         onChange={onChange}
+        required={required}
         className="block px-4 pb-2.5 pt-5 w-full text-body-lg text-on-surface bg-transparent rounded-lg border border-outline appearance-none focus:outline-none focus:ring-0 focus:border-primary peer resize-none"
       />
       <label

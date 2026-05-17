@@ -1,24 +1,24 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserEntity } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly repo: Repository<UserEntity>,
+    @InjectRepository(User)
+    private readonly repo: Repository<User>,
   ) {}
 
-  async findById(id: string): Promise<UserEntity | null> {
+  async findById(id: string): Promise<User | null> {
     return this.repo.findOne({ where: { id } });
   }
 
-  async findByEmail(email: string): Promise<UserEntity | null> {
+  async findByEmail(email: string): Promise<User | null> {
     return this.repo.findOne({ where: { email } });
   }
 
-  async findByUsername(username: string): Promise<UserEntity> {
+  async findByUsername(username: string): Promise<User> {
     const user = await this.repo.findOne({ where: { username } });
     if (!user) throw new NotFoundException(`User @${username} not found`);
     return user;
@@ -48,7 +48,7 @@ export class UserService {
     email: string;
     username: string;
     passwordHash: string;
-  }): Promise<UserEntity> {
+  }): Promise<User> {
     const user = this.repo.create({
       email: params.email,
       username: params.username,
@@ -62,7 +62,7 @@ export class UserService {
   /**
    * Activate a user after email verification.
    */
-  async activateUser(email: string): Promise<UserEntity> {
+  async activateUser(email: string): Promise<User> {
     const user = await this.repo.findOne({ where: { email } });
     if (!user) throw new NotFoundException('User not found');
 

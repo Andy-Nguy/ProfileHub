@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 
-import { UserEntity } from '../../entities/user.entity';
+import { User } from '../../entities/user.entity';
 import { ProfileEntity } from '../../entities/profile.entity';
 
 import { AuthController } from './auth.controller';
@@ -19,7 +19,7 @@ import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, ProfileEntity]),
+    TypeOrmModule.forFeature([User, ProfileEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}), // secrets provided at sign/verify time
     ConfigModule,

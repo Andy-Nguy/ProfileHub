@@ -1,28 +1,45 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProfileEntity } from '../../entities/profile.entity';
-import { UserEntity } from '../../entities/user.entity';
-import { ExperienceEntity } from '../../entities/experience.entity';
 import { EducationEntity } from '../../entities/education.entity';
+import { ExperienceEntity } from '../../entities/experience.entity';
+import { ProfileEntity } from '../../entities/profile.entity';
 import { SkillEntity } from '../../entities/skill.entity';
-import { ProfileService } from './profile.service';
+import { SocialLinkEntity } from '../../entities/social-link.entity';
+import { User } from '../../entities/user.entity';
+import { UserModule } from '../user/user.module';
+import {
+  EducationMapper,
+  ExperienceMapper,
+  ProfileMapper,
+  SkillMapper,
+  SocialLinkMapper,
+} from './mappers';
 import { ProfileController } from './profile.controller';
 import { ProfileRepository } from './profile.repository';
-import { UserModule } from '../user/user.module';
+import { ProfileService } from './profile.service';
 
 @Module({
   imports: [
     UserModule,
     TypeOrmModule.forFeature([
       ProfileEntity,
-      UserEntity,
+      User,
       ExperienceEntity,
       EducationEntity,
       SkillEntity,
+      SocialLinkEntity,
     ]),
   ],
   controllers: [ProfileController],
-  providers: [ProfileService, ProfileRepository],
+  providers: [
+    ProfileService,
+    ProfileRepository,
+    ExperienceMapper,
+    EducationMapper,
+    SkillMapper,
+    SocialLinkMapper,
+    ProfileMapper,
+  ],
   exports: [ProfileService, ProfileRepository],
 })
 export class ProfileModule {}
