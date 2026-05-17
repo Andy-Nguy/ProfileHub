@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { LandingPage } from './pages/LandingPage';
 import { DiscoveryPage } from './pages/DiscoveryPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { PublicProfilePage } from './pages/PublicProfilePage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -55,7 +56,7 @@ const App: React.FC = () => {
             />
 
             {/* Any user's public portfolio */}
-            <Route path="/u/:username" element={<ProfilePage />} />
+            <Route path="/u/:username" element={<PublicProfilePage />} />
 
             {/* Coming Soon Pages */}
             <Route path="/messages"  element={<ProtectedRoute><ComingSoonPage title="Messages" icon="mail" /></ProtectedRoute>} />

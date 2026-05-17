@@ -78,6 +78,8 @@ export class DiscoveryProfileDto {
   @ApiProperty()
   likesCount!: number;
 
+  @ApiProperty({ type: 'array', items: { type: 'object', properties: { name: { type: 'string' } } } })
+  skills!: { name: string }[];
 }
 
 export class DiscoveryFeedResponseDto {

@@ -55,7 +55,7 @@ export const SideNav: React.FC<SideNavProps> = ({
           // Mark profile-related routes as active together
           const isActive =
             location.pathname === item.to ||
-            (item.to === '/profile' && location.pathname.startsWith('/u/'));
+            (item.to === '/discovery' && location.pathname.startsWith('/u/'));
           return (
             <Link
               key={item.to}

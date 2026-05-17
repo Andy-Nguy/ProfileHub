@@ -74,6 +74,7 @@ export class ProfileMapper {
       location: profile.location,
       industry: profile.industry,
       likesCount: 0,
+      skills: profile.skills?.map(s => ({ name: s.name })) || [],
     };
   }
 }

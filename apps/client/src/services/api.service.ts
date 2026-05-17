@@ -1,6 +1,5 @@
-/**
- * ApiError — typed error thrown by ApiClient for non-2xx responses.
- */
+import { getStoredAuthSession, setStoredAuthSession, removeStoredAuthSession } from './auth-session.service';
+
 export class ApiError extends Error {
   response?: {
     data?: any;
@@ -13,9 +12,44 @@ export class ApiError extends Error {
   }
 }
 
-const AUTH_STORAGE_KEY = 'profilehub.auth';
-const AUTH_SESSION_EVENT = 'profilehub-auth-changed';
+// ── Token Refresh Mutex ─────────────────────────────────────────────────────
+// Prevents multiple concurrent 401s from each triggering a separate /auth/refresh call.
+// The first one calls refresh; subsequent ones queue up and reuse the same promise.
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
 
+function subscribeToTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function notifyRefreshSubscribers(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+async function doRefresh(): Promise<string> {
+  const response = await fetch('/api/auth/refresh', {
+    method: 'POST',
+    credentials: 'include', // send httpOnly refresh-token cookie
+  });
+
+  if (!response.ok) {
+    throw new Error('Refresh failed');
+  }
+
+  const data = await response.json();
+  const newToken: string = data.accessToken;
+
+  // Persist new token while keeping existing user data
+  const existing = getStoredAuthSession();
+  if (existing && newToken) {
+    setStoredAuthSession({ ...existing, accessToken: newToken });
+  }
+
+  return newToken;
+}
+
+// ── ApiClient ───────────────────────────────────────────────────────────────
 class ApiClient {
   private baseUrl = '/api';
 
@@ -37,32 +71,10 @@ class ApiClient {
 
   private getAccessToken(): string | null {
     try {
-      const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
-      if (!raw) return null;
-      const session = JSON.parse(raw);
-      return session?.accessToken ?? null;
-    } catch {
-      return null;
-    }
-  }
-
-  private persistNewAccessToken(accessToken: string): void {
-    try {
-      const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
-      const session = raw ? JSON.parse(raw) : {};
-      session.accessToken = accessToken;
-      window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-      // Notify all useAuthSession subscribers across tabs
-      window.dispatchEvent(new Event(AUTH_SESSION_EVENT));
-    } catch {
-      // Ignore storage errors
-    }
-  }
-
-  private clearSession(): void {
-    try {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY);
-      window.dispatchEvent(new Event(AUTH_SESSION_EVENT));
+      const session = getStoredAuthSession();
+      if (session?.accessToken) {
+        headers['Authorization'] = `Bearer ${session.accessToken}`;
+      }
     } catch {
       // Ignore
     }
@@ -81,105 +93,21 @@ class ApiClient {
     return headers;
   }
 
-  // ── Token Refresh Logic ───────────────────────────────────────────────
-
-  /**
-   * Attempts to refresh the access token using the httpOnly refresh cookie.
-   *
-   * If a refresh is already in-flight, new callers queue up and receive
-   * the same result — preventing a thundering-herd of concurrent refresh calls.
-   *
-   * On failure, the session is cleared and the user is redirected to /login.
-   */
-  private async refreshAccessToken(): Promise<string> {
-    // If a refresh is already running, queue this caller to wait for it
-    if (this.isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
-        this.pendingRefreshQueue.push({ resolve, reject });
-      });
+  private buildFetchOptions(method: string, body?: any): RequestInit {
+    const headers: Record<string, string> = {};
+    if (body) {
+      headers['Content-Type'] = 'application/json';
     }
-
-    this.isRefreshing = true;
-
-    try {
-      const res = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include', // Required to send the httpOnly refresh cookie
-      });
-
-      if (!res.ok) {
-        throw new ApiError('Session expired. Please log in again.', {
-          status: res.status,
-        });
-      }
-
-      const data = await res.json();
-      const newAccessToken: string = data.accessToken;
-
-      // Persist the new token so subsequent requests pick it up
-      this.persistNewAccessToken(newAccessToken);
-
-      // Resolve all queued callers with the new token
-      this.pendingRefreshQueue.forEach(({ resolve }) => resolve(newAccessToken));
-      this.pendingRefreshQueue = [];
-
-      return newAccessToken;
-    } catch (err) {
-      // Refresh failed — reject all queued callers and clear the session
-      this.pendingRefreshQueue.forEach(({ reject }) => reject(err));
-      this.pendingRefreshQueue = [];
-      this.clearSession();
-
-      // Redirect to login (only if not already there)
-      if (!window.location.pathname.startsWith('/login')) {
-        window.location.href = '/login';
-      }
-
-      throw err;
-    } finally {
-      this.isRefreshing = false;
-    }
+    return {
+      method,
+      headers: this.getHeaders(headers),
+      credentials: 'include',
+      body: body ? JSON.stringify(body) : undefined,
+    };
   }
 
-  // ── Core Request Method ───────────────────────────────────────────────
-
-  /**
-   * Executes a fetch request. On 401, attempts one silent token refresh
-   * and retries the original request exactly once with the new access token.
-   */
-  private async request<T>(
-    url: string,
-    init: RequestInit,
-  ): Promise<{ data: T }> {
-    const token = this.getAccessToken();
-
-    const response = await fetch(`${this.baseUrl}${url}`, {
-      ...init,
-      credentials: 'include', // Always send cookies (needed for refresh/logout)
-      headers: this.getHeaders(token, init.headers as Record<string, string>),
-    });
-
-    // 401 → try to refresh the token and retry the original request once.
-    // refreshAccessToken() handles the queue: if a refresh is already in-flight,
-    // this call will wait for it rather than firing a second one.
-    if (response.status === 401) {
-      const newToken = await this.refreshAccessToken();
-
-      // Retry with the new token. If this also returns 401, handleResponse
-      // will throw an ApiError — no infinite loop.
-      const retryResponse = await fetch(`${this.baseUrl}${url}`, {
-        ...init,
-        credentials: 'include',
-        headers: this.getHeaders(
-          newToken,
-          init.headers as Record<string, string>,
-        ),
-      });
-
-      return this.handleResponse<T>(retryResponse);
-    }
-
-    return this.handleResponse<T>(response);
+  async get<T = any>(url: string): Promise<{ data: T }> {
+    return this.requestWithRetry<T>(url, 'GET');
   }
 
   // ── Public HTTP Methods ───────────────────────────────────────────────
@@ -189,37 +117,82 @@ class ApiClient {
   }
 
   async post<T = any>(url: string, body?: any): Promise<{ data: T }> {
-    return this.request<T>(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    return this.requestWithRetry<T>(url, 'POST', body);
   }
 
   async put<T = any>(url: string, body?: any): Promise<{ data: T }> {
-    return this.request<T>(url, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    return this.requestWithRetry<T>(url, 'PUT', body);
   }
 
   async patch<T = any>(url: string, body?: any): Promise<{ data: T }> {
-    return this.request<T>(url, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    return this.requestWithRetry<T>(url, 'PATCH', body);
   }
 
   async delete<T = any>(url: string): Promise<{ data: T }> {
-    return this.request<T>(url, { method: 'DELETE' });
+    return this.requestWithRetry<T>(url, 'DELETE');
+  }
+
+  /**
+   * Core fetch logic with automatic 401 → refresh → retry.
+   *
+   * Flow:
+   *  1. Make the request.
+   *  2. If response is 401 AND this is not the refresh endpoint itself:
+   *     a. If a refresh is already in-flight, queue this request behind it.
+   *     b. Otherwise start a refresh, notify all waiting requests on success,
+   *        clear the session on failure, and redirect to /login.
+   *  3. Retry the original request once with the new token.
+   */
+  private async requestWithRetry<T>(
+    url: string,
+    method: string,
+    body?: any,
+  ): Promise<{ data: T }> {
+    const isRefreshEndpoint = url.includes('/auth/refresh') || url.includes('/auth/login');
+
+    const makeRequest = () =>
+      fetch(`${this.baseUrl}${url}`, this.buildFetchOptions(method, body));
+
+    let response = await makeRequest();
+
+    if (response.status === 401 && !isRefreshEndpoint) {
+      // ── Refresh logic ──────────────────────────────────────────────
+      if (isRefreshing) {
+        // Wait for the ongoing refresh, then retry
+        const newToken = await new Promise<string>((resolve, reject) => {
+          subscribeToTokenRefresh((token) => {
+            if (token) resolve(token);
+            else reject(new Error('Refresh failed'));
+          });
+        });
+
+        if (newToken) {
+          response = await makeRequest(); // headers re-read from localStorage automatically
+        }
+      } else {
+        isRefreshing = true;
+        try {
+          const newToken = await doRefresh();
+          notifyRefreshSubscribers(newToken);
+          response = await makeRequest(); // retry with new token
+        } catch {
+          notifyRefreshSubscribers(''); // unblock waiting requests
+          removeStoredAuthSession();
+          window.location.href = '/login';
+          throw new ApiError('Session expired. Redirecting to login.');
+        } finally {
+          isRefreshing = false;
+        }
+      }
+    }
+
+    return this.handleResponse<T>(response);
   }
 
   // ── Response Handler ──────────────────────────────────────────────────
 
   private async handleResponse<T>(response: Response): Promise<{ data: T }> {
-    let data;
+    let data: any;
     try {
       data = await response.json();
     } catch {

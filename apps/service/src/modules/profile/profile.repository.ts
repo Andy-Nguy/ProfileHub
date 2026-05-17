@@ -1,395 +1,210 @@
+// profile.repository.ts
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  EntityManager,
-  EntityTarget,
-  In,
-  ObjectLiteral,
-  Repository,
-} from 'typeorm';
-import { EducationEntity } from '../../entities/education.entity';
+import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { User } from '../../entities/user.entity';
+import { ProfileEntity } from '../../entities/profile.entity';
 import { ExperienceEntity } from '../../entities/experience.entity';
-import { ProfileEntity, VisibilityType } from '../../entities/profile.entity';
-import { SkillCategory, SkillEntity } from '../../entities/skill.entity';
+import { EducationEntity } from '../../entities/education.entity';
+import { SkillEntity } from '../../entities/skill.entity';
 import { SocialLinkEntity } from '../../entities/social-link.entity';
-import {
-  SyncEducationDto,
-  SyncExperienceDto,
-  SyncSkillDto,
-  SyncSocialLinkDto,
-  UpdateOnboardingDto,
-  UpdateProfileDto,
-} from './dto';
-
-interface DiscoveryQueryParams {
-  page: number;
-  limit: number;
-  search?: string;
-}
-
-interface DiscoveryQueryResult {
-  profiles: ProfileEntity[];
-  total: number;
-}
+import { UpsertProfileDto } from './dto/upsert-profile.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
 
 @Injectable()
 export class ProfileRepository {
+
   constructor(
     private readonly dataSource: DataSource,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     @InjectRepository(ProfileEntity)
-    private readonly profileRepository: Repository<ProfileEntity>,
-    @InjectRepository(SkillEntity)
-    private readonly skillRepository: Repository<SkillEntity>,
-  ) {}
+    private readonly profileRepo: Repository<ProfileEntity>,
+  ) { }
 
-  async getFullProfileAggregateByUserId(
-    userId: string,
-    manager?: EntityManager,
-  ): Promise<ProfileEntity | null> {
-    return this.buildAggregateQuery(manager)
-      .where('profile.user_id = :userId', { userId })
+  // ── Private helper ────────────────────────────────────────────
+
+  private buildFullProfileQuery(): SelectQueryBuilder<User> {
+    return this.userRepo
+      .createQueryBuilder('u')
+      .leftJoinAndSelect('u.profile', 'p')
+      .leftJoinAndSelect('p.socialLinks', 'sl')
+      .leftJoinAndSelect('p.experiences', 'exp')
+      .leftJoinAndSelect('p.educations', 'edu')
+      .leftJoinAndSelect('p.skills', 'sk')
+      .select([
+        'u.id', 'u.email', 'u.username', 'u.role',
+        'u.isActive', 'u.emailVerifiedAt', 'u.lastLoginAt', 'u.createdAt',
+        'p.id', 'p.displayName', 'p.headline', 'p.avatarUrl', 'p.coverUrl',
+        'p.bio', 'p.location', 'p.industry', 'p.visibility',
+        'p.createdAt', 'p.updatedAt',
+        'sl.id', 'sl.platform', 'sl.url',
+        'exp.id', 'exp.title', 'exp.company', 'exp.location',
+        'exp.employmentType', 'exp.startDate', 'exp.endDate',
+        'exp.isCurrent', 'exp.description', 'exp.displayOrder',
+        'edu.id', 'edu.institution', 'edu.degree', 'edu.fieldOfStudy',
+        'edu.startDate', 'edu.endDate', 'edu.isCurrent',
+        'edu.description', 'edu.displayOrder',
+        'sk.id', 'sk.name', 'sk.category', 'sk.endorsementCount', 'sk.displayOrder',
+      ])
+      .orderBy('exp.displayOrder', 'ASC')
+      .addOrderBy('edu.displayOrder', 'ASC')
+      .addOrderBy('sk.displayOrder', 'ASC')
+      .where('u.deletedAt IS NULL');
+  }
+
+  async getUserFullProfile(userId: string): Promise<User | null> {
+    return this.buildFullProfileQuery()
+      .andWhere('u.id = :userId', { userId })
       .getOne();
   }
 
-  async getPublicProfileAggregateByUsername(username: string): Promise<ProfileEntity | null> {
-    return this.buildAggregateQuery()
-      .where('profile.visibility = :visibility', { visibility: VisibilityType.PUBLIC })
-      .andWhere('account.username = :username', { username })
-      .andWhere('account.is_active = :isActive', { isActive: true })
-      .andWhere('account.deleted_at IS NULL')
+  async getFullProfileByProfileId(profileId: string): Promise<User | null> {
+    return this.buildFullProfileQuery()
+      .andWhere('p.id = :profileId', { profileId })
       .getOne();
   }
 
-  async getDiscoveryFeed(params: DiscoveryQueryParams): Promise<DiscoveryQueryResult> {
-    const baseQuery = this.profileRepository
-      .createQueryBuilder('profile')
-      .leftJoinAndSelect('profile.user', 'account')
-      .where('profile.visibility = :visibility', { visibility: VisibilityType.PUBLIC })
-      .andWhere('account.is_active = :isActive', { isActive: true })
-      .andWhere('account.deleted_at IS NULL');
+  async getFullProfileByUsername(username: string): Promise<User | null> {
+    return this.buildFullProfileQuery()
+      .andWhere('u.username = :username', { username })
+      .getOne();
+  }
 
-    if (params.search) {
-      baseQuery.andWhere(
-        `
-          (
-            profile.display_name ILIKE :search
-            OR profile.headline ILIKE :search
-            OR profile.location ILIKE :search
-            OR profile.industry ILIKE :search
-            OR account.username ILIKE :search
-          )
-        `,
-        { search: `%${params.search}%` },
-      );
-    }
 
-    baseQuery
-      .orderBy('profile.updated_at', 'DESC')
-      .addOrderBy('profile.created_at', 'DESC')
-      .skip((params.page - 1) * params.limit)
-      .take(params.limit);
 
-    const [profiles, total] = await baseQuery.getManyAndCount();
-    if (profiles.length === 0) {
-      return { profiles, total };
-    }
-
-    const profileIds = profiles.map((profile) => profile.id);
-    const skills = await this.skillRepository
-      .createQueryBuilder('skill')
-      .where('skill.profile_id IN (:...profileIds)', { profileIds })
-      .orderBy('skill.display_order', 'ASC')
-      .addOrderBy('skill.created_at', 'DESC')
+  async getAllUsersFullProfile(): Promise<User[]> {
+    return this.buildFullProfileQuery()
+      .addOrderBy('u.createdAt', 'DESC')
       .getMany();
-
-    const skillsByProfileId = this.groupByProfileId(skills);
-    for (const profile of profiles) {
-      profile.skills = skillsByProfileId.get(profile.id) ?? [];
-    }
-
-    return { profiles, total };
   }
 
-  async updateOnboardingProfileByUserId(
+  // ── Tìm profile theo userId (nhẹ, không join) ─────────────────
+
+  async findProfileByUserId(userId: string): Promise<ProfileEntity | null> {
+    return this.profileRepo
+      .createQueryBuilder('p')
+      .where('p.userId = :userId', { userId })
+      .getOne();
+  }
+
+  // ── BASIC PROFILE UPDATE ──────────────────────────────────────────
+
+
+  async upsertProfileFields(
     userId: string,
-    dto: UpdateOnboardingDto,
-  ): Promise<ProfileEntity | null> {
+    payload: Partial<ProfileEntity>,
+  ): Promise<ProfileEntity> {
+    await this.profileRepo.upsert(
+      { userId, ...payload },
+      ['userId'],
+    );
+
+    return this.findProfileByUserId(userId) as Promise<ProfileEntity>;
+  }
+
+  // ── CV SECTION CRUD: SKILL ────────────────────────────────────────
+
+  async existsSkillByNormalizedName(profileId: string, name: string): Promise<boolean> {
+    const count = await this.dataSource.getRepository(SkillEntity)
+      .createQueryBuilder('s')
+      .where('s.profileId = :profileId', { profileId })
+      .andWhere('LOWER(s.name) = LOWER(:name)', { name })
+      .getCount();
+    return count > 0;
+  }
+
+  async createSkill(profileId: string, dto: SkillDto): Promise<SkillEntity> {
     return this.dataSource.transaction(async (manager) => {
-      const profile = await this.getFullProfileAggregateByUserId(userId, manager);
-      if (!profile) {
-        return null;
-      }
-
-      this.applyOnboardingPatch(profile, dto);
-      await this.getRepository(ProfileEntity, manager).save(profile);
-
-      return this.getFullProfileAggregateByUserId(userId, manager);
+      const count = await manager.createQueryBuilder(SkillEntity, 's')
+        .where('s.profileId = :profileId', { profileId })
+        .andWhere('LOWER(s.name) = LOWER(:name)', { name: dto.name })
+        .getCount();
+      if (count > 0) throw new Error('Skill already exists');
+      const skill = manager.create(SkillEntity, { profileId, ...dto });
+      return manager.save(skill);
     });
   }
 
-  async syncOwnedProfileAggregate(
-    userId: string,
-    dto: UpdateProfileDto,
-  ): Promise<ProfileEntity | null> {
+  async updateSkill(profileId: string, skillId: string, dto: SkillDto): Promise<SkillEntity | null> {
+    const skillRepo = this.dataSource.getRepository(SkillEntity);
+    const result = await skillRepo.update({ id: skillId, profileId }, dto);
+    if (result.affected === 0) return null;
+    return skillRepo.findOne({ where: { id: skillId, profileId } });
+  }
+
+  async deleteSkill(profileId: string, skillId: string): Promise<boolean> {
+    const result = await this.dataSource.getRepository(SkillEntity).delete({ id: skillId, profileId });
+    return (result.affected ?? 0) > 0;
+  }
+
+  // ── CV SECTION CRUD: EXPERIENCE ───────────────────────────────────
+
+  async createExperience(profileId: string, dto: ExperienceDto): Promise<ExperienceEntity> {
     return this.dataSource.transaction(async (manager) => {
-      const aggregate = await this.getFullProfileAggregateByUserId(userId, manager);
-      if (!aggregate) {
-        return null;
-      }
-
-      this.applyProfilePatch(aggregate, dto);
-      await this.getRepository(ProfileEntity, manager).save(aggregate);
-
-      if (dto.experiences !== undefined) {
-        await this.syncExperiences(manager, aggregate.id, aggregate.experiences ?? [], dto.experiences);
-      }
-
-      if (dto.educations !== undefined) {
-        await this.syncEducations(manager, aggregate.id, aggregate.educations ?? [], dto.educations);
-      }
-
-      if (dto.skills !== undefined) {
-        await this.syncSkills(manager, aggregate.id, aggregate.skills ?? [], dto.skills);
-      }
-
-      if (dto.socialLinks !== undefined) {
-        await this.syncSocialLinks(manager, aggregate.id, aggregate.socialLinks ?? [], dto.socialLinks);
-      }
-
-      return this.getFullProfileAggregateByUserId(userId, manager);
+      const exp = manager.create(ExperienceEntity, { profileId, ...dto });
+      return manager.save(exp);
     });
   }
 
-  private buildAggregateQuery(manager?: EntityManager) {
-    const repository = this.getRepository(ProfileEntity, manager);
-
-    return repository
-      .createQueryBuilder('profile')
-      .leftJoinAndSelect('profile.user', 'account')
-      .leftJoinAndSelect('profile.experiences', 'experience')
-      .leftJoinAndSelect('profile.educations', 'education')
-      .leftJoinAndSelect('profile.skills', 'skill')
-      .leftJoinAndSelect('profile.socialLinks', 'socialLink')
-      .orderBy('experience.display_order', 'ASC')
-      .addOrderBy('experience.created_at', 'DESC')
-      .addOrderBy('education.display_order', 'ASC')
-      .addOrderBy('education.created_at', 'DESC')
-      .addOrderBy('skill.display_order', 'ASC')
-      .addOrderBy('skill.created_at', 'DESC')
-      .addOrderBy('socialLink.platform', 'ASC');
+  async updateExperience(profileId: string, expId: string, dto: ExperienceDto): Promise<ExperienceEntity | null> {
+    const repo = this.dataSource.getRepository(ExperienceEntity);
+    const result = await repo.update({ id: expId, profileId }, dto);
+    if (result.affected === 0) return null;
+    return repo.findOne({ where: { id: expId, profileId } });
   }
 
-  private applyOnboardingPatch(profile: ProfileEntity, dto: UpdateOnboardingDto): void {
-    if (dto.displayName !== undefined) {
-      profile.displayName = dto.displayName;
-    }
-
-    if (dto.headline !== undefined) {
-      profile.headline = dto.headline;
-    }
-
-    if (dto.avatarUrl !== undefined) {
-      profile.avatarUrl = dto.avatarUrl;
-    }
-
-    if (dto.visibility !== undefined) {
-      profile.visibility = dto.visibility;
-    }
+  async deleteExperience(profileId: string, expId: string): Promise<boolean> {
+    const result = await this.dataSource.getRepository(ExperienceEntity).delete({ id: expId, profileId });
+    return (result.affected ?? 0) > 0;
   }
 
-  private applyProfilePatch(profile: ProfileEntity, dto: UpdateProfileDto): void {
-    this.applyOnboardingPatch(profile, dto);
+  // ── CV SECTION CRUD: EDUCATION ────────────────────────────────────
 
-    if (dto.bio !== undefined) {
-      profile.bio = dto.bio;
-    }
-
-    if (dto.coverUrl !== undefined) {
-      profile.coverUrl = dto.coverUrl;
-    }
-
-    if (dto.location !== undefined) {
-      profile.location = dto.location;
-    }
-
-    if (dto.industry !== undefined) {
-      profile.industry = dto.industry;
-    }
+  async createEducation(profileId: string, dto: EducationDto): Promise<EducationEntity> {
+    return this.dataSource.transaction(async (manager) => {
+      const edu = manager.create(EducationEntity, { profileId, ...dto });
+      return manager.save(edu);
+    });
   }
 
-  private async syncExperiences(
-    manager: EntityManager,
-    profileId: string,
-    existingItems: ExperienceEntity[],
-    incomingItems: SyncExperienceDto[],
-  ): Promise<void> {
-    const repository = this.getRepository(ExperienceEntity, manager);
-    const existingById = new Map(existingItems.map((item) => [item.id, item]));
-    const retainedIds = new Set(incomingItems.filter((item) => item.id).map((item) => item.id!));
-    const upsertItems: ExperienceEntity[] = [];
-
-    for (const item of incomingItems) {
-      const entity = item.id ? existingById.get(item.id) : undefined;
-      const target = entity ?? repository.create({ profileId });
-
-      target.profileId = profileId;
-      target.title = item.title;
-      target.company = item.company;
-      target.location = item.location ?? null;
-      target.employmentType = item.employmentType ?? target.employmentType;
-      target.startDate = new Date(item.startDate);
-      target.endDate = item.endDate ? new Date(item.endDate) : null;
-      target.isCurrent = item.isCurrent ?? false;
-      target.description = item.description ?? null;
-      target.displayOrder = item.displayOrder ?? 0;
-
-      upsertItems.push(target);
-    }
-
-    const deleteIds = existingItems
-      .filter((item) => !retainedIds.has(item.id))
-      .map((item) => item.id);
-
-    if (upsertItems.length > 0) {
-      await repository.save(upsertItems);
-    }
-
-    if (deleteIds.length > 0) {
-      await repository.delete({ id: In(deleteIds) });
-    }
+  async updateEducation(profileId: string, eduId: string, dto: EducationDto): Promise<EducationEntity | null> {
+    const repo = this.dataSource.getRepository(EducationEntity);
+    const result = await repo.update({ id: eduId, profileId }, dto);
+    if (result.affected === 0) return null;
+    return repo.findOne({ where: { id: eduId, profileId } });
   }
 
-  private async syncEducations(
-    manager: EntityManager,
-    profileId: string,
-    existingItems: EducationEntity[],
-    incomingItems: SyncEducationDto[],
-  ): Promise<void> {
-    const repository = this.getRepository(EducationEntity, manager);
-    const existingById = new Map(existingItems.map((item) => [item.id, item]));
-    const retainedIds = new Set(incomingItems.filter((item) => item.id).map((item) => item.id!));
-    const upsertItems: EducationEntity[] = [];
-
-    for (const item of incomingItems) {
-      const entity = item.id ? existingById.get(item.id) : undefined;
-      const target = entity ?? repository.create({ profileId });
-
-      target.profileId = profileId;
-      target.institution = item.institution;
-      target.degree = item.degree ?? null;
-      target.fieldOfStudy = item.fieldOfStudy ?? null;
-      target.startDate = new Date(item.startDate);
-      target.endDate = item.endDate ? new Date(item.endDate) : null;
-      target.isCurrent = item.isCurrent ?? false;
-      target.description = item.description ?? null;
-      target.displayOrder = item.displayOrder ?? 0;
-
-      upsertItems.push(target);
-    }
-
-    const deleteIds = existingItems
-      .filter((item) => !retainedIds.has(item.id))
-      .map((item) => item.id);
-
-    if (upsertItems.length > 0) {
-      await repository.save(upsertItems);
-    }
-
-    if (deleteIds.length > 0) {
-      await repository.delete({ id: In(deleteIds) });
-    }
+  async deleteEducation(profileId: string, eduId: string): Promise<boolean> {
+    const result = await this.dataSource.getRepository(EducationEntity).delete({ id: eduId, profileId });
+    return (result.affected ?? 0) > 0;
   }
 
-  private async syncSkills(
-    manager: EntityManager,
-    profileId: string,
-    existingItems: SkillEntity[],
-    incomingItems: SyncSkillDto[],
-  ): Promise<void> {
-    const repository = this.getRepository(SkillEntity, manager);
-    const existingById = new Map(existingItems.map((item) => [item.id, item]));
-    const retainedIds = new Set(incomingItems.filter((item) => item.id).map((item) => item.id!));
-    const upsertItems: SkillEntity[] = [];
+  // ── CV SECTION CRUD: SOCIAL LINK ──────────────────────────────────
 
-    for (const item of incomingItems) {
-      const entity = item.id ? existingById.get(item.id) : undefined;
-      const target = entity ?? repository.create({ profileId });
-
-      target.profileId = profileId;
-      target.name = item.name;
-      target.category = item.category ?? SkillCategory.OTHER;
-      target.displayOrder = item.displayOrder ?? 0;
-
-      upsertItems.push(target);
-    }
-
-    const deleteIds = existingItems
-      .filter((item) => !retainedIds.has(item.id))
-      .map((item) => item.id);
-
-    if (upsertItems.length > 0) {
-      await repository.save(upsertItems);
-    }
-
-    if (deleteIds.length > 0) {
-      await repository.delete({ id: In(deleteIds) });
-    }
+  async createSocialLink(profileId: string, dto: SocialLinkDto): Promise<SocialLinkEntity> {
+    return this.dataSource.transaction(async (manager) => {
+      const count = await manager.createQueryBuilder(SocialLinkEntity, 'sl')
+        .where('sl.profileId = :profileId', { profileId })
+        .andWhere('sl.platform = :platform', { platform: dto.platform })
+        .getCount();
+      if (count > 0) throw new Error('Platform already exists for this profile');
+      const sl = manager.create(SocialLinkEntity, { profileId, ...dto });
+      return manager.save(sl);
+    });
   }
 
-  private async syncSocialLinks(
-    manager: EntityManager,
-    profileId: string,
-    existingItems: SocialLinkEntity[],
-    incomingItems: SyncSocialLinkDto[],
-  ): Promise<void> {
-    const repository = this.getRepository(SocialLinkEntity, manager);
-    const existingById = new Map(existingItems.map((item) => [item.id, item]));
-    const retainedIds = new Set(incomingItems.filter((item) => item.id).map((item) => item.id!));
-    const upsertItems: SocialLinkEntity[] = [];
-
-    for (const item of incomingItems) {
-      const entity = item.id ? existingById.get(item.id) : undefined;
-      const target = entity ?? repository.create({ profileId });
-
-      target.profileId = profileId;
-      target.platform = item.platform;
-      target.url = item.url;
-
-      upsertItems.push(target);
-    }
-
-    const deleteIds = existingItems
-      .filter((item) => !retainedIds.has(item.id))
-      .map((item) => item.id);
-
-    if (upsertItems.length > 0) {
-      await repository.save(upsertItems);
-    }
-
-    if (deleteIds.length > 0) {
-      await repository.delete({ id: In(deleteIds) });
-    }
+  async updateSocialLink(profileId: string, linkId: string, dto: SocialLinkDto): Promise<SocialLinkEntity | null> {
+    const repo = this.dataSource.getRepository(SocialLinkEntity);
+    const result = await repo.update({ id: linkId, profileId }, dto);
+    if (result.affected === 0) return null;
+    return repo.findOne({ where: { id: linkId, profileId } });
   }
 
-  private getRepository<T extends ObjectLiteral>(
-    entity: EntityTarget<T>,
-    manager?: EntityManager,
-  ): Repository<T> {
-    return manager
-      ? manager.getRepository(entity)
-      : this.dataSource.getRepository(entity);
-  }
-
-  private groupByProfileId<T extends { profileId: string }>(items: T[]): Map<string, T[]> {
-    const grouped = new Map<string, T[]>();
-
-    for (const item of items) {
-      const current = grouped.get(item.profileId) ?? [];
-      current.push(item);
-      grouped.set(item.profileId, current);
-    }
-
-    return grouped;
+  async deleteSocialLink(profileId: string, linkId: string): Promise<boolean> {
+    const result = await this.dataSource.getRepository(SocialLinkEntity).delete({ id: linkId, profileId });
+    return (result.affected ?? 0) > 0;
   }
 }
