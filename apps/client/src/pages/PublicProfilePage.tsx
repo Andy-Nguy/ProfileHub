@@ -52,8 +52,8 @@ export const PublicProfilePage: React.FC = () => {
 
   return (
     <>
-      <main className="flex-1 md:ml-72 flex flex-col h-screen overflow-hidden">
-        <div className="flex-1 overflow-y-auto py-8 px-4 md:px-8 bg-background">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-[calc(100vh-64px)]">
+        <div className="flex-1 py-8 px-4 md:px-8 bg-background">
           <div className="w-full max-w-[1024px] mx-auto space-y-12 pb-12">
             {/* Profile Header Area */}
           <section className="bg-surface rounded-xl shadow-sm elevation-1 p-8 md:p-12 relative overflow-hidden border border-outline-variant/30">
