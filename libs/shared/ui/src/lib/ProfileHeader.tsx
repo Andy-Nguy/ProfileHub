@@ -96,7 +96,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
 
           {/* Avatar */}
           <div
-            className={`relative select-none ${isOwnProfile && !avatarUploading ? 'cursor-pointer group' : 'cursor-default'}`}
+            className={`w-24 h-24 md:w-32 md:h-32 rounded-full relative select-none flex-shrink-0 ${
+              isOwnProfile && !avatarUploading ? 'cursor-pointer group' : 'cursor-default'
+            }`}
             onClick={isOwnProfile && !avatarUploading ? onAvatarClick : undefined}
             role={isOwnProfile && !avatarUploading ? 'button' : undefined}
             aria-label={isOwnProfile ? 'Edit profile photo' : undefined}
@@ -105,36 +107,30 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               if (e.key === 'Enter' && isOwnProfile && !avatarUploading) onAvatarClick?.();
             }}
           >
-            {/* White ring border */}
-            <div
-              className="rounded-full p-1 bg-white shadow-lg"
-              style={{ display: 'inline-block' }}
-            >
-              {showFallback ? (
-                /* Initials fallback */
-                <div
-                  className="w-24 h-24 md:w-32 md:h-32 rounded-full flex items-center justify-center text-white font-bold text-2xl md:text-3xl"
-                  style={{
-                    background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})`,
-                    opacity: avatarUploading ? 0.6 : 1,
-                  }}
-                >
-                  {initials}
-                </div>
-              ) : (
-                <img
-                  src={avatarUrl!}
-                  alt={displayName}
-                  className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover"
-                  style={{ opacity: avatarUploading ? 0.6 : 1 }}
-                  onError={() => setImgError(true)}
-                />
-              )}
-            </div>
+            {showFallback ? (
+              /* Initials fallback */
+              <div
+                className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-2xl md:text-3xl border-4 border-white shadow-md"
+                style={{
+                  background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})`,
+                  opacity: avatarUploading ? 0.6 : 1,
+                }}
+              >
+                {initials}
+              </div>
+            ) : (
+              <img
+                src={avatarUrl!}
+                alt={displayName}
+                className="w-full h-full rounded-full object-cover border-4 border-white shadow-md"
+                style={{ opacity: avatarUploading ? 0.6 : 1 }}
+                onError={() => setImgError(true)}
+              />
+            )}
 
             {/* Upload spinner */}
             {avatarUploading && (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
                 <div className="w-9 h-9 rounded-full border-4 border-white/30 border-t-white animate-spin" />
               </div>
             )}
@@ -162,7 +158,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* "Edit" badge (always visible on own profile, not uploading) */}
             {isOwnProfile && !avatarUploading && (
               <div
-                className="absolute bottom-1 right-1 w-7 h-7 rounded-full border-2 border-white flex items-center justify-center shadow-md"
+                className="absolute bottom-0 right-0 w-7 h-7 rounded-full border-2 border-white flex items-center justify-center shadow-md z-10"
                 style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
               >
                 <span className="material-symbols-outlined text-white" style={{ fontSize: '14px' }}>

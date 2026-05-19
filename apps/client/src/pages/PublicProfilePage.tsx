@@ -42,7 +42,7 @@ export const PublicProfilePage: React.FC = () => {
           <p className="text-on-surface-variant mb-6">
             The profile for @{username} does not exist.
           </p>
-          <Link to="/discovery" className="text-primary hover:underline font-label-lg text-label-lg">
+          <Link to="/discovery" className="text-primary hover:underline decoration-1 underline-offset-4 font-label-lg text-label-lg transition-all">
             ← Back to Discovery
           </Link>
         </div>
@@ -91,8 +91,16 @@ export const PublicProfilePage: React.FC = () => {
                     </div>
                   )}
                   {profile.socialLinks?.[0] && (
-                    <a href={profile.socialLinks[0].url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-primary hover:underline">
-                      <span className="material-symbols-outlined text-[20px]">link</span> {profile.socialLinks[0].platform}
+                    <a
+                      href={profile.socialLinks[0].url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-1 text-primary no-underline transition-all"
+                    >
+                      <span className="material-symbols-outlined text-[20px] no-underline">link</span>
+                      <span className="group-hover:underline decoration-1 underline-offset-4">
+                        {profile.socialLinks[0].platform}
+                      </span>
                     </a>
                   )}
                 </div>
@@ -210,8 +218,9 @@ export const PublicProfilePage: React.FC = () => {
                 <div className="p-6">
                   <h4 className="font-title-lg text-title-lg text-on-surface mb-2">Design System Pro</h4>
                   <p className="font-body-lg text-body-lg text-on-surface-variant mb-4 line-clamp-2">A comprehensive component library built in Figma, fully mapped to React components.</p>
-                  <a className="inline-flex items-center text-primary font-label-lg text-label-lg hover:underline" href="#">
-                    View Case Study <span className="material-symbols-outlined text-[18px] ml-1">arrow_forward</span>
+                   <a className="group inline-flex items-center text-primary font-label-lg text-label-lg no-underline" href="#">
+                    <span className="group-hover:underline decoration-1 underline-offset-4">View Case Study</span>
+                    <span className="material-symbols-outlined text-[18px] ml-1">arrow_forward</span>
                   </a>
                 </div>
               </div>
@@ -222,8 +231,9 @@ export const PublicProfilePage: React.FC = () => {
                 <div className="p-6">
                   <h4 className="font-title-lg text-title-lg text-on-surface mb-2">Analytics Dashboard</h4>
                   <p className="font-body-lg text-body-lg text-on-surface-variant mb-4 line-clamp-2">Redesign of legacy reporting tools, introducing customizable dashboards and interactive data visualization.</p>
-                  <a className="inline-flex items-center text-primary font-label-lg text-label-lg hover:underline" href="#">
-                    View Prototype <span className="material-symbols-outlined text-[18px] ml-1">arrow_forward</span>
+                  <a className="group inline-flex items-center text-primary font-label-lg text-label-lg no-underline" href="#">
+                    <span className="group-hover:underline decoration-1 underline-offset-4">View Prototype</span>
+                    <span className="material-symbols-outlined text-[18px] ml-1">arrow_forward</span>
                   </a>
                 </div>
               </div>
