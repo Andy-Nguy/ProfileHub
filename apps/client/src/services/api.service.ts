@@ -77,14 +77,16 @@ class ApiClient {
 
   private buildFetchOptions(method: string, body?: any): RequestInit {
     const customHeaders: Record<string, string> = {};
-    if (body) {
+    const isFormData = body instanceof FormData;
+
+    if (body && !isFormData) {
       customHeaders['Content-Type'] = 'application/json';
     }
     return {
       method,
       headers: this.getHeaders(customHeaders),
       credentials: 'include',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
     };
   }
 

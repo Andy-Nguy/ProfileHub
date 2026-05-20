@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface NavItem {
   icon: string;
-  label: string;
+  labelKey: string;
   to: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { icon: 'account_circle', label: 'My Profile', to: '/profile' },
-  { icon: 'explore',        label: 'Discover',   to: '/discovery' },
-  { icon: 'mail',           label: 'Messages',   to: '/messages' },
-  { icon: 'insights',       label: 'Analytics',  to: '/analytics' },
-  { icon: 'settings',       label: 'Settings',   to: '/settings' },
+  { icon: 'account_circle', labelKey: 'nav.myProfile', to: '/profile' },
+  { icon: 'explore',        labelKey: 'nav.discover',  to: '/discovery' },
+  { icon: 'mail',           labelKey: 'nav.messages',  to: '/messages' },
+  { icon: 'insights',       labelKey: 'nav.analytics', to: '/analytics' },
+  { icon: 'settings',       labelKey: 'nav.settings',  to: '/settings' },
 ];
 
 interface SideNavProps {
@@ -31,6 +32,7 @@ export const SideNav: React.FC<SideNavProps> = ({
   },
 }) => {
   const location = useLocation();
+  const { t } = useTranslation('common');
 
   return (
     <aside className="hidden md:flex flex-col py-[32px] space-y-[8px] fixed left-0 top-16 h-[calc(100vh-64px)] overflow-y-auto bg-surface-container-low shadow-md w-72 z-40">
@@ -67,7 +69,7 @@ export const SideNav: React.FC<SideNavProps> = ({
               }`}
             >
               <span className="material-symbols-outlined mr-3">{item.icon}</span>
-              <span className="font-label-lg text-label-lg">{item.label}</span>
+              <span className="font-label-lg text-label-lg">{t(item.labelKey)}</span>
             </Link>
           );
         })}
@@ -75,10 +77,12 @@ export const SideNav: React.FC<SideNavProps> = ({
 
       {/* Share Button */}
       <div className="px-gutter mt-auto pt-6">
-        <button className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-3 rounded-full hover:bg-surface-tint transition-colors shadow-sm flex items-center justify-center gap-2"
-          style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.1)' }}>
+        <button
+          className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-3 rounded-full hover:bg-surface-tint transition-colors shadow-sm flex items-center justify-center gap-2"
+          style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.1)' }}
+        >
           <span className="material-symbols-outlined text-sm" style={{ fontSize: '18px' }}>share</span>
-          Share Portfolio
+          {t('nav.sharePortfolio')}
         </button>
       </div>
     </aside>

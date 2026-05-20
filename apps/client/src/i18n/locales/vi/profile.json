@@ -1,0 +1,52 @@
+{
+  "onboarding": {
+    "title": "Chào mừng đến với ProfileHub!",
+    "subtitle": "Hãy thiết lập danh tính chuyên nghiệp của bạn. Điền thông tin cơ bản để bắt đầu.",
+    "avatarHint": "Nhấn để đổi avatar ngẫu nhiên",
+    "displayNameLabel": "Tên hiển thị",
+    "headlineLabel": "Tiêu đề chuyên nghiệp (ví dụ: Lập trình viên Fullstack)",
+    "visibilityLabel": "Chế độ hiển thị hồ sơ *",
+    "visibilityPublic": "Công khai",
+    "visibilityPublicHint": "Mọi người đều có thể xem",
+    "visibilityPrivate": "Riêng tư",
+    "visibilityPrivateHint": "Chỉ bạn mới có thể xem",
+    "optionalToggleShow": "Thêm thông tin tùy chọn (Vị trí, Ngành nghề, Tiểu sử)",
+    "optionalToggleHide": "Ẩn thông tin tùy chọn (Vị trí, Ngành nghề, Tiểu sử)",
+    "locationLabel": "Vị trí (Tùy chọn)",
+    "industryLabel": "Ngành nghề (Tùy chọn)",
+    "bioLabel": "Tiểu sử (Tùy chọn)",
+    "bioPlaceholder": "Hãy kể một chút về bản thân bạn...",
+    "submitButton": "Hoàn tất Onboarding",
+    "submittingButton": "Đang lưu..."
+  },
+  "page": {
+    "loading": "Đang tải hồ sơ...",
+    "notFound": "Không tìm thấy hồ sơ",
+    "notFoundMessage": "Hồ sơ của @{{username}} không tồn tại.",
+    "editProfile": "Chỉnh sửa hồ sơ",
+    "completeProfile": "Hoàn thiện hồ sơ",
+    "share": "Chia sẻ",
+    "connect": "Kết nối",
+    "about": "Giới thiệu",
+    "skills": "Kỹ năng",
+    "endorsements": "Tín nhiệm",
+    "total": "Tổng cộng",
+    "socialPresence": "Mạng xã hội",
+    "socialPresenceOwn": "Chia sẻ portfolio của bạn trên các nền tảng.",
+    "socialPresenceOther": "Kết nối với {{name}} trên các nền tảng khác.",
+    "noSocialLinks": "Chưa có liên kết mạng xã hội.",
+    "profileCompletion": "Mức độ hoàn thiện hồ sơ:",
+    "completeProfileCta": "Hoàn thiện hồ sơ →",
+    "experience": "Kinh nghiệm",
+    "education": "Học vấn"
+  },
+  "discovery": {
+    "title": "Khám phá Cộng đồng",
+    "subtitle": "Kết nối với các nhà lãnh đạo ngành và duyệt qua các portfolio được tuyển chọn.",
+    "searchPlaceholder": "Tìm kiếm hồ sơ...",
+    "loading": "Đang tải hồ sơ...",
+    "errorLoading": "Lỗi khi tải hồ sơ",
+    "endorsements": "tín nhiệm",
+    "noResults": "Không tìm thấy chuyên gia nào phù hợp với tìm kiếm của bạn."
+  }
+}

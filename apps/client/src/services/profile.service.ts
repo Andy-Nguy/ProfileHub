@@ -76,6 +76,24 @@ export const profileAPI = {
     }
   },
 
+  uploadAvatar: async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await apiClient.post('/storage/avatar', formData);
+      return response.data;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        const errorMessage = error.response?.data?.message || error.message;
+        const displayedMessage = Array.isArray(errorMessage) ? errorMessage.join(',') : errorMessage;
+        toast.error(`Upload avatar failed: ${displayedMessage || 'Unknown Error'}`);
+      } else {
+        toast.error('Upload avatar failed: Unknown Error');
+      }
+      throw error;
+    }
+  },
+
   getDiscoveryFeed: async (page = 1, limit = 20, search?: string) => {
     try {
       const query = new URLSearchParams({

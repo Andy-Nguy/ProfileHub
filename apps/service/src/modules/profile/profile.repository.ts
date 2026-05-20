@@ -97,10 +97,20 @@ export class ProfileRepository {
     userId: string,
     payload: Partial<ProfileEntity>,
   ): Promise<ProfileEntity> {
-    await this.profileRepo.upsert(
-      { userId, ...payload },
-      ['userId'],
-    );
+    let profile = await this.findProfileByUserId(userId);
+    
+    if (profile) {
+      await this.profileRepo.update({ userId }, payload);
+    } else {
+      const user = await this.userRepo.findOne({ where: { id: userId } });
+      const displayName = payload.displayName || user?.username || 'New User';
+      profile = this.profileRepo.create({ 
+        userId, 
+        ...payload, 
+        displayName 
+      });
+      await this.profileRepo.save(profile);
+    }
 
     return this.findProfileByUserId(userId) as Promise<ProfileEntity>;
   }

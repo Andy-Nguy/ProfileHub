@@ -17,6 +17,7 @@ import { SocialLinkEntity } from './entities/social-link.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
@@ -66,6 +67,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
     AuthModule,
     UserModule,
     ProfileModule,
+    StorageModule,
   ],
   providers: [
     // ── Global Guards ───────────────────────────────────────────────

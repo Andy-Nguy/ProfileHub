@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../services/auth-login.service';
 import { profileAPI } from '../services/profile.service';
@@ -13,6 +14,7 @@ export const OnboardingPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showOptional, setShowOptional] = useState(false);
+  const { t } = useTranslation(['profile', 'common']);
 
   const [formData, setFormData] = useState({
     displayName: user?.displayName || user?.username || '',
@@ -49,7 +51,7 @@ export const OnboardingPage: React.FC = () => {
       // Refresh the page to update auth context needsOnboarding
       window.location.reload();
     } catch (err: any) {
-      setError(err.message || 'Failed to complete onboarding. Please try again.');
+      setError(err.message || t('common:errorGeneric'));
     } finally {
       setIsLoading(false);
     }
@@ -68,10 +70,10 @@ export const OnboardingPage: React.FC = () => {
             waving_hand
           </span>
           <h1 className="font-display-md text-display-md text-on-surface font-bold mb-2">
-            Welcome to ProfileHub!
+            {t('profile:onboarding.title')}
           </h1>
           <p className="text-on-surface-variant text-body-lg">
-            Let's set up your professional identity. Fill in the basics to get started.
+            {t('profile:onboarding.subtitle')}
           </p>
         </div>
 
@@ -97,13 +99,13 @@ export const OnboardingPage: React.FC = () => {
                 <span className="material-symbols-outlined text-sm">refresh</span>
               </button>
             </div>
-            <p className="text-sm text-on-surface-variant mt-3">Click to randomize your avatar</p>
+            <p className="text-sm text-on-surface-variant mt-3">{t('profile:onboarding.avatarHint')}</p>
           </div>
 
           <div className="grid grid-cols-1 gap-6">
             <FloatingField
               id="displayName"
-              label="Display Name"
+              label={t('profile:onboarding.displayNameLabel')}
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
               required
@@ -111,13 +113,15 @@ export const OnboardingPage: React.FC = () => {
 
             <FloatingField
               id="headline"
-              label="Professional Headline (e.g. Fullstack Developer)"
+              label={t('profile:onboarding.headlineLabel')}
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
             />
 
             <div className="space-y-3">
-              <label className="text-sm font-medium text-on-surface-variant ml-1">Profile Visibility *</label>
+              <label className="text-sm font-medium text-on-surface-variant ml-1">
+                {t('profile:onboarding.visibilityLabel')}
+              </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   type="button"
@@ -129,8 +133,8 @@ export const OnboardingPage: React.FC = () => {
                 >
                   <span className="material-symbols-outlined">public</span>
                   <div className="text-left">
-                    <div className="font-bold">Public</div>
-                    <div className="text-xs opacity-70">Visible to everyone</div>
+                    <div className="font-bold">{t('profile:onboarding.visibilityPublic')}</div>
+                    <div className="text-xs opacity-70">{t('profile:onboarding.visibilityPublicHint')}</div>
                   </div>
                 </button>
 
@@ -144,8 +148,8 @@ export const OnboardingPage: React.FC = () => {
                 >
                   <span className="material-symbols-outlined">lock</span>
                   <div className="text-left">
-                    <div className="font-bold">Private</div>
-                    <div className="text-xs opacity-70">Only you can see</div>
+                    <div className="font-bold">{t('profile:onboarding.visibilityPrivate')}</div>
+                    <div className="text-xs opacity-70">{t('profile:onboarding.visibilityPrivateHint')}</div>
                   </div>
                 </button>
               </div>
@@ -158,7 +162,9 @@ export const OnboardingPage: React.FC = () => {
                 onClick={() => setShowOptional(!showOptional)}
                 className="flex items-center text-primary font-medium hover:underline focus:outline-none"
               >
-                {showOptional ? 'Hide' : 'Add'} optional details (Location, Industry, Bio)
+                {showOptional
+                  ? t('profile:onboarding.optionalToggleHide')
+                  : t('profile:onboarding.optionalToggleShow')}
                 <span className="material-symbols-outlined ml-1 text-xl">
                   {showOptional ? 'expand_less' : 'expand_more'}
                 </span>
@@ -176,26 +182,28 @@ export const OnboardingPage: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                     <FloatingField
                       id="location"
-                      label="Location (Optional)"
+                      label={t('profile:onboarding.locationLabel')}
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     />
                     <FloatingField
                       id="industry"
-                      label="Industry (Optional)"
+                      label={t('profile:onboarding.industryLabel')}
                       value={formData.industry}
                       onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-on-surface-variant ml-1 mb-2 block">Bio (Optional)</label>
+                    <label className="text-sm font-medium text-on-surface-variant ml-1 mb-2 block">
+                      {t('profile:onboarding.bioLabel')}
+                    </label>
                     <textarea
                       id="bio"
                       rows={3}
                       value={formData.bio}
                       onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                       className="w-full bg-surface-container-lowest border-2 border-outline-variant rounded-2xl px-4 py-3 text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
-                      placeholder="Tell us a little bit about yourself..."
+                      placeholder={t('profile:onboarding.bioPlaceholder')}
                     />
                   </div>
                 </motion.div>
@@ -207,9 +215,9 @@ export const OnboardingPage: React.FC = () => {
             type="submit"
             className="w-full justify-center bg-primary text-on-primary py-5 rounded-2xl text-lg font-bold shadow-xl hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300 gap-3 mt-8"
             isLoading={isLoading}
-            loadingText="Saving..."
+            loadingText={t('profile:onboarding.submittingButton')}
           >
-            Complete Onboarding
+            {t('profile:onboarding.submitButton')}
             <span className="material-symbols-outlined">arrow_forward</span>
           </Button>
         </form>
@@ -217,4 +225,3 @@ export const OnboardingPage: React.FC = () => {
     </div>
   );
 };
-
