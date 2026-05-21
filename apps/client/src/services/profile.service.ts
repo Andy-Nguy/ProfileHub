@@ -26,7 +26,7 @@ export interface UpdateProfileDto {
   visibility?: VisibilityTypeEnum;
 }
 
-export interface UpdateOnboardingDto extends UpdateProfileDto {}
+export interface UpdateOnboardingDto extends UpdateProfileDto { }
 
 export interface OnboardingStatusResponse {
   needsOnboarding: boolean;
@@ -78,12 +78,18 @@ export const profileAPI = {
     }
   },
 
-  getMyProfile: async (): Promise<ProfileResponse> => {
+  getMyProfile: async () => {
     try {
-      const response = await apiClient.get<ProfileResponse>('/profiles/me');
+      const response = await apiClient.get('/profiles/mine');
       return response.data;
     } catch (error) {
-      showApiError('Get profile failed', error);
+      if (error instanceof ApiError) {
+        const errorMessage = error.response?.data?.message || error.message;
+        const displayedMessage = Array.isArray(errorMessage) ? errorMessage.join(',') : errorMessage;
+        toast.error(`Get profile failed: ${displayedMessage || 'Unknown Error'}`);
+      } else {
+        toast.error('Get profile failed: Unknown Error');
+      }
       throw error;
     }
   },
