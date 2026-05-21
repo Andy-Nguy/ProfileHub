@@ -22,7 +22,7 @@ export class RefreshTokenService {
     private readonly refreshRepo: Repository<RefreshTokenEntity>,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
-  ) {}
+  ) { }
 
   /**
    * Generate a new access + refresh token pair.

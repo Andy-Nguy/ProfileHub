@@ -149,8 +149,8 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-72 flex flex-col">
-        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter overflow-y-auto">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-[calc(100vh-64px)]">
+        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter">
           <div className="max-w-[1280px] mx-auto space-y-6">
 
             {/* ── Profile Header ─────────────────────────────────── */}
