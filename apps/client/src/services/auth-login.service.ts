@@ -1,6 +1,6 @@
 import { apiClient } from './api.service';
 
-import { ILoginDto, IRegisterDto, IVerifyEmailDto } from '../../../../libs/shared/types/auth.types';
+import { ILoginDto, IRegisterDto, IVerifyEmailDto } from '@profilehub/types';
 
 export const authAPI = {
   login: async ({email, password}: ILoginDto) => {

@@ -2,18 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { BaseDialog } from './BaseDialog';
 import { Button } from '../../shared/Button';
 import { SkillTag } from '../../shared/SkillTag';
-import { profileAPI } from '../../../services/profile.service';
+import { ProfileResponse, profileAPI } from '../../../services/profile.service';
 import { apiClient } from '../../../services/api.service';
+import { ISkill, SkillCategory } from '@profilehub/types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  profile: any;
+  profile: ProfileResponse;
   onSuccess: () => void;
 }
 
 export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSuccess }) => {
-  const [skills, setSkills] = useState<any[]>([]);
+  const [skills, setSkills] = useState<ISkill[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +30,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
     
     setLoading(true);
     try {
-      const newSkill = await profileAPI.addSkill({ name: trimmed });
+      const newSkill = await profileAPI.addSkill({ name: trimmed, category: SkillCategory.OTHER });
       setSkills(prev => [...prev, newSkill]);
       setInputValue('');
       onSuccess();

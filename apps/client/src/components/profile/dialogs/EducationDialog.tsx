@@ -4,13 +4,20 @@ import { FloatingField, FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
 import { profileAPI } from '../../../services/profile.service';
 import { apiClient } from '../../../services/api.service';
+import { IEducation } from '@profilehub/types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   educationId?: string | null;
-  initialData?: any;
+  initialData?: IEducation;
   onSuccess: () => void;
+}
+
+function toDateInputValue(value: string | Date | null | undefined) {
+  if (!value) return '';
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return value.split('T')[0];
 }
 
 export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId, initialData, onSuccess }) => {
@@ -32,8 +39,8 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
           institution: initialData.institution || '',
           degree: initialData.degree || '',
           fieldOfStudy: initialData.fieldOfStudy || '',
-          startDate: initialData.startDate ? initialData.startDate.split('T')[0] : '',
-          endDate: initialData.endDate ? initialData.endDate.split('T')[0] : '',
+          startDate: toDateInputValue(initialData.startDate),
+          endDate: toDateInputValue(initialData.endDate),
           isCurrent: initialData.isCurrent || false,
           description: initialData.description || '',
         });
@@ -51,8 +58,8 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
     try {
       const payload = {
         ...formData,
-        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
-        endDate: (!formData.isCurrent && formData.endDate) ? new Date(formData.endDate).toISOString() : undefined,
+        startDate: new Date(formData.startDate),
+        endDate: !formData.isCurrent && formData.endDate ? new Date(formData.endDate) : null,
       };
 
       if (educationId) {

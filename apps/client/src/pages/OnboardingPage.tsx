@@ -7,6 +7,7 @@ import { authAPI } from '../services/auth-login.service';
 import { profileAPI } from '../services/profile.service';
 import { FloatingField } from '../components/shared/FloatingField';
 import { Button } from '../components/shared/Button';
+import { VisibilityTypeEnum } from '@profilehub/types';
 
 export const OnboardingPage: React.FC = () => {
   const { user, authenticate } = useAuth();
@@ -23,7 +24,7 @@ export const OnboardingPage: React.FC = () => {
     location: '',
     industry: '',
     bio: '',
-    visibility: 'public' as 'public' | 'private',
+    visibility: VisibilityTypeEnum.PUBLIC,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,8 +126,8 @@ export const OnboardingPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, visibility: 'public' })}
-                  className={`py-4 px-6 rounded-2xl border-2 transition-all flex items-center gap-3 ${formData.visibility === 'public'
+                  onClick={() => setFormData({ ...formData, visibility: VisibilityTypeEnum.PUBLIC })}
+                  className={`py-4 px-6 rounded-2xl border-2 transition-all flex items-center gap-3 ${formData.visibility === VisibilityTypeEnum.PUBLIC
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-outline-variant text-on-surface-variant hover:border-outline'
                     }`}
@@ -140,8 +141,8 @@ export const OnboardingPage: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, visibility: 'private' })}
-                  className={`py-4 px-6 rounded-2xl border-2 transition-all flex items-center gap-3 ${formData.visibility === 'private'
+                  onClick={() => setFormData({ ...formData, visibility: VisibilityTypeEnum.PRIVATE })}
+                  className={`py-4 px-6 rounded-2xl border-2 transition-all flex items-center gap-3 ${formData.visibility === VisibilityTypeEnum.PRIVATE
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-outline-variant text-on-surface-variant hover:border-outline'
                     }`}

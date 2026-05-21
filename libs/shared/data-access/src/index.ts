@@ -9,3 +9,4 @@ export * from './schemas/skill.schema';
 export * from './schemas/experience.schema';
 export * from './schemas/education.schema';
 export * from './schemas/interaction.schema';
+export * from './schemas/social-link.schema';

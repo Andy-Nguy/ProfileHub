@@ -13,9 +13,9 @@ import { SkillEntity } from './skill.entity';
 import { ExperienceEntity } from './experience.entity';
 import { EducationEntity } from './education.entity';
 import { SocialLinkEntity } from './social-link.entity';
-import { VisibilityTypeEnum, IProfile } from '../../../../libs/shared/types/types';
+import { VisibilityTypeEnum, IProfile } from '@profilehub/types';
 
-export { VisibilityTypeEnum, IProfile } from '../../../../libs/shared/types/types';
+export { VisibilityTypeEnum, IProfile } from '@profilehub/types';
 
 @Entity('profiles')
 export class ProfileEntity implements IProfile {

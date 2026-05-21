@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthSession } from '../../services/auth-session.service';
-import { profileAPI } from '../../services/profile.service';
+import { profileAPI, ProfileResponse } from '../../services/profile.service';
 
 interface NavItem {
   icon: string;
@@ -30,7 +30,7 @@ export const SideNav: React.FC<SideNavProps> = ({ user }) => {
   const { user: authUser, isAuthenticated } = useAuthSession();
   const location = useLocation();
   const { t } = useTranslation('common');
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
 
   // Fetch the canonical user profile from the database if logged in
   useEffect(() => {
@@ -51,19 +51,17 @@ export const SideNav: React.FC<SideNavProps> = ({ user }) => {
   const workspaceName = 'Hub Workspace';
 
   // Dynamic user data for the top card layout with robust fallbacks
-  const authUserAny = authUser as any;
   const userName =
     user?.name ||
     profile?.displayName ||
-    (isAuthenticated && (authUserAny?.profile?.displayName || authUserAny?.displayName || authUserAny?.username)) ||
+    (isAuthenticated && authUser && (authUser.displayName || authUser.username)) ||
     'Expertise Level: Senior';
 
   const userAvatarUrl =
     user?.avatarUrl ||
     profile?.avatarUrl ||
-    (isAuthenticated && authUserAny?.profile?.avatarUrl) ||
-    (isAuthenticated && authUserAny?.username
-      ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUserAny.username}`
+    (isAuthenticated && authUser && authUser.username
+      ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${authUser.username}`
       : 'https://i.pravatar.cc/150?u=1');
 
   return (
