@@ -91,9 +91,9 @@ export const SideNav: React.FC<SideNavProps> = ({ user }) => {
               {workspaceName}
             </h2>
             
-            <p className="text-xs text-on-surface-variant font-semibold tracking-wide truncate mt-1 flex items-center space-x-0.5" title={userName}>
+            <p className="text-xs text-on-surface-variant font-semibold tracking-wide truncate mt-1 flex items-center" title={userName}>
               <span className="text-secondary select-none font-bold text-sm">@</span>
-              <span className="opacity-90">{userName}</span>
+              <span className="opacity-90">{userName.replace(/\s+/g, '')}</span>
             </p>
           </div>
         </div>
