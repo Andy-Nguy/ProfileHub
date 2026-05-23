@@ -10,12 +10,12 @@ import { SkillsDialog } from '../components/profile/dialogs/SkillsDialog';
 import { ExperienceDialog } from '../components/profile/dialogs/ExperienceDialog';
 import { EducationDialog } from '../components/profile/dialogs/EducationDialog';
 import { AvatarEditDialog } from '../components/profile/dialogs/AvatarEditDialog';
+import { SkillsSection } from '../components/profile/SkillsSection';
 import { ProfileResponse, profileAPI } from '../services/profile.service';
 import { useAuth } from '../contexts/AuthContext';
-import { IEducation, IExperience, ISkill, ISocialLink } from '@profilehub/types';
+import { IEducation, IExperience, ISocialLink } from '@profilehub/types';
 import {
   M3Card,
-  SkillChip,
   EndorsementButton,
   ProfileHeader,
   TimelineSection,
@@ -285,31 +285,15 @@ export const ProfilePage: React.FC = () => {
               {/* Right: Skills + Social */}
               <div className="space-y-6">
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+                  <SkillsSection
+                    skills={profile.skills}
+                    isOwner={isOwnProfile}
+                    onEdit={isOwnProfile ? () => setSkillsOpen(true) : undefined}
+                  />
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
                   <M3Card>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">psychology</span>
-                        {t('page.skills')}
-                      </h3>
-                      {isOwnProfile && (
-                        <button
-                          onClick={() => setSkillsOpen(true)}
-                          className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full p-1.5 transition-colors"
-                          aria-label="Edit skills"
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {profile.skills.map((skill: ISkill) => (
-                        <SkillChip key={skill.id} name={skill.name} />
-                      ))}
-                    </div>
-
-                    <hr className="border-outline-variant mb-6" />
-
                     <h3 className="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-primary">verified</span>
                       {t('page.endorsements')}
