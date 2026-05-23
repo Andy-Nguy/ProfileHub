@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authAPI } from '../services/auth-login.service';
+import { ILoginDto, IRegisterDto, IVerifyEmailDto } from '@profilehub/types';
+import { DiscoveryFeedResponse, ProfileResponse } from '../services/profile.service';
 
 const API = '/api';
 
@@ -12,7 +14,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 // ── Auth ────────────────────────────────
 export function useLogin() {
   return useMutation({
-    mutationFn: async (credentials: any) => {
+    mutationFn: async (credentials: ILoginDto) => {
       try {
         return await authAPI.login(credentials);
       } catch (err: any) {
@@ -24,7 +26,7 @@ export function useLogin() {
 
 export function useRegister() {
   return useMutation({
-    mutationFn: async (userData: any) => {
+    mutationFn: async (userData: IRegisterDto) => {
       try {
         return await authAPI.register(userData);
       } catch (err: any) {
@@ -36,7 +38,7 @@ export function useRegister() {
 
 export function useVerifyEmail() {
   return useMutation({
-    mutationFn: async (verificationData: any) => {
+    mutationFn: async (verificationData: IVerifyEmailDto) => {
       try {
         return await authAPI.verifyEmail(verificationData);
       } catch (err: any) {
@@ -65,7 +67,7 @@ export function useDiscoveryFeed(page = 1, limit = 20, search = '') {
 
   return useQuery({
     queryKey: ['discovery', page, limit, search],
-    queryFn: () => fetchJson<any>(`${API}/profiles/discover?${params}`),
+    queryFn: () => fetchJson<DiscoveryFeedResponse>(`${API}/profiles/discover?${params}`),
   });
 }
 
@@ -73,7 +75,7 @@ export function useDiscoveryFeed(page = 1, limit = 20, search = '') {
 export function useProfile(username: string) {
   return useQuery({
     queryKey: ['profile', username],
-    queryFn: () => fetchJson<any>(`${API}/profiles/${username}`),
+    queryFn: () => fetchJson<ProfileResponse>(`${API}/profiles/${username}`),
     enabled: !!username,
   });
 }
@@ -99,11 +101,11 @@ export function useToggleLike() {
       await qc.cancelQueries({ queryKey: ['discovery'] });
       const prev = qc.getQueriesData({ queryKey: ['discovery'] });
 
-      qc.setQueriesData({ queryKey: ['discovery'] }, (old: any) => {
+      qc.setQueriesData<DiscoveryFeedResponse>({ queryKey: ['discovery'] }, (old) => {
         if (!old?.data) return old;
         return {
           ...old,
-          data: old.data.map((p: any) =>
+          data: old.data.map((p) =>
             p.id === profileId ? { ...p, likesCount: p.likesCount + 1 } : p,
           ),
         };
@@ -119,3 +121,4 @@ export function useToggleLike() {
     },
   });
 }
+

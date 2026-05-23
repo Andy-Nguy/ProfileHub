@@ -23,7 +23,8 @@
     "baseUrl": ".",
     "paths": {
       "@profilehub/data-access": ["libs/shared/data-access/src/index.ts"],
-      "../../../../libs/shared/types/types": ["libs/shared/src/types/index.ts"],
+      "@profilehub/types": ["libs/shared/types/types.ts"],
+      "../../../../libs/shared/types/types": ["libs/shared/types/types.ts"],
       "@profilehub/ui": ["libs/shared/ui/src/index.ts"]
     }
   },

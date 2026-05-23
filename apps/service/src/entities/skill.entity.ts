@@ -8,9 +8,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
-export { SkillCategory } from '../../../../libs/shared/types/types';
-export { ISkill } from '../../../../libs/shared/types/types';
-import { SkillCategory, ISkill } from '../../../../libs/shared/types/types';
+export { SkillCategory, ISkill } from '@profilehub/types';
+import { SkillCategory, ISkill } from '@profilehub/types';
 
 @Entity('skills')
 export class SkillEntity implements ISkill {

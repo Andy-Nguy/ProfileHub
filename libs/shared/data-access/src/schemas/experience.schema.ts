@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { EmploymentType } from '../../../types/types';
+import { EmploymentType } from '@profilehub/types';
 
 export const CreateExperienceSchema = z
   .object({

@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { useAuthSession } from '../services/auth-session.service';
 import { authAPI } from '../services/auth-login.service';
-import { AuthUser } from '../../../../libs/shared/types/auth.types';
+import { AuthUser } from '@profilehub/types';
 
 interface AuthContextValue {
   isAuthenticated: boolean;

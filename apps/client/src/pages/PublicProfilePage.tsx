@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { profileAPI } from '../services/profile.service';
+import { profileAPI, ProfileResponse } from '../services/profile.service';
 import { EndorsementButton } from '@profilehub/ui';
+import { ISkill, IExperience, IEducation } from '@profilehub/types';
 
 export const PublicProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -134,8 +135,8 @@ export const PublicProfilePage: React.FC = () => {
                   <span className="material-symbols-outlined text-primary">psychology</span> Core Skills
                 </h3>
                 <div className="flex flex-wrap gap-2 mt-4">
-                  {profile.skills?.length > 0 ? (
-                    profile.skills.map((skill: any, i: number) => (
+                  {profile.skills && profile.skills.length > 0 ? (
+                    profile.skills.map((skill: ISkill, i: number) => (
                       <span key={skill.id || skill.name} className={`px-3 py-1.5 rounded-lg font-label-lg text-label-lg ${i % 3 === 0 ? 'bg-secondary-container text-on-secondary-container border border-secondary/20' : 'bg-surface-container-high text-on-surface border border-outline-variant/50'}`}>
                         {skill.name}
                       </span>
@@ -156,8 +157,8 @@ export const PublicProfilePage: React.FC = () => {
                 </h3>
                 
                 <div className="relative border-l-2 border-surface-variant ml-4 space-y-10">
-                  {profile.experiences?.length > 0 ? (
-                    profile.experiences.map((exp: any, i: number) => (
+                  {profile.experiences && profile.experiences.length > 0 ? (
+                    profile.experiences.map((exp: IExperience, i: number) => (
                       <div key={exp.id} className="relative pl-8">
                         <div className={`absolute w-4 h-4 rounded-full -left-[9px] top-1 border-4 border-surface ${i === 0 ? 'bg-primary' : 'bg-outline-variant'}`}></div>
                         <div className="mb-1 flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
@@ -183,8 +184,8 @@ export const PublicProfilePage: React.FC = () => {
                 </h3>
                 
                 <div className="space-y-6">
-                  {profile.educations?.length > 0 ? (
-                    profile.educations.map((edu: any) => (
+                  {profile.educations && profile.educations.length > 0 ? (
+                    profile.educations.map((edu: IEducation) => (
                       <div key={edu.id} className="flex items-start gap-4">
                         <div className="w-12 h-12 bg-surface-container flex items-center justify-center rounded-lg flex-shrink-0">
                           <span className="material-symbols-outlined text-on-surface-variant">account_balance</span>

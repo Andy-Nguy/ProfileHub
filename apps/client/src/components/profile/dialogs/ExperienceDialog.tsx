@@ -4,14 +4,20 @@ import { FloatingField, FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
 import { profileAPI } from '../../../services/profile.service';
 import { apiClient } from '../../../services/api.service';
-import { EmploymentType } from '../../../types/enums';
+import { EmploymentType, IExperience } from '@profilehub/types';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   experienceId?: string | null;
-  initialData?: any;
+  initialData?: IExperience;
   onSuccess: () => void;
+}
+
+function toDateInputValue(value: string | Date | null | undefined) {
+  if (!value) return '';
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return value.split('T')[0];
 }
 
 export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceId, initialData, onSuccess }) => {
@@ -19,7 +25,7 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
     title: '',
     company: '',
     location: '',
-    employmentType: EmploymentType.FULL_TIME as string,
+    employmentType: EmploymentType.FULL_TIME,
     startDate: '',
     endDate: '',
     isCurrent: false,
@@ -35,8 +41,8 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
           company: initialData.company || '',
           location: initialData.location || '',
           employmentType: initialData.employmentType || EmploymentType.FULL_TIME,
-          startDate: initialData.startDate ? initialData.startDate.split('T')[0] : '',
-          endDate: initialData.endDate ? initialData.endDate.split('T')[0] : '',
+          startDate: toDateInputValue(initialData.startDate),
+          endDate: toDateInputValue(initialData.endDate),
           isCurrent: initialData.isCurrent || false,
           description: initialData.description || '',
         });
@@ -54,8 +60,8 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
     try {
       const payload = {
         ...formData,
-        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
-        endDate: (!formData.isCurrent && formData.endDate) ? new Date(formData.endDate).toISOString() : undefined,
+        startDate: new Date(formData.startDate),
+        endDate: !formData.isCurrent && formData.endDate ? new Date(formData.endDate) : null,
       };
 
       if (experienceId) {

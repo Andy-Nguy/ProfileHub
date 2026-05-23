@@ -22,6 +22,7 @@ import {
   getRefreshCookieName,
   getClearRefreshCookieOptions,
 } from '../../shared/helpers';
+import { AuthUser } from '@profilehub/types';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -154,7 +155,7 @@ export class AuthController {
     description: 'Invalid or missing access token, or user is inactive/deleted',
   })
   async getMe(@Req() req: Request): Promise<AuthMeResponseDto> {
-    const user = req.user as any;
+    const user = req.user as AuthUser;
     return this.authService.getUserProfile(user.id);
   }
 }
