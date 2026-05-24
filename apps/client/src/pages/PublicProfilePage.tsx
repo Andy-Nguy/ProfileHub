@@ -6,7 +6,7 @@ import { ProfileHeader } from '@profilehub/ui';
 import { TimelineSection } from '@profilehub/ui';
 import { ISkill, IExperience, IEducation, ISocialLink } from '@profilehub/types';
 import { SkillsSection } from '../components/profile/SkillsSection';
-import { DashboardPageLoader } from '../components/shared/LottieLoader';
+import { DashboardLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 const formatYearRange = (
@@ -45,7 +45,7 @@ export const PublicProfilePage: React.FC = () => {
   const showLoading = useMinimumLoading(loading);
 
   if (showLoading) {
-    return <DashboardPageLoader label="Loading profile…" />;
+    return <DashboardLoader label="Loading profile…" />;
   }
 
   if (!profile) {

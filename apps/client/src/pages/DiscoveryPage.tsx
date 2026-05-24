@@ -7,7 +7,7 @@ import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
 import { ProfileResponse } from '../services/profile.service';
 import { ISkill } from '@profilehub/types';
-import { DashboardPageLoader } from '../components/shared/LottieLoader';
+import { DashboardLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 const MOCK_PROFILES = [
@@ -84,11 +84,6 @@ export const DiscoveryPage: React.FC = () => {
   );
 
 
-  // Early return — renders sidebar-aware loader at correct position
-  if (showLoading) {
-    return <DashboardPageLoader label={t('discovery.loading')} />;
-  }
-
   return (
     <>
       {/* Main Content */}
@@ -128,7 +123,9 @@ export const DiscoveryPage: React.FC = () => {
             </motion.div>
 
             {/* ── Profile Grid ────────────────── */}
-            {error ? (
+            {showLoading ? (
+              <DashboardLoader label={t('discovery.loading')} />
+            ) : error ? (
               <div className="text-center py-24 text-error">
                 <div className="text-xl">{t('discovery.errorLoading')}</div>
               </div>
@@ -195,8 +192,8 @@ export const DiscoveryPage: React.FC = () => {
               </div>
             )}
 
-            {/* Empty state — only reached when not loading and not error */}
-            {!error && filtered.length === 0 && (
+            {/* Empty state */}
+            {!showLoading && !error && filtered.length === 0 && (
               <div className="text-center py-24">
                 <span className="material-symbols-outlined text-6xl text-outline-variant block mb-4">
                   search_off

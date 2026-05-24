@@ -20,7 +20,7 @@ import {
   ProfileHeader,
   TimelineSection,
 } from '@profilehub/ui';
-import { DashboardPageLoader } from '../components/shared/LottieLoader';
+import { DashboardLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 
@@ -96,7 +96,7 @@ export const ProfilePage: React.FC = () => {
   const showLoading = useMinimumLoading(loading);
 
   if (showLoading) {
-    return <DashboardPageLoader label={t('page.loading')} />;
+    return <DashboardLoader label={t('page.loading')} />;
   }
 
   if (!profile) {
