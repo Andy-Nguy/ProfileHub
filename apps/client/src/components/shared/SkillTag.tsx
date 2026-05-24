@@ -5,48 +5,55 @@ export const SKILL_CATEGORY_CONFIG: Record<
   SkillCategory,
   { label: string; icon: string; color: string; bg: string; border: string }
 > = {
-  [SkillCategory.LANGUAGE]: {
-    label: 'Languages',
-    icon: 'code',
+  // Kỹ năng chuyên môn cốt lõi — React, Kế toán thuế, SEO, AutoCAD...
+  [SkillCategory.TECHNICAL]: {
+    label: 'Technical',
+    icon: 'engineering',
     color: 'text-blue-600',
     bg: 'bg-blue-50',
     border: 'border-blue-200',
   },
-  [SkillCategory.FRAMEWORK]: {
-    label: 'Frameworks',
-    icon: 'layers',
-    color: 'text-violet-600',
-    bg: 'bg-violet-50',
-    border: 'border-violet-200',
-  },
+  // Công cụ & Phần mềm — Docker, SAP, Google Analytics, Figma, Excel...
   [SkillCategory.TOOL]: {
-    label: 'Tools',
+    label: 'Tools & Software',
     icon: 'build',
     color: 'text-amber-600',
     bg: 'bg-amber-50',
     border: 'border-amber-200',
   },
-  [SkillCategory.DATABASE]: {
-    label: 'Databases',
-    icon: 'database',
+  // Phương pháp & Quy trình — Agile, Six Sigma, Montessori, IFRS...
+  [SkillCategory.METHODOLOGY]: {
+    label: 'Methodology',
+    icon: 'account_tree',
+    color: 'text-violet-600',
+    bg: 'bg-violet-50',
+    border: 'border-violet-200',
+  },
+  // Kiến thức ngành & lý thuyết — Machine Learning, Luật thuế, Dược lý...
+  [SkillCategory.DOMAIN]: {
+    label: 'Domain Knowledge',
+    icon: 'menu_book',
     color: 'text-emerald-600',
     bg: 'bg-emerald-50',
     border: 'border-emerald-200',
   },
-  [SkillCategory.CLOUD]: {
-    label: 'Cloud & DevOps',
-    icon: 'cloud',
+  // Ngôn ngữ giao tiếp — English, Japanese, Korean, French...
+  [SkillCategory.LANGUAGE]: {
+    label: 'Languages',
+    icon: 'translate',
     color: 'text-sky-600',
     bg: 'bg-sky-50',
     border: 'border-sky-200',
   },
-  [SkillCategory.DESIGN]: {
-    label: 'Design',
-    icon: 'palette',
-    color: 'text-pink-600',
-    bg: 'bg-pink-50',
-    border: 'border-pink-200',
+  // Chứng chỉ & Bằng cấp — AWS SAA, CPA, PMP, IELTS, TESOL...
+  [SkillCategory.CERTIFICATION]: {
+    label: 'Certifications',
+    icon: 'workspace_premium',
+    color: 'text-orange-600',
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
   },
+  // Kỹ năng mềm — Leadership, Communication, Critical Thinking...
   [SkillCategory.SOFT_SKILL]: {
     label: 'Soft Skills',
     icon: 'psychology',
@@ -54,6 +61,7 @@ export const SKILL_CATEGORY_CONFIG: Record<
     bg: 'bg-teal-50',
     border: 'border-teal-200',
   },
+  // Các kỹ năng khác không thuộc nhóm trên
   [SkillCategory.OTHER]: {
     label: 'Other',
     icon: 'more_horiz',

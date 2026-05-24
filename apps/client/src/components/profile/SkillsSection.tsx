@@ -9,12 +9,12 @@ interface SkillsSectionProps {
 }
 
 const CATEGORY_ORDER: SkillCategory[] = [
-  SkillCategory.LANGUAGE,
-  SkillCategory.FRAMEWORK,
-  SkillCategory.DATABASE,
-  SkillCategory.CLOUD,
+  SkillCategory.TECHNICAL,
   SkillCategory.TOOL,
-  SkillCategory.DESIGN,
+  SkillCategory.METHODOLOGY,
+  SkillCategory.DOMAIN,
+  SkillCategory.CERTIFICATION,
+  SkillCategory.LANGUAGE,
   SkillCategory.SOFT_SKILL,
   SkillCategory.OTHER,
 ];

@@ -7,8 +7,10 @@ import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
 import { ProfileResponse } from '../services/profile.service';
 import { ISkill } from '@profilehub/types';
-import { DashboardLoader } from '../components/shared/LottieLoader';
+import { DashboardLoader, LottieLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
+import { useDebounce } from '../hooks/useDebounce';
+
 
 const MOCK_PROFILES = [
   {
@@ -70,17 +72,18 @@ const MOCK_PROFILES = [
 export const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 150);
   const { t } = useTranslation('profile');
 
-  const { data, isFetching, error } = useDiscoveryFeed(1, 100);
+  const { data, isFetching, error } = useDiscoveryFeed(1, 100, debouncedSearch);
   const showLoading = useMinimumLoading(isFetching);
 
   const profiles = data?.data || [];
 
   const filtered = profiles.filter(
     (p: ProfileResponse) =>
-      p.displayName.toLowerCase().includes(search.toLowerCase()) ||
-      p.skills?.some((s: ISkill) => s.name.toLowerCase().includes(search.toLowerCase()))
+      p.displayName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      p.skills?.some((s: ISkill) => s.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
   );
 
 
@@ -124,7 +127,9 @@ export const DiscoveryPage: React.FC = () => {
 
             {/* ── Profile Grid ────────────────── */}
             {showLoading ? (
-              <DashboardLoader label={t('discovery.loading')} />
+              <div className="flex items-center justify-center py-24 min-h-[300px]">
+                <LottieLoader label={t('discovery.loading')} />
+              </div>
             ) : error ? (
               <div className="text-center py-24 text-error">
                 <div className="text-xl">{t('discovery.errorLoading')}</div>
