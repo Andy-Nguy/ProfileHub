@@ -7,6 +7,8 @@ import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
 import { ProfileResponse } from '../services/profile.service';
 import { ISkill } from '@profilehub/types';
+import { DashboardPageLoader } from '../components/shared/LottieLoader';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 const MOCK_PROFILES = [
   {
@@ -70,7 +72,8 @@ export const DiscoveryPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const { t } = useTranslation('profile');
 
-  const { data, isLoading, error } = useDiscoveryFeed(1, 100);
+  const { data, isFetching, error } = useDiscoveryFeed(1, 100);
+  const showLoading = useMinimumLoading(isFetching);
 
   const profiles = data?.data || [];
 
@@ -80,6 +83,11 @@ export const DiscoveryPage: React.FC = () => {
       p.skills?.some((s: ISkill) => s.name.toLowerCase().includes(search.toLowerCase()))
   );
 
+
+  // Early return — renders sidebar-aware loader at correct position
+  if (showLoading) {
+    return <DashboardPageLoader label={t('discovery.loading')} />;
+  }
 
   return (
     <>
@@ -120,11 +128,7 @@ export const DiscoveryPage: React.FC = () => {
             </motion.div>
 
             {/* ── Profile Grid ────────────────── */}
-            {isLoading ? (
-              <div className="text-center py-24">
-                <div className="text-xl">{t('discovery.loading')}</div>
-              </div>
-            ) : error ? (
+            {error ? (
               <div className="text-center py-24 text-error">
                 <div className="text-xl">{t('discovery.errorLoading')}</div>
               </div>
@@ -191,8 +195,8 @@ export const DiscoveryPage: React.FC = () => {
               </div>
             )}
 
-            {/* Empty state */}
-            {filtered.length === 0 && (
+            {/* Empty state — only reached when not loading and not error */}
+            {!error && filtered.length === 0 && (
               <div className="text-center py-24">
                 <span className="material-symbols-outlined text-6xl text-outline-variant block mb-4">
                   search_off

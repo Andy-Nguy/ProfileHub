@@ -20,6 +20,8 @@ import {
   ProfileHeader,
   TimelineSection,
 } from '@profilehub/ui';
+import { DashboardPageLoader } from '../components/shared/LottieLoader';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 
 
@@ -91,12 +93,10 @@ export const ProfilePage: React.FC = () => {
     fetchProfile();
   }, [username, user]);
 
-  if (loading) {
-    return (
-      <div className="bg-background text-on-background min-h-screen flex items-center justify-center">
-        <div className="text-xl">{t('page.loading')}</div>
-      </div>
-    );
+  const showLoading = useMinimumLoading(loading);
+
+  if (showLoading) {
+    return <DashboardPageLoader label={t('page.loading')} />;
   }
 
   if (!profile) {
