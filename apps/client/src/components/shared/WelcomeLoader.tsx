@@ -2,7 +2,7 @@ import React from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const WELCOME_LOTTIE_SRC =
-  'https://lottie.host/657a195b-95c9-437e-8cea-74bbe1ac6ce0/6fs50CZCUd.lottie';
+  'https://lottie.host/efd3d908-4daa-4e25-a377-86ae0c278548/t3aOB4vQky.lottie';
 
 /**
  * WelcomeLoader — A special Lottie animation used specifically for the 
@@ -21,3 +21,4 @@ export const WelcomeLoader: React.FC = () => {
     </div>
   );
 };
+

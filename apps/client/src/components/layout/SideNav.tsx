@@ -34,7 +34,7 @@ export const SideNav: React.FC<SideNavProps> = ({ user }) => {
   const { t } = useTranslation('common');
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
-  const showWelcome = useMinimumLoading(profileLoading, 4000);
+  const showWelcome = useMinimumLoading(profileLoading, 3989);
 
   // Fetch the canonical user profile from the database if logged in
   useEffect(() => {
