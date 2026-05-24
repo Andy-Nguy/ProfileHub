@@ -82,24 +82,28 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, o
         )}
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {activeCategories.map((cat) => {
           const cfg = SKILL_CATEGORY_CONFIG[cat];
           const catSkills = grouped[cat]!;
           return (
-            <div key={cat}>
-              {/* Category Header */}
-              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg mb-3 ${cfg.bg} ${cfg.border} border`}>
-                <span className={`material-symbols-outlined ${cfg.color}`} style={{ fontSize: '15px' }}>
+            <div key={cat} className="flex flex-col gap-2.5">
+              {/* Category Label — neutral, plain text */}
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="material-symbols-outlined text-on-surface-variant"
+                  style={{ fontSize: '13px' }}
+                >
                   {cfg.icon}
                 </span>
-                <span className={`text-xs font-semibold uppercase tracking-wide ${cfg.color}`}>
+                <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
                   {cfg.label}
                 </span>
+                <div className="flex-1 h-px bg-outline-variant/30 ml-1" />
               </div>
 
-              {/* Skill Tags in this category */}
-              <div className="flex flex-wrap gap-2">
+              {/* Skill Chips */}
+              <div className="flex flex-wrap gap-2 pl-0.5">
                 {catSkills.map((skill) => (
                   <SkillTag key={skill.id} name={skill.name} category={skill.category} />
                 ))}
