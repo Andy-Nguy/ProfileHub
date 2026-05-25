@@ -20,6 +20,8 @@ import {
   ProfileHeader,
   TimelineSection,
 } from '@profilehub/ui';
+import { DashboardLoader } from '../components/shared/LottieLoader';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 
 
@@ -91,12 +93,10 @@ export const ProfilePage: React.FC = () => {
     fetchProfile();
   }, [username, user]);
 
-  if (loading) {
-    return (
-      <div className="bg-background text-on-background min-h-screen flex items-center justify-center">
-        <div className="text-xl">{t('page.loading')}</div>
-      </div>
-    );
+  const showLoading = useMinimumLoading(loading);
+
+  if (showLoading) {
+    return <DashboardLoader label={t('page.loading')} />;
   }
 
   if (!profile) {
@@ -181,6 +181,9 @@ export const ProfilePage: React.FC = () => {
                 displayName={profile.displayName}
                 headline={profile.headline}
                 location={profile.location}
+                industry={profile.industry}
+                username={profile.username}
+                socialLinks={profile.socialLinks}
                 avatarUrl={profile.avatarUrl}
                 coverUrl={profile.coverUrl}
                 showActions={!isOwnProfile}
@@ -259,6 +262,8 @@ export const ProfilePage: React.FC = () => {
                       subtitle: exp.company,
                       dateRange: formatYearRange(exp.startDate, exp.endDate, exp.isCurrent),
                       description: exp.description ?? undefined,
+                      badge: exp.employmentType,
+                      location: exp.location ?? undefined,
                       onEdit: isOwnProfile ? () => setExpState({ isOpen: true, id: exp.id, data: exp }) : undefined,
                     }))}
                     onAdd={isOwnProfile ? () => setExpState({ isOpen: true }) : undefined}
@@ -272,7 +277,7 @@ export const ProfilePage: React.FC = () => {
                     items={profile.educations.map((edu: IEducation) => ({
                       id: edu.id,
                       title: edu.institution,
-                      subtitle: `${edu.degree || ''} ${edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}`,
+                      subtitle: [edu.degree, edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''].filter(Boolean).join(' '),
                       dateRange: formatYearRange(edu.startDate, edu.endDate, edu.isCurrent),
                       description: edu.description ?? undefined,
                       onEdit: isOwnProfile ? () => setEduState({ isOpen: true, id: edu.id, data: edu }) : undefined,

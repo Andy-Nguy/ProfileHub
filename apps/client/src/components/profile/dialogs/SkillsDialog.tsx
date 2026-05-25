@@ -124,8 +124,8 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
                     onClick={() => setSelectedCategory(cat)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150
                       ${isSelected
-                        ? `${cfg.bg} ${cfg.border} ${cfg.color} ring-2 ring-offset-1 ring-current`
-                        : 'bg-surface-container border-outline-variant text-on-surface-variant hover:border-outline'
+                        ? 'bg-surface-variant border-outline text-on-surface ring-2 ring-primary ring-offset-1'
+                        : 'bg-surface-container border-outline-variant text-on-surface-variant hover:border-outline hover:text-on-surface'
                       }
                     `}
                   >
@@ -163,8 +163,8 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
                     onClick={() => setActiveFilter(cat)}
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border transition-all
                       ${isActive
-                        ? `${cfg.bg} ${cfg.border} ${cfg.color}`
-                        : 'bg-surface-container border-outline-variant text-on-surface-variant hover:border-outline'
+                        ? 'bg-surface-variant border-outline text-on-surface'
+                        : 'bg-surface-container border-outline-variant text-on-surface-variant hover:border-outline hover:text-on-surface'
                       }
                     `}
                   >

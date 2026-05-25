@@ -20,9 +20,9 @@
     "submittingButton": "Đang lưu..."
   },
   "page": {
-    "loading": "Đang tải hồ sơ...",
+    "loading": "Đang tải hồ sơ…",
     "notFound": "Không tìm thấy hồ sơ",
-    "notFoundMessage": "Hồ sơ của @{{username}} không tồn tại.",
+    "notFoundMessage": "Hồ sơ của @{{username}} không tồn tại hoặc đã được đặt thành riêng tư.",
     "editProfile": "Chỉnh sửa hồ sơ",
     "completeProfile": "Hoàn thiện hồ sơ",
     "share": "Chia sẻ",
@@ -30,7 +30,7 @@
     "about": "Giới thiệu",
     "skills": "Kỹ năng",
     "endorsements": "Tín nhiệm",
-    "total": "Tổng cộng",
+    "total": "Tổng số tín nhiệm",
     "socialPresence": "Mạng xã hội",
     "socialPresenceOwn": "Chia sẻ portfolio của bạn trên các nền tảng.",
     "socialPresenceOther": "Kết nối với {{name}} trên các nền tảng khác.",
@@ -38,7 +38,28 @@
     "profileCompletion": "Mức độ hoàn thiện hồ sơ:",
     "completeProfileCta": "Hoàn thiện hồ sơ →",
     "experience": "Kinh nghiệm",
-    "education": "Học vấn"
+    "education": "Học vấn",
+    "backToDiscovery": "Quay lại Khám phá"
+  },
+  "footer": {
+    "privacyPolicy": "Chính sách bảo mật",
+    "termsOfService": "Điều khoản dịch vụ",
+    "copyright": "© 2024 ProHub · Phát triển chuyên nghiệp"
+  },
+  "skills": {
+    "title": "Kỹ năng",
+    "edit": "Chỉnh sửa",
+    "addFirst": "Thêm kỹ năng đầu tiên của bạn để thể hiện chuyên môn.",
+    "noSkills": "Chưa liệt kê kỹ năng nào.",
+    "categories": {
+      "technical": "Kỹ thuật",
+      "tools": "Công cụ & Phần mềm",
+      "domain": "Kiến thức chuyên môn",
+      "certification": "Chứng chỉ",
+      "language": "Ngôn ngữ",
+      "softSkill": "Kỹ năng Mềm",
+      "other": "Khác"
+    }
   },
   "discovery": {
     "title": "Khám phá Cộng đồng",

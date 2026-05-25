@@ -7,6 +7,10 @@ import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
 import { ProfileResponse } from '../services/profile.service';
 import { ISkill } from '@profilehub/types';
+import { DashboardLoader, LottieLoader } from '../components/shared/LottieLoader';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
+import { useDebounce } from '../hooks/useDebounce';
+
 
 const MOCK_PROFILES = [
   {
@@ -68,16 +72,18 @@ const MOCK_PROFILES = [
 export const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 150);
   const { t } = useTranslation('profile');
 
-  const { data, isLoading, error } = useDiscoveryFeed(1, 100);
+  const { data, isFetching, error } = useDiscoveryFeed(1, 100, debouncedSearch);
+  const showLoading = useMinimumLoading(isFetching);
 
   const profiles = data?.data || [];
 
   const filtered = profiles.filter(
     (p: ProfileResponse) =>
-      p.displayName.toLowerCase().includes(search.toLowerCase()) ||
-      p.skills?.some((s: ISkill) => s.name.toLowerCase().includes(search.toLowerCase()))
+      p.displayName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      p.skills?.some((s: ISkill) => s.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
   );
 
 
@@ -120,9 +126,9 @@ export const DiscoveryPage: React.FC = () => {
             </motion.div>
 
             {/* ── Profile Grid ────────────────── */}
-            {isLoading ? (
-              <div className="text-center py-24">
-                <div className="text-xl">{t('discovery.loading')}</div>
+            {showLoading ? (
+              <div className="flex items-center justify-center py-24 min-h-[300px]">
+                <LottieLoader label={t('discovery.loading')} />
               </div>
             ) : error ? (
               <div className="text-center py-24 text-error">
@@ -192,7 +198,7 @@ export const DiscoveryPage: React.FC = () => {
             )}
 
             {/* Empty state */}
-            {filtered.length === 0 && (
+            {!showLoading && !error && filtered.length === 0 && (
               <div className="text-center py-24">
                 <span className="material-symbols-outlined text-6xl text-outline-variant block mb-4">
                   search_off

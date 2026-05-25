@@ -68,6 +68,7 @@ export function useDiscoveryFeed(page = 1, limit = 20, search = '') {
   return useQuery({
     queryKey: ['discovery', page, limit, search],
     queryFn: () => fetchJson<DiscoveryFeedResponse>(`${API}/profiles/discover?${params}`),
+    staleTime: 0,
   });
 }
 
