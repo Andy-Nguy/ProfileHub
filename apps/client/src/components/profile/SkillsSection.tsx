@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SkillTag, SKILL_CATEGORY_CONFIG } from '../shared/SkillTag';
 import { ISkill, SkillCategory } from '@profilehub/types';
 
@@ -11,7 +12,6 @@ interface SkillsSectionProps {
 const CATEGORY_ORDER: SkillCategory[] = [
   SkillCategory.TECHNICAL,
   SkillCategory.TOOL,
-  SkillCategory.METHODOLOGY,
   SkillCategory.DOMAIN,
   SkillCategory.CERTIFICATION,
   SkillCategory.LANGUAGE,
@@ -19,7 +19,19 @@ const CATEGORY_ORDER: SkillCategory[] = [
   SkillCategory.OTHER,
 ];
 
+const CATEGORY_TRANSLATION_KEY: Record<SkillCategory, string> = {
+  [SkillCategory.TECHNICAL]: 'skills.categories.technical',
+  [SkillCategory.TOOL]: 'skills.categories.tools',
+  [SkillCategory.DOMAIN]: 'skills.categories.domain',
+  [SkillCategory.CERTIFICATION]: 'skills.categories.certification',
+  [SkillCategory.LANGUAGE]: 'skills.categories.language',
+  [SkillCategory.SOFT_SKILL]: 'skills.categories.softSkill',
+  [SkillCategory.OTHER]: 'skills.categories.other',
+};
+
 export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, onEdit }) => {
+  const { t } = useTranslation('profile');
+
   if (!skills || skills.length === 0) {
     return (
       <section
@@ -29,20 +41,22 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, o
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">psychology</span>
-            Skills
+            {t('skills.title')}
           </h3>
           {isOwner && onEdit && (
             <button
               onClick={onEdit}
               className="text-sm text-primary hover:text-primary/70 font-medium flex items-center gap-1 transition-colors"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-              Edit
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+                edit
+              </span>
+              {t('skills.edit')}
             </button>
           )}
         </div>
         <p className="text-on-surface-variant text-sm text-center py-4">
-          {isOwner ? 'Add your first skill to showcase your expertise.' : 'No skills listed yet.'}
+          {isOwner ? t('skills.addFirst') : t('skills.noSkills')}
         </p>
       </section>
     );
@@ -56,7 +70,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, o
     grouped[cat]!.push(skill);
   }
 
-  const activeCategories = CATEGORY_ORDER.filter(cat => (grouped[cat]?.length ?? 0) > 0);
+  const activeCategories = CATEGORY_ORDER.filter((cat) => (grouped[cat]?.length ?? 0) > 0);
 
   return (
     <section
@@ -66,7 +80,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, o
       <div className="flex items-center justify-between mb-6">
         <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">psychology</span>
-          Skills
+          {t('skills.title')}
           <span className="ml-1 text-xs font-normal text-on-surface-variant bg-surface-container rounded-full px-2 py-0.5">
             {skills.length}
           </span>
@@ -76,8 +90,10 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, o
             onClick={onEdit}
             className="text-sm text-primary hover:text-primary/70 font-medium flex items-center gap-1 transition-colors"
           >
-            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-            Edit
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
+              edit
+            </span>
+            {t('skills.edit')}
           </button>
         )}
       </div>
@@ -97,7 +113,7 @@ export const SkillsSection: React.FC<SkillsSectionProps> = ({ skills, isOwner, o
                   {cfg.icon}
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-widest text-on-surface-variant">
-                  {cfg.label}
+                  {t(CATEGORY_TRANSLATION_KEY[cat])}
                 </span>
                 <div className="flex-1 h-px bg-outline-variant/30 ml-1" />
               </div>
