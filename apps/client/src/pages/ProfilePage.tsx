@@ -264,6 +264,7 @@ export const ProfilePage: React.FC = () => {
                       description: exp.description ?? undefined,
                       badge: exp.employmentType,
                       location: exp.location ?? undefined,
+                      logoUrl: exp.companyDetails?.logoUrl ?? undefined,
                       onEdit: isOwnProfile ? () => setExpState({ isOpen: true, id: exp.id, data: exp }) : undefined,
                     }))}
                     onAdd={isOwnProfile ? () => setExpState({ isOpen: true }) : undefined}

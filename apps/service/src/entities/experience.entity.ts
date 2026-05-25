@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
+import { CompanyEntity } from './company.entity';
 export { EmploymentType, IExperience } from '@profilehub/types';
 import { EmploymentType, IExperience } from '@profilehub/types';
 
@@ -18,6 +19,9 @@ export class ExperienceEntity implements IExperience {
 
   @Column({ name: 'profile_id', type: 'uuid' })
   profileId!: string;
+
+  @Column({ name: 'company_id', type: 'uuid', nullable: true })
+  companyId!: string | null;
 
   @Column({ name: 'job_title', type: 'varchar', length: 255 })
   title!: string;
@@ -60,4 +64,11 @@ export class ExperienceEntity implements IExperience {
   @ManyToOne(() => ProfileEntity, (p) => p.experiences, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'profile_id' })
   profile?: ProfileEntity;
+
+  @ManyToOne(() => CompanyEntity, (company) => company.experiences, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'company_id' })
+  companyDetails?: CompanyEntity | null;
 }
