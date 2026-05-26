@@ -51,11 +51,11 @@ const TimelineItemCard: React.FC<{ item: TimelineItem; isLast: boolean }> = ({ i
       {/* Timeline spine */}
       <div className="flex flex-col items-center flex-shrink-0">
         {/* Dot */}
-        <div className="w-10 h-10 rounded-full bg-surface border-2 border-primary/30 flex items-center justify-center flex-shrink-0 z-10 group-hover:border-primary transition-colors duration-200 overflow-hidden shadow-sm">
+        <div className="w-10 h-10 rounded-md bg-surface border-2 border-primary/30 flex items-center justify-center flex-shrink-0 z-10 group-hover:border-primary transition-colors duration-200 overflow-hidden shadow-sm">
           {item.logoUrl ? (
-            <img src={item.logoUrl} alt={item.subtitle} className="w-full h-full object-cover rounded-full" />
+            <img src={item.logoUrl} alt={item.subtitle} className="w-full h-full object-cover rounded-sm" />
           ) : (
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
+            <div className="w-full h-full rounded-sm bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center">
               <span className="text-primary font-bold text-xs">
                 {item.subtitle.charAt(0).toUpperCase()}
               </span>
