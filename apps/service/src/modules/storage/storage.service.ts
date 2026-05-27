@@ -78,6 +78,38 @@ export class StorageService {
     return { avatarUrl };
   }
 
+  async uploadCompanyLogo(
+    domain: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    this.logger.debug(`Initiating company logo upload for domain: ${domain}, size: ${file?.size} bytes`);
+    this.validateFile(file);
+
+    const storagePath = this.buildCompanyLogoPath(domain, file);
+    this.logger.debug(`Generated company logo target storage path: ${storagePath}`);
+
+    const { error } = await this.supabase.storage
+      .from(this.bucket)
+      .upload(storagePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (error) {
+      this.logger.debug(`Supabase company logo upload failed for path: ${storagePath}. Error: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to upload company logo: ${error.message}`,
+      );
+    }
+
+    const { data: publicUrlData } = this.supabase.storage
+      .from(this.bucket)
+      .getPublicUrl(storagePath);
+
+    this.logger.debug(`Company logo public URL generated: ${publicUrlData.publicUrl}`);
+    return publicUrlData.publicUrl;
+  }
+
   // ── Private helpers ───────────────────────────────────────────────────────────
 
   /**
@@ -133,5 +165,32 @@ export class StorageService {
     const timestamp = Date.now();
     const random = Math.random().toString(36).slice(2, 8);
     return `avatars/${userId}/${timestamp}-${random}.webp`;
+  }
+
+  private buildCompanyLogoPath(domain: string, file: Express.Multer.File): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).slice(2, 8);
+    const safeDomain = this.slugifyPathSegment(domain);
+    const extension = this.getImageExtension(file.mimetype);
+
+    return `logos/${safeDomain}/${timestamp}-${random}.${extension}`;
+  }
+
+  private slugifyPathSegment(value: string): string {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/[^a-z0-9.-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return normalized || 'unknown';
+  }
+
+  private getImageExtension(mimeType: string): 'jpg' | 'png' | 'webp' {
+    if (mimeType === 'image/png') return 'png';
+    if (mimeType === 'image/webp') return 'webp';
+    return 'jpg';
   }
 }

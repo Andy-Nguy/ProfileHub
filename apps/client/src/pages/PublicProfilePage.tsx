@@ -160,6 +160,7 @@ export const PublicProfilePage: React.FC = () => {
                   description: exp.description ?? undefined,
                   badge: exp.employmentType,
                   location: exp.location ?? undefined,
+                  logoUrl: exp.companyDetails?.logoUrl ?? undefined,
                 }))}
               />
 

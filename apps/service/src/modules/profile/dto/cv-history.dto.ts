@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString, IsBoolean, ValidateIf, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsBoolean, ValidateIf, IsEnum, IsUUID } from 'class-validator';
 import { EmploymentType } from '../../../entities/experience.entity';
 
 export class ExperienceDto {
@@ -7,6 +7,10 @@ export class ExperienceDto {
 
   @IsString()
   company!: string;
+
+  @IsOptional()
+  @IsUUID()
+  companyId?: string;
 
   @IsOptional()
   @IsString()

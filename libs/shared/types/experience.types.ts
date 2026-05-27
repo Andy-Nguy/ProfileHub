@@ -7,11 +7,21 @@ export enum EmploymentType {
   VOLUNTEER = 'volunteer',
 }
 
+export interface ICompany {
+  id: string;
+  name: string;
+  domain: string | null;
+  logoUrl: string | null;
+  createdAt: string | Date;
+}
+
 export interface IExperience {
   id: string;
   profileId: string;
+  companyId?: string | null;
   title: string;
   company: string;
+  companyDetails?: ICompany | null;
   location: string | null;
   employmentType: EmploymentType;
   startDate: string | Date;

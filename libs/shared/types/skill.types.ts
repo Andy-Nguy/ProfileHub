@@ -13,14 +13,13 @@
  * - OTHER:        Không thuộc các nhóm trên
  */
 export enum SkillCategory {
-  TECHNICAL     = 'technical',
-  TOOL          = 'tool',
-  METHODOLOGY   = 'methodology',
-  DOMAIN        = 'domain',
-  LANGUAGE      = 'language',
+  TECHNICAL = 'technical',
+  TOOL = 'tool',
+  DOMAIN = 'domain',
+  LANGUAGE = 'language',
   CERTIFICATION = 'certification',
-  SOFT_SKILL    = 'soft_skill',
-  OTHER         = 'other',
+  SOFT_SKILL = 'soft_skill',
+  OTHER = 'other',
 }
 
 export interface ISkill {
