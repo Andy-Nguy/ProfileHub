@@ -105,6 +105,7 @@ export class EducationResponseDto {
   startDate!: string;
   endDate!: string | null;
   isCurrent!: boolean;
+  institutionLogoUrl!: string | null;
   description!: string | null;
   displayOrder!: number;
   createdAt!: string;

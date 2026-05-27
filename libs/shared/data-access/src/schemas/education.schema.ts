@@ -7,6 +7,7 @@ export const CreateEducationSchema = z.object({
   startDate: z.coerce.date(),
   endDate: z.coerce.date().nullable().optional(),
   isCurrent: z.boolean().optional(),
+  institutionLogoUrl: z.string().url().nullable().optional(),
   description: z.string().nullable().optional(),
 });
 

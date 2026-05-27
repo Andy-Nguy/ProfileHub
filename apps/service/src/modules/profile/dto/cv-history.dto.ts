@@ -59,5 +59,9 @@ export class EducationDto {
 
   @IsOptional()
   @IsString()
+  institutionLogoUrl?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 }

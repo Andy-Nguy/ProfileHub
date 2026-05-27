@@ -38,6 +38,9 @@ export class EducationEntity implements IEducation {
   @Column({ name: 'is_current', type: 'boolean', default: false })
   isCurrent!: boolean;
 
+  @Column({ name: 'institution_logo_url', type: 'varchar', length: 2048, nullable: true })
+  institutionLogoUrl!: string | null;
+
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 

@@ -176,6 +176,7 @@ export const PublicProfilePage: React.FC = () => {
                     .join(' '),
                   dateRange: formatYearRange(edu.startDate, edu.endDate, edu.isCurrent),
                   description: edu.description ?? undefined,
+                  logoUrl: edu.institutionLogoUrl ?? undefined,
                 }))}
               />
             </div>
