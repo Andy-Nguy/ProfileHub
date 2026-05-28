@@ -6,6 +6,6 @@ export class SearchCompaniesDto {
   @MinLength(1)
   @MaxLength(100)
   @Transform(({ value }) => value?.trim())
-  q!: string;
+  q: string;
 }
 

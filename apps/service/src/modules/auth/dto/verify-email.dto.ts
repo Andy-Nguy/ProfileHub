@@ -4,10 +4,10 @@ import { ApiProperty } from '@nestjs/swagger';
 export class VerifyEmailDto {
   @ApiProperty({ example: 'john@example.com' })
   @IsEmail()
-  email!: string;
+  email: string;
 
   @ApiProperty({ example: '123456' })
   @IsString()
   @Length(6, 6, { message: 'OTP must be exactly 6 digits' })
-  code!: string;
+  code: string;
 }

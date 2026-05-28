@@ -6,5 +6,5 @@ export class SearchEducationDto {
   @MinLength(1)
   @MaxLength(100)
   @Transform(({ value }) => value?.trim())
-  q!: string;
+  q: string;
 }

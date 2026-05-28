@@ -2,8 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class EducationSearchResultDto {
   @ApiProperty()
-  institution!: string;
+  institution: string;
 
   @ApiPropertyOptional({ nullable: true })
-  institutionLogoUrl!: string | null;
+  institutionLogoUrl: string | null;
 }

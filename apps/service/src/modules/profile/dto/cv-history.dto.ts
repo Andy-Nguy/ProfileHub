@@ -3,10 +3,10 @@ import { EmploymentType } from '../../../entities/experience.entity';
 
 export class ExperienceDto {
   @IsString()
-  title!: string;
+  title: string;
 
   @IsString()
-  company!: string;
+  company: string;
 
   @IsOptional()
   @IsUUID()
@@ -21,14 +21,14 @@ export class ExperienceDto {
   employmentType?: EmploymentType;
 
   @IsDateString()
-  startDate!: string;
+  startDate: string;
 
   @ValidateIf((o) => !o.isCurrent)
   @IsDateString()
   endDate?: string;
 
   @IsBoolean()
-  isCurrent!: boolean;
+  isCurrent: boolean;
 
   @IsOptional()
   @IsString()
@@ -37,7 +37,7 @@ export class ExperienceDto {
 
 export class EducationDto {
   @IsString()
-  institution!: string;
+  institution: string;
 
   @IsOptional()
   @IsString()
@@ -48,14 +48,14 @@ export class EducationDto {
   fieldOfStudy?: string;
 
   @IsDateString()
-  startDate!: string;
+  startDate: string;
 
   @ValidateIf((o) => !o.isCurrent)
   @IsDateString()
   endDate?: string;
 
   @IsBoolean()
-  isCurrent!: boolean;
+  isCurrent: boolean;
 
   @IsOptional()
   @IsString()
