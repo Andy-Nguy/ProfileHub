@@ -82,8 +82,16 @@ export const TopAppBar: React.FC = () => {
           )}
 
           {/* Logo */}
-          <Link to="/" className="font-title-lg text-title-lg font-bold text-primary md:ml-2">
-            ProHub
+          <Link to="/" className="flex items-center gap-2 md:ml-2 shrink-0" aria-label="ProHub Home">
+            <img
+              src="/logo.png"
+              alt="ProHub logo"
+              className="h-8 w-8 rounded-lg object-cover shadow-sm"
+              draggable={false}
+            />
+            <span className="font-title-lg text-title-lg font-bold text-primary">
+              ProHub
+            </span>
           </Link>
 
           {/* Desktop Nav */}
@@ -205,7 +213,15 @@ export const TopAppBar: React.FC = () => {
             >
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-surface">
-                <span className="font-title-lg text-title-lg font-bold text-primary">ProHub</span>
+                <div className="flex items-center gap-2">
+                  <img
+                    src="/logo.png"
+                    alt="ProHub logo"
+                    className="h-8 w-8 rounded-lg object-cover shadow-sm"
+                    draggable={false}
+                  />
+                  <span className="font-title-lg text-title-lg font-bold text-primary">ProHub</span>
+                </div>
                 <button
                   onClick={() => setIsMobileNavOpen(false)}
                   className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
