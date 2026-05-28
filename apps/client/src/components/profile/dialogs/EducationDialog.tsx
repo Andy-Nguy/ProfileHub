@@ -5,6 +5,7 @@ import { Button } from '../../shared/Button';
 import { profileAPI } from '../../../services/profile.service';
 import { apiClient } from '../../../services/api.service';
 import { IEducation } from '@profilehub/types';
+import { educationAPI, IEducationSearchResult } from '../../../services/education.service';
 
 interface Props {
   isOpen: boolean;
@@ -32,10 +33,16 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
   });
   const [loading, setLoading] = useState(false);
 
-  // Institution Logo States – mirrors ExperienceDialog's company logo states
-  const [institutionLogo, setInstitutionLogo] = useState<File | null>(null);
-  const [institutionLogoPreview, setInstitutionLogoPreview] = useState<string | null>(null);
-  const [existingLogoUrl, setExistingLogoUrl] = useState<string | null>(null);
+  // Institution Autocomplete & Logo States – mirrors ExperienceDialog's company autocomplete
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<IEducationSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedInstitution, setSelectedInstitution] = useState<IEducationSearchResult | null>(null);
+
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [newInstitutionLogo, setNewInstitutionLogo] = useState<File | null>(null);
+  const [newInstitutionLogoPreview, setNewInstitutionLogoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -49,51 +56,102 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
           isCurrent: initialData.isCurrent || false,
           description: initialData.description || '',
         });
-        setExistingLogoUrl(initialData.institutionLogoUrl || null);
+        setSearchQuery(initialData.institution || '');
+        if (initialData.institutionLogoUrl) {
+          setSelectedInstitution({
+            institution: initialData.institution,
+            institutionLogoUrl: initialData.institutionLogoUrl,
+          });
+        } else {
+          setSelectedInstitution(null);
+        }
       } else {
         setFormData({
           institution: '', degree: '', fieldOfStudy: '',
           startDate: '', endDate: '', isCurrent: false, description: '',
         });
-        setExistingLogoUrl(null);
+        setSearchQuery('');
+        setSelectedInstitution(null);
+        setIsCreatingNew(false);
+        setNewInstitutionLogo(null);
+        setNewInstitutionLogoPreview(null);
       }
-      setInstitutionLogo(null);
-      setInstitutionLogoPreview(null);
     }
   }, [isOpen, initialData]);
 
-  // Handle Logo Preview – identical pattern to ExperienceDialog
+  // Handle Logo Preview
   useEffect(() => {
-    if (institutionLogo) {
-      const objectUrl = URL.createObjectURL(institutionLogo);
-      setInstitutionLogoPreview(objectUrl);
+    if (newInstitutionLogo) {
+      const objectUrl = URL.createObjectURL(newInstitutionLogo);
+      setNewInstitutionLogoPreview(objectUrl);
       return () => URL.revokeObjectURL(objectUrl);
     } else {
-      setInstitutionLogoPreview(null);
+      setNewInstitutionLogoPreview(null);
     }
-  }, [institutionLogo]);
+  }, [newInstitutionLogo]);
 
-  // The displayed logo: new file preview takes priority over existing URL
-  const displayedLogoSrc = institutionLogoPreview || existingLogoUrl;
+  // Debounced Search – mirrors ExperienceDialog
+  useEffect(() => {
+    if (!showDropdown || !searchQuery.trim() || selectedInstitution?.institution === searchQuery.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const results = await educationAPI.searchEducation(searchQuery.trim());
+        setSearchResults(results);
+      } catch (err) {
+        console.error('Failed to search institutions', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, showDropdown, selectedInstitution]);
+
+  const handleInstitutionSelect = (inst: IEducationSearchResult) => {
+    setSelectedInstitution(inst);
+    setSearchQuery(inst.institution);
+    setFormData(prev => ({ ...prev, institution: inst.institution }));
+    setShowDropdown(false);
+    setIsCreatingNew(false);
+  };
+
+  const handleInstitutionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    setFormData(prev => ({ ...prev, institution: val }));
+    setSelectedInstitution(null);
+    setShowDropdown(true);
+    if (!val) {
+      setIsCreatingNew(false);
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Step 1: upload logo first if user picked a new file (mirrors company logo flow)
-      let institutionLogoUrl: string | null = existingLogoUrl;
-      if (institutionLogo && formData.institution.trim()) {
+      // If user selected an existing institution with a logo, use it directly
+      // If user is creating new with a file upload, upload first
+      let institutionLogoUrl: string | null = selectedInstitution?.institutionLogoUrl || null;
+
+      if (isCreatingNew && newInstitutionLogo && searchQuery.trim()) {
         const uploadForm = new FormData();
-        uploadForm.append('file', institutionLogo);
+        uploadForm.append('file', newInstitutionLogo);
         const res = await apiClient.post<{ institutionLogoUrl: string }>(
-          `/storage/institution-logo?institutionName=${encodeURIComponent(formData.institution.trim())}`,
+          `/storage/institution-logo?institutionName=${encodeURIComponent(searchQuery.trim())}`,
           uploadForm,
         );
         institutionLogoUrl = res.data.institutionLogoUrl;
       }
 
-      // Step 2: save education entry with the resolved logo URL
       const payload = {
         ...formData,
+        institution: searchQuery.trim(),
         institutionLogoUrl,
         startDate: new Date(formData.startDate),
         endDate: !formData.isCurrent && formData.endDate ? new Date(formData.endDate) : null,
@@ -133,53 +191,97 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
     <BaseDialog isOpen={isOpen} onClose={onClose} title={educationId ? 'Edit Education' : 'Add Education'}>
       <div className="space-y-4">
 
-        {/* ── Institution Name + Logo Preview ─────────────────────────────
-            Matches ExperienceDialog: logo thumb on the LEFT of the name field */}
+        {/* ── Institution Autocomplete Field ───────────────────────────────
+            Mirrors ExperienceDialog's company autocomplete exactly */}
         <div className="relative">
           <div className="flex gap-2 items-center">
-            {/* Logo preview – shows when an existing or newly-selected logo is available */}
-            {displayedLogoSrc && (
+            {(selectedInstitution?.institutionLogoUrl || newInstitutionLogoPreview) && (
               <img
-                src={displayedLogoSrc}
+                src={selectedInstitution?.institutionLogoUrl || newInstitutionLogoPreview!}
                 alt="Institution Logo"
-                className="w-12 h-12 rounded bg-surface border border-outline-variant object-cover flex-shrink-0"
+                className="w-12 h-12 rounded bg-surface border border-outline-variant object-cover"
               />
             )}
-            <div className="flex-1">
+            <div className="flex-1 relative">
               <FloatingField
                 id="institution"
                 label="School / Institution *"
-                value={formData.institution}
-                onChange={e => setFormData({ ...formData, institution: e.target.value })}
+                value={searchQuery}
+                onChange={handleInstitutionChange}
+                onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
               />
+              {showDropdown && searchQuery.trim() && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-surface-container-highest border border-outline-variant rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {isSearching ? (
+                    <div className="p-3 text-sm text-on-surface-variant">Searching...</div>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      {searchResults.map((inst, idx) => (
+                        <button
+                          key={`${inst.institution}-${idx}`}
+                          type="button"
+                          className="w-full text-left p-3 hover:bg-surface-variant flex items-center gap-3 transition-colors border-b border-outline-variant/30 last:border-0"
+                          onClick={() => handleInstitutionSelect(inst)}
+                        >
+                          {inst.institutionLogoUrl ? (
+                            <img src={inst.institutionLogoUrl} alt={inst.institution} className="w-8 h-8 rounded object-cover" />
+                          ) : (
+                            <div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                              {inst.institution.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-medium text-on-surface text-sm">{inst.institution}</div>
+                          </div>
+                        </button>
+                      ))}
+                      <div className="p-2 border-t border-outline-variant/50">
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); setShowDropdown(false); setIsCreatingNew(true); }}
+                          className="w-full text-left p-2 text-sm text-primary font-medium hover:bg-primary/10 rounded"
+                        >
+                          + Create "{searchQuery}"
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-2">
+                      <div className="p-2 text-sm text-on-surface-variant">No existing institutions found.</div>
+                      <button
+                        type="button"
+                        onMouseDown={(e) => { e.preventDefault(); setShowDropdown(false); setIsCreatingNew(true); }}
+                        className="w-full text-left p-2 text-sm text-primary font-medium hover:bg-primary/10 rounded mt-1"
+                      >
+                        + Create "{searchQuery}"
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* ── Logo Upload Panel ──────────────────────────────────────────
-              Same container style as ExperienceDialog's "Create New Company" panel */}
-          <div className="mt-3 p-4 bg-surface-container-low border border-outline-variant rounded-lg space-y-3">
-            <div className="text-sm font-semibold text-on-surface">School Logo (Optional)</div>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={e => {
-                if (e.target.files && e.target.files[0]) {
-                  setInstitutionLogo(e.target.files[0]);
-                }
-              }}
-              className="w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-            />
-            {/* "Remove" link – only shows when there is an existing logo without a new replacement */}
-            {existingLogoUrl && !institutionLogoPreview && (
-              <button
-                type="button"
-                onClick={() => setExistingLogoUrl(null)}
-                className="text-xs text-error hover:underline"
-              >
-                Remove current logo
-              </button>
-            )}
-          </div>
+          {/* New Institution Inline Fields – mirrors ExperienceDialog's "Create New Company" panel */}
+          {isCreatingNew && !selectedInstitution && (
+            <div className="mt-3 p-4 bg-surface-container-low border border-outline-variant rounded-lg space-y-3">
+              <div className="text-sm font-semibold text-on-surface">Create New Institution</div>
+              <div>
+                <label className="text-sm font-medium text-on-surface-variant block mb-1">School Logo (Optional)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setNewInstitutionLogo(e.target.files[0]);
+                    }
+                  }}
+                  className="w-full text-sm text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <FloatingField id="degree" label="Degree (e.g. Bachelor's)" value={formData.degree} onChange={e => setFormData({ ...formData, degree: e.target.value })} />
