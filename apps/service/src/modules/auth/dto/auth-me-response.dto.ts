@@ -2,42 +2,42 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AuthMeProfileDto {
   @ApiProperty()
-  id!: string;
+  id: string;
 
   @ApiProperty()
-  displayName!: string;
+  displayName: string;
 
   @ApiProperty({ nullable: true })
-  headline!: string | null;
+  headline: string | null;
 
   @ApiProperty({ nullable: true })
-  avatarUrl!: string | null;
+  avatarUrl: string | null;
 
   @ApiProperty()
-  visibility!: string;
+  visibility: string;
 }
 
 export class AuthMeUserDto {
   @ApiProperty()
-  id!: string;
+  id: string;
 
   @ApiProperty()
-  email!: string;
+  email: string;
 
   @ApiProperty()
-  username!: string;
+  username: string;
 
   @ApiProperty()
-  role!: string;
+  role: string;
 
 
 }
 
 export class AuthMeResponseDto {
   @ApiProperty()
-  authenticated!: boolean;
+  authenticated: boolean;
 
 
   @ApiProperty({ type: () => AuthMeUserDto })
-  user!: AuthMeUserDto;
+  user: AuthMeUserDto;
 }

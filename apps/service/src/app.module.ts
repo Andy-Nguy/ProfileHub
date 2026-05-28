@@ -20,6 +20,7 @@ import { UserModule } from './modules/user/user.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { EducationModule } from './modules/education/education.module';
 
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
@@ -72,6 +73,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
     ProfileModule,
     StorageModule,
     CompaniesModule,
+    EducationModule,
   ],
   providers: [
     // ── Global Guards ───────────────────────────────────────────────

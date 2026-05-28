@@ -3,155 +3,156 @@ import { VisibilityTypeEnum } from '../../../entities';
 
 export class ProfileResponseDto {
   @ApiProperty()
-  id!: string;
+  id: string;
 
   @ApiProperty()
-  userId!: string;
+  userId: string;
 
   @ApiPropertyOptional()
   username?: string;
 
   @ApiProperty()
-  displayName!: string;
+  displayName: string;
 
   @ApiProperty({ nullable: true })
-  headline!: string | null;
+  headline: string | null;
 
   @ApiProperty({ nullable: true })
-  bio!: string | null;
+  bio: string | null;
 
   @ApiProperty({ nullable: true })
-  avatarUrl!: string | null;
+  avatarUrl: string | null;
 
   @ApiProperty({ nullable: true })
-  coverUrl!: string | null;
+  coverUrl: string | null;
 
   @ApiProperty({ nullable: true })
-  location!: string | null;
+  location: string | null;
 
   @ApiProperty({ nullable: true })
-  industry!: string | null;
+  industry: string | null;
 
   @ApiProperty({ enum: VisibilityTypeEnum })
-  visibility!: VisibilityTypeEnum;
+  visibility: VisibilityTypeEnum;
 
   @ApiProperty()
-  completionPercent!: number;
+  completionPercent: number;
 
   @ApiProperty()
-  needsOnboarding!: boolean;
+  needsOnboarding: boolean;
 
   @ApiProperty()
-  likesCount!: number;
+  likesCount: number;
 
   @ApiProperty()
-  createdAt!: string;
+  createdAt: string;
 
   @ApiProperty()
-  updatedAt!: string;
+  updatedAt: string;
 
 
 }
 
 export class DiscoveryProfileDto {
   @ApiProperty()
-  id!: string;
+  id: string;
 
   @ApiProperty()
-  username!: string;
+  username: string;
 
   @ApiProperty()
-  displayName!: string;
+  displayName: string;
 
   @ApiProperty({ nullable: true })
-  headline!: string | null;
+  headline: string | null;
 
   @ApiProperty({ nullable: true })
-  avatarUrl!: string | null;
+  avatarUrl: string | null;
 
   @ApiProperty({ nullable: true })
-  location!: string | null;
+  location: string | null;
 
   @ApiProperty({ nullable: true })
-  industry!: string | null;
+  industry: string | null;
 
   @ApiProperty()
-  likesCount!: number;
+  likesCount: number;
 
   @ApiProperty({ type: 'array', items: { type: 'object', properties: { name: { type: 'string' } } } })
-  skills!: { name: string }[];
+  skills: { name: string }[];
 }
 
 export class DiscoveryFeedResponseDto {
   @ApiProperty({ type: [DiscoveryProfileDto] })
-  data!: DiscoveryProfileDto[];
+  data: DiscoveryProfileDto[];
 
   @ApiProperty()
-  total!: number;
+  total: number;
 
   @ApiProperty()
-  page!: number;
+  page: number;
 
   @ApiProperty()
-  totalPages!: number;
+  totalPages: number;
 }
 
 export class EducationResponseDto {
-  id!: string;
-  profileId!: string;
-  institution!: string;
-  degree!: string | null;
-  fieldOfStudy!: string | null;
-  startDate!: string;
-  endDate!: string | null;
-  isCurrent!: boolean;
-  description!: string | null;
-  displayOrder!: number;
-  createdAt!: string;
-  updatedAt!: string;
+  id: string;
+  profileId: string;
+  institution: string;
+  degree: string | null;
+  fieldOfStudy: string | null;
+  startDate: string;
+  endDate: string | null;
+  isCurrent: boolean;
+  institutionLogoUrl: string | null;
+  description: string | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class ExperienceResponseDto {
-  id!: string;
-  profileId!: string;
-  companyId!: string | null;
-  title!: string;
-  company!: string;
-  companyDetails!: CompanyProfileResponseDto | null;
-  location!: string | null;
-  employmentType!: string;
-  startDate!: string;
-  endDate!: string | null;
-  isCurrent!: boolean;
-  description!: string | null;
-  displayOrder!: number;
-  createdAt!: string;
-  updatedAt!: string;
+  id: string;
+  profileId: string;
+  companyId: string | null;
+  title: string;
+  company: string;
+  companyDetails: CompanyProfileResponseDto | null;
+  location: string | null;
+  employmentType: string;
+  startDate: string;
+  endDate: string | null;
+  isCurrent: boolean;
+  description: string | null;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class CompanyProfileResponseDto {
-  id!: string;
-  name!: string;
-  domain!: string | null;
-  logoUrl!: string | null;
+  id: string;
+  name: string;
+  domain: string | null;
+  logoUrl: string | null;
 }
 
 export class SkillResponseDto {
-  id!: string;
-  profileId!: string;
-  name!: string;
-  category!: string;
-  endorsementCount!: number;
-  displayOrder!: number;
-  createdAt!: string;
-  updatedAt!: string;
+  id: string;
+  profileId: string;
+  name: string;
+  category: string;
+  endorsementCount: number;
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export class SocialLinkResponseDto {
-  id!: string;
-  profileId!: string;
-  platform!: string;
-  url!: string;
-  createdAt!: string;
-  updatedAt!: string;
+  id: string;
+  profileId: string;
+  platform: string;
+  url: string;
+  createdAt: string;
+  updatedAt: string;
 }
