@@ -20,9 +20,9 @@
     "submittingButton": "Saving..."
   },
   "page": {
-    "loading": "Loading profile...",
+    "loading": "Loading profile…",
     "notFound": "Profile not found",
-    "notFoundMessage": "The profile for @{{username}} does not exist.",
+    "notFoundMessage": "The profile for @{{username}} does not exist or has been made private.",
     "editProfile": "Edit Profile",
     "completeProfile": "Complete Profile",
     "share": "Share",
@@ -30,7 +30,7 @@
     "about": "About",
     "skills": "Skills",
     "endorsements": "Endorsements",
-    "total": "Total",
+    "total": "Total endorsements",
     "socialPresence": "Social Presence",
     "socialPresenceOwn": "Share your portfolio across platforms.",
     "socialPresenceOther": "Connect with {{name}} on other platforms.",
@@ -38,7 +38,29 @@
     "profileCompletion": "Profile completion:",
     "completeProfileCta": "Complete your profile →",
     "experience": "Experience",
-    "education": "Education"
+    "education": "Education",
+    "backToDiscovery": "Back to Discovery"
+  },
+  "footer": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "© 2024 ProHub · Professional Growth"
+  },
+  "skills": {
+    "title": "Skills",
+    "edit": "Edit",
+    "addFirst": "Add your first skill to showcase your expertise.",
+    "noSkills": "No skills listed yet.",
+    "categories": {
+      "technical": "Technical",
+      "tools": "Tools & Software",
+      "methodology": "Methodologies",
+      "domain": "Domain Knowledge",
+      "certification": "Certifications",
+      "language": "Languages",
+      "softSkill": "Soft Skills",
+      "other": "Other"
+    }
   },
   "discovery": {
     "title": "Community Discovery",

@@ -5,6 +5,7 @@ import { PersonalInfoSection } from './PersonalInfoSection';
 import { ExperienceSection } from './ExperienceSection';
 import { SkillsSection } from './SkillsSection';
 import { VisibilityCard } from './VisibilityCard';
+import { ISkill } from '@profilehub/types';
 
 interface ProfileEditDialogProps {
   isOpen: boolean;
@@ -16,7 +17,7 @@ interface ProfileEditDialogProps {
     lastName?: string;
     headline?: string;
     bio?: string;
-    skills?: string[];
+    skills?: ISkill[];
     completionPercent?: number;
   };
   onSave?: () => void;
@@ -125,7 +126,7 @@ export const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
 
                   {/* Right Column */}
                   <div className="lg:col-span-1 space-y-6">
-                    <SkillsSection initialSkills={initialData.skills} />
+                    <SkillsSection skills={initialData.skills ?? []} />
                     <VisibilityCard />
                   </div>
                 </div>

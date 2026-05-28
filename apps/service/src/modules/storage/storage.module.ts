@@ -15,5 +15,6 @@ import { ProfileModule } from '../profile/profile.module';
     SupabaseClientProvider,
     StorageService,
   ],
+  exports: [StorageService],
 })
 export class StorageModule {}

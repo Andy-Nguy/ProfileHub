@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { UserRole } from '../../../../../../libs/shared/types/types';
+import { UserRole } from '@profilehub/types';
 
 export const ROLES_KEY = 'roles';
 

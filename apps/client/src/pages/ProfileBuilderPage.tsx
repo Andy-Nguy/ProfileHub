@@ -78,7 +78,7 @@ export const ProfileBuilderPage: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.25, duration: 0.4 }}
               >
-                <SkillsSection />
+                <SkillsSection skills={[]} />
                 <VisibilityCard />
               </motion.div>
             </div>

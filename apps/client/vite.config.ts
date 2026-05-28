@@ -5,6 +5,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   root: __dirname,
+  envDir: '../../',
   build: {
     outDir: '../../dist/apps/client',
     emptyOutDir: true,
@@ -20,6 +21,10 @@ export default defineConfig({
       '@profilehub/data-access': path.resolve(
         __dirname,
         '../../libs/shared/data-access/src/index.ts',
+      ),
+      '@profilehub/types': path.resolve(
+        __dirname,
+        '../../libs/shared/types/types.ts',
       ),
       '@profilehub/ui': path.resolve(
         __dirname,

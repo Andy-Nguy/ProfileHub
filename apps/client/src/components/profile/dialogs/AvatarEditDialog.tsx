@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import Cropper from 'react-easy-crop';
+import Cropper, { Area, Point } from 'react-easy-crop';
 import { useTranslation } from 'react-i18next';
 import getCroppedImg from '../../../utils/cropImage';
 
@@ -37,10 +37,10 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
 
   // States
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
 
   // Reset when dialog closes
@@ -79,7 +79,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
     }
   };
 
-  const onCropComplete = useCallback((_: any, pixels: any) => {
+  const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
   }, []);
 

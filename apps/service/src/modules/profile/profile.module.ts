@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { EducationEntity } from '../../entities/education.entity';
 import { ExperienceEntity } from '../../entities/experience.entity';
+import { CompanyEntity } from '../../entities/company.entity';
 import { ProfileEntity } from '../../entities/profile.entity';
 import { SkillEntity } from '../../entities/skill.entity';
 import { SocialLinkEntity } from '../../entities/social-link.entity';
@@ -25,6 +26,7 @@ import { ProfileService } from './profile.service';
       ProfileEntity,
       User,
       ExperienceEntity,
+      CompanyEntity,
       EducationEntity,
       SkillEntity,
       SocialLinkEntity,

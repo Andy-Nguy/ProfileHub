@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -24,6 +25,7 @@ const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
 
 @Injectable()
 export class StorageService {
+  private readonly logger = new Logger(StorageService.name);
   private readonly bucket: string;
 
   constructor(
@@ -40,9 +42,11 @@ export class StorageService {
     userId: string,
     file: Express.Multer.File,
   ): Promise<{ avatarUrl: string }> {
+    this.logger.debug(`Initiating avatar upload for user ID: ${userId}, size: ${file?.size} bytes`);
     this.validateFile(file);
 
     const storagePath = this.buildPath(userId);
+    this.logger.debug(`Generated target storage path: ${storagePath}`);
 
     const { error } = await this.supabase.storage
       .from(this.bucket)
@@ -52,8 +56,49 @@ export class StorageService {
       });
 
     if (error) {
+      this.logger.debug(`Supabase upload failed for path: ${storagePath}. Error: ${error.message}`);
       throw new InternalServerErrorException(
         `Failed to upload avatar: ${error.message}`,
+      );
+    }
+
+    this.logger.debug(`Supabase upload completed successfully for path: ${storagePath}`);
+
+    const { data: publicUrlData } = this.supabase.storage
+      .from(this.bucket)
+      .getPublicUrl(storagePath);
+
+    const avatarUrl = publicUrlData.publicUrl;
+    this.logger.debug(`Supabase public URL generated: ${avatarUrl}`);
+
+    // Persist avatarUrl in the profiles table via repository
+    await this.profileRepository.upsertProfileFields(userId, { avatarUrl });
+    this.logger.debug(`Successfully persisted avatar URL to profile DB record for user ID: ${userId}`);
+
+    return { avatarUrl };
+  }
+
+  async uploadCompanyLogo(
+    domain: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    this.logger.debug(`Initiating company logo upload for domain: ${domain}, size: ${file?.size} bytes`);
+    this.validateFile(file);
+
+    const storagePath = this.buildCompanyLogoPath(domain, file);
+    this.logger.debug(`Generated company logo target storage path: ${storagePath}`);
+
+    const { error } = await this.supabase.storage
+      .from(this.bucket)
+      .upload(storagePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (error) {
+      this.logger.debug(`Supabase company logo upload failed for path: ${storagePath}. Error: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to upload company logo: ${error.message}`,
       );
     }
 
@@ -61,12 +106,8 @@ export class StorageService {
       .from(this.bucket)
       .getPublicUrl(storagePath);
 
-    const avatarUrl = publicUrlData.publicUrl;
-
-    // Persist avatarUrl in the profiles table via repository
-    await this.profileRepository.upsertProfileFields(userId, { avatarUrl });
-
-    return { avatarUrl };
+    this.logger.debug(`Company logo public URL generated: ${publicUrlData.publicUrl}`);
+    return publicUrlData.publicUrl;
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────────
@@ -77,26 +118,32 @@ export class StorageService {
    */
   private validateFile(file: Express.Multer.File): void {
     if (!file || !file.buffer) {
+      this.logger.debug(`Validation failed: No file or buffer present`);
       throw new BadRequestException('No file uploaded.');
     }
 
     if (file.size > MAX_SIZE_BYTES) {
+      this.logger.debug(`Validation failed: File size ${file.size} exceeds max allowed ${MAX_SIZE_BYTES}`);
       throw new BadRequestException(
         `File too large. Maximum allowed size is 2 MB.`,
       );
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.mimetype as typeof ALLOWED_MIME_TYPES[number])) {
+      this.logger.debug(`Validation failed: Invalid MIME type: ${file.mimetype}`);
       throw new BadRequestException(
         `Invalid file type. Allowed types: jpeg, png, webp.`,
       );
     }
 
     if (!this.hasMagicBytes(file.buffer)) {
+      this.logger.debug(`Validation failed: File headers magic bytes check failed`);
       throw new BadRequestException(
         'File content does not match a valid image. Rejected.',
       );
     }
+
+    this.logger.debug(`File validated successfully: MIME type ${file.mimetype}, size: ${file.size}`);
   }
 
   /**
@@ -118,5 +165,32 @@ export class StorageService {
     const timestamp = Date.now();
     const random = Math.random().toString(36).slice(2, 8);
     return `avatars/${userId}/${timestamp}-${random}.webp`;
+  }
+
+  private buildCompanyLogoPath(domain: string, file: Express.Multer.File): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).slice(2, 8);
+    const safeDomain = this.slugifyPathSegment(domain);
+    const extension = this.getImageExtension(file.mimetype);
+
+    return `logos/${safeDomain}/${timestamp}-${random}.${extension}`;
+  }
+
+  private slugifyPathSegment(value: string): string {
+    const normalized = value
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/[^a-z0-9.-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+
+    return normalized || 'unknown';
+  }
+
+  private getImageExtension(mimeType: string): 'jpg' | 'png' | 'webp' {
+    if (mimeType === 'image/png') return 'png';
+    if (mimeType === 'image/webp') return 'webp';
+    return 'jpg';
   }
 }

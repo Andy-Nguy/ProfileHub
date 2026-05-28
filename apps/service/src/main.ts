@@ -1,3 +1,30 @@
+import * as path from 'path';
+import * as tsConfigPaths from 'tsconfig-paths';
+
+// Register path mappings at runtime so Node.js can resolve them
+const isCompiled = __dirname.includes(path.join('dist', 'apps', 'service'));
+if (isCompiled) {
+  const distRoot = path.resolve(__dirname, '../../..'); // dist/apps/service
+  tsConfigPaths.register({
+    baseUrl: distRoot,
+    paths: {
+      '@profilehub/types': ['libs/shared/types/types'],
+      '@profilehub/data-access': ['libs/shared/data-access/src/index'],
+      '@profilehub/ui': ['libs/shared/ui/src/index'],
+    },
+  });
+} else {
+  try {
+    const tsconfigBase = require('../../../tsconfig.base.json');
+    tsConfigPaths.register({
+      baseUrl: path.resolve(__dirname, '../../..'),
+      paths: tsconfigBase.compilerOptions.paths,
+    });
+  } catch (e) {
+    // Silent catch
+  }
+}
+
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
