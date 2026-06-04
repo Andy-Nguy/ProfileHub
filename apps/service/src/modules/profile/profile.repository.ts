@@ -48,7 +48,7 @@ export class ProfileRepository {
         'companyDetails.id', 'companyDetails.name', 'companyDetails.domain', 'companyDetails.logoUrl',
         'edu.id', 'edu.institution', 'edu.degree', 'edu.fieldOfStudy',
         'edu.startDate', 'edu.endDate', 'edu.isCurrent',
-        'edu.description', 'edu.displayOrder',
+        'edu.institutionLogoUrl', 'edu.description', 'edu.displayOrder',
         'sk.id', 'sk.name', 'sk.category', 'sk.endorsementCount', 'sk.displayOrder',
       ])
       .orderBy('exp.displayOrder', 'ASC')

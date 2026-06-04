@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Controller,
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,6 +15,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -69,5 +72,65 @@ export class StorageController {
     @UploadedFile() file: Express.Multer.File,
   ): Promise<UploadAvatarResponseDto> {
     return this.storageService.uploadAvatar(userId, file);
+  }
+
+  /**
+   * POST /api/storage/institution-logo?institutionName=Harvard+University
+   *
+   * Accepts a multipart/form-data upload with field name `file`.
+   * Validates the file, uploads it to Supabase Storage under
+   * institution-logos/{slugifiedName}/... and returns the public URL.
+   * The client is responsible for including the returned URL in the
+   * education create/update payload as `institutionLogoUrl`.
+   */
+  @Post('institution-logo')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 2 * 1024 * 1024 },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload a school/institution logo image' })
+  @ApiQuery({
+    name: 'institutionName',
+    required: true,
+    description: 'Name of the institution (used to build the storage path)',
+  })
+  @ApiBody({
+    description: 'Institution logo image file (jpeg, png, webp – max 2 MB).',
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logo uploaded successfully. Returns the public URL.',
+    schema: {
+      type: 'object',
+      properties: {
+        institutionLogoUrl: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Missing institutionName, invalid file type, size, or content.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized – valid JWT required.' })
+  async uploadInstitutionLogo(
+    @Query('institutionName') institutionName: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<{ institutionLogoUrl: string }> {
+    if (!institutionName?.trim()) {
+      throw new BadRequestException('institutionName query param is required.');
+    }
+    const institutionLogoUrl = await this.storageService.uploadInstitutionLogo(
+      institutionName.trim(),
+      file,
+    );
+    return { institutionLogoUrl };
   }
 }

@@ -2,18 +2,18 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CompanyResponseDto {
   @ApiProperty()
-  id!: string;
+  id: string;
 
   @ApiProperty()
-  name!: string;
+  name: string;
 
   @ApiPropertyOptional({ nullable: true })
-  domain!: string | null;
+  domain: string | null;
 
   @ApiPropertyOptional({ nullable: true })
-  logoUrl!: string | null;
+  logoUrl: string | null;
 
   @ApiProperty()
-  createdAt!: string;
+  createdAt: string;
 }
 
