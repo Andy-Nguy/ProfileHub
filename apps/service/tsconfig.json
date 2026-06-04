@@ -6,12 +6,17 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "outDir": "../../dist/apps/service",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "src/**/*.ts",
     "../../libs/shared/data-access/src/**/*.ts",
     "../../libs/shared/types/types.ts"
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

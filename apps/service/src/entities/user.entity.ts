@@ -8,7 +8,7 @@ import {
   OneToOne,
 } from 'typeorm';
 import { ProfileEntity } from './profile.entity';
-import { UserRole, IUser } from '../../../../libs/shared/types/types';
+import { UserRole, IUser } from '@profilehub/types';
 
 @Entity('users')
 export class User implements IUser {

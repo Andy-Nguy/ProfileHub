@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SkillCategory } from '../../../types/types';
+import { SkillCategory } from '@profilehub/types';
 
 export const CreateSkillSchema = z.object({
   name: z

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { BaseDialog } from './BaseDialog';
 import { FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
-import { profileAPI } from '../../../services/profile.service';
+import { ProfileResponse, profileAPI } from '../../../services/profile.service';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  profile: any;
+  profile: ProfileResponse;
   onSuccess: () => void;
 }
 

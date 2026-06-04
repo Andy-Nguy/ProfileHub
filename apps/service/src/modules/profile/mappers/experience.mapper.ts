@@ -8,8 +8,17 @@ export class ExperienceMapper {
     return {
       id: entity.id,
       profileId: entity.profileId,
+      companyId: entity.companyId,
       title: entity.title,
       company: entity.company,
+      companyDetails: entity.companyDetails
+        ? {
+            id: entity.companyDetails.id,
+            name: entity.companyDetails.name,
+            domain: entity.companyDetails.domain,
+            logoUrl: entity.companyDetails.logoUrl,
+          }
+        : null,
       location: entity.location,
       employmentType: entity.employmentType,
       startDate: this.toDateOnlyString(entity.startDate),

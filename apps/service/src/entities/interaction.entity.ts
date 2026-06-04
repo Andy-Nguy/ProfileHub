@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm';
-import { InteractionTargetType, InteractionType } from '../../../../libs/shared/types/types';
+import { InteractionTargetType, InteractionType } from '@profilehub/types';
 
 @Entity('interactions')
 @Index(['userId', 'targetType', 'targetId', 'interactionType'], { unique: true })

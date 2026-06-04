@@ -32,6 +32,7 @@ export class ProfileRepository {
       .leftJoinAndSelect('u.profile', 'p')
       .leftJoinAndSelect('p.socialLinks', 'sl')
       .leftJoinAndSelect('p.experiences', 'exp')
+      .leftJoinAndSelect('exp.companyDetails', 'companyDetails')
       .leftJoinAndSelect('p.educations', 'edu')
       .leftJoinAndSelect('p.skills', 'sk')
       .select([
@@ -41,9 +42,10 @@ export class ProfileRepository {
         'p.bio', 'p.location', 'p.industry', 'p.visibility',
         'p.createdAt', 'p.updatedAt',
         'sl.id', 'sl.platform', 'sl.url',
-        'exp.id', 'exp.title', 'exp.company', 'exp.location',
+        'exp.id', 'exp.companyId', 'exp.title', 'exp.company', 'exp.location',
         'exp.employmentType', 'exp.startDate', 'exp.endDate',
         'exp.isCurrent', 'exp.description', 'exp.displayOrder',
+        'companyDetails.id', 'companyDetails.name', 'companyDetails.domain', 'companyDetails.logoUrl',
         'edu.id', 'edu.institution', 'edu.degree', 'edu.fieldOfStudy',
         'edu.startDate', 'edu.endDate', 'edu.isCurrent',
         'edu.description', 'edu.displayOrder',

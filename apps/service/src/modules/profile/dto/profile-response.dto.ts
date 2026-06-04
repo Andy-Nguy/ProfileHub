@@ -50,7 +50,7 @@ export class ProfileResponseDto {
   @ApiProperty()
   updatedAt!: string;
 
- 
+
 }
 
 export class DiscoveryProfileDto {
@@ -114,8 +114,10 @@ export class EducationResponseDto {
 export class ExperienceResponseDto {
   id!: string;
   profileId!: string;
+  companyId!: string | null;
   title!: string;
   company!: string;
+  companyDetails!: CompanyProfileResponseDto | null;
   location!: string | null;
   employmentType!: string;
   startDate!: string;
@@ -125,6 +127,13 @@ export class ExperienceResponseDto {
   displayOrder!: number;
   createdAt!: string;
   updatedAt!: string;
+}
+
+export class CompanyProfileResponseDto {
+  id!: string;
+  name!: string;
+  domain!: string | null;
+  logoUrl!: string | null;
 }
 
 export class SkillResponseDto {

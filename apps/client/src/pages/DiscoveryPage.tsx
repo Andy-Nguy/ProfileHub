@@ -5,6 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
+import { ProfileResponse } from '../services/profile.service';
+import { ISkill } from '@profilehub/types';
+import { DashboardLoader, LottieLoader } from '../components/shared/LottieLoader';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
+import { useDebounce } from '../hooks/useDebounce';
+
 
 const MOCK_PROFILES = [
   {
@@ -66,24 +72,26 @@ const MOCK_PROFILES = [
 export const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 150);
   const { t } = useTranslation('profile');
 
-  const { data, isLoading, error } = useDiscoveryFeed(1, 100);
+  const { data, isFetching, error } = useDiscoveryFeed(1, 100, debouncedSearch);
+  const showLoading = useMinimumLoading(isFetching);
 
   const profiles = data?.data || [];
 
   const filtered = profiles.filter(
-    (p: any) =>
-      p.displayName.toLowerCase().includes(search.toLowerCase()) ||
-      p.skills?.some((s: any) => s.name.toLowerCase().includes(search.toLowerCase()))
+    (p: ProfileResponse) =>
+      p.displayName.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+      p.skills?.some((s: ISkill) => s.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
   );
 
 
   return (
     <>
       {/* Main Content */}
-      <main className="flex-1 md:ml-72 flex flex-col">
-        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter overflow-y-auto">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-[calc(100vh-64px)]">
+        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter">
           <div className="max-w-[1280px] mx-auto">
 
             {/* ── Header + Search ─────────────── */}
@@ -118,9 +126,9 @@ export const DiscoveryPage: React.FC = () => {
             </motion.div>
 
             {/* ── Profile Grid ────────────────── */}
-            {isLoading ? (
-              <div className="text-center py-24">
-                <div className="text-xl">{t('discovery.loading')}</div>
+            {showLoading ? (
+              <div className="flex items-center justify-center py-24 min-h-[300px]">
+                <LottieLoader label={t('discovery.loading')} />
               </div>
             ) : error ? (
               <div className="text-center py-24 text-error">
@@ -128,7 +136,7 @@ export const DiscoveryPage: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((profile: any, i: number) => (
+                {filtered.map((profile: ProfileResponse, i: number) => (
                   <motion.div
                     key={profile.id}
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -141,7 +149,7 @@ export const DiscoveryPage: React.FC = () => {
                     {/* Avatar + Name */}
                     <div className="flex items-center gap-4">
                       <img
-                        src={profile.avatarUrl}
+                        src={profile.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.displayName)}&background=6366f1&color=fff&size=150`}
                         alt={profile.displayName}
                         className="w-16 h-16 rounded-full object-cover shadow-sm"
                       />
@@ -162,7 +170,7 @@ export const DiscoveryPage: React.FC = () => {
 
                     {/* Skills */}
                     <div className="flex flex-wrap gap-2 mt-auto pt-2">
-                      {profile.skills?.map((skill: any) => (
+                      {profile.skills?.map((skill: ISkill) => (
                         <span
                           key={skill.name}
                           className="inline-flex items-center bg-surface-container border border-outline-variant rounded-lg px-3 py-1 font-label-lg text-label-lg text-on-surface"
@@ -190,7 +198,7 @@ export const DiscoveryPage: React.FC = () => {
             )}
 
             {/* Empty state */}
-            {filtered.length === 0 && (
+            {!showLoading && !error && filtered.length === 0 && (
               <div className="text-center py-24">
                 <span className="material-symbols-outlined text-6xl text-outline-variant block mb-4">
                   search_off

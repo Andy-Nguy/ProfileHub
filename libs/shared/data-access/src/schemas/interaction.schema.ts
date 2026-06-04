@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { InteractionTargetType, InteractionType } from '../../../types/types';
+import { InteractionTargetType, InteractionType } from '@profilehub/types';
 
 export const CreateInteractionSchema = z.object({
   targetType: z.nativeEnum(InteractionTargetType),

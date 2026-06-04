@@ -45,6 +45,8 @@ export class AuthService {
    * 6. Return success message only (no tokens, no user data)
    */
   async register(dto: RegisterDto): Promise<{ message: string }> {
+    this.logger.debug(`Register process initiated for email: ${dto.email}, username: ${dto.username}`);
+
     // 1. Check uniqueness
     await this.userService.assertUnique(dto.email, dto.username);
 
@@ -52,19 +54,21 @@ export class AuthService {
     const passwordHash = await hashPassword(dto.password);
 
     // 3. Create inactive user
-    await this.userService.createInactiveUser({
+    const user = await this.userService.createInactiveUser({
       email: dto.email,
       username: dto.username,
       passwordHash,
     });
+    this.logger.debug(`Inactive user created successfully`, { userId: user.id });
 
     // 4. Generate + save OTP
     const rawOtp = await this.otpService.createOtp(dto.email, OtpPurpose.REGISTER);
+    this.logger.debug(`OTP generated successfully for email: ${dto.email}`);
 
     // 5. Send OTP email
     await this.mailService.sendVerificationOtp(dto.email, rawOtp);
+    this.logger.debug(`Verification email with OTP sent successfully to: ${dto.email}`);
 
-    // 6. Return success message only — no user data leaked
     return {
       message: 'Registration successful. Please check your email for the verification code.',
     };
@@ -80,8 +84,11 @@ export class AuthService {
    * - If either fails, both are rolled back
    */
   async verifyEmail(dto: VerifyEmailDto): Promise<{ message: string }> {
+    this.logger.debug(`Verify email request initiated for: ${dto.email}`);
+
     // Verify OTP (handles expiry, attempts, brute-force protection)
     await this.otpService.verifyAndConsumeOtp(dto.email, dto.code, OtpPurpose.REGISTER);
+    this.logger.debug(`OTP successfully verified and consumed for: ${dto.email}`);
 
     // Use transaction for atomicity: activate user + create profile
     await this.dataSource.transaction(async (manager) => {
@@ -100,15 +107,19 @@ export class AuthService {
 
       user.isActive = true;
       user.emailVerifiedAt = new Date();
-      await manager.save(user);
+      const activatedUser = await manager.save(user);
+      this.logger.debug(`User activated successfully in transaction`, { userId: activatedUser.id });
 
       // Automatically create profile with display_name = username
       const profile = manager.create(ProfileEntity, {
         userId: user.id,
         displayName: user.username,
       });
-      await manager.save(profile);
+      const createdProfile = await manager.save(profile);
+      this.logger.debug(`Profile created successfully in transaction`, { profileId: createdProfile.id });
     });
+
+    this.logger.debug(`Email verification transaction completed successfully for: ${dto.email}`);
 
     return {
       message: 'Email verified successfully. You can now log in.',
@@ -136,14 +147,18 @@ export class AuthService {
     user: { id: string; email: string; username: string; role: string; profile?: any };
     needsOnboarding: boolean;
   }> {
+    this.logger.debug(`Login attempt for email: ${dto.email}`);
+
     const user = await this.userService.findByEmail(dto.email);
 
     // Generic error message to prevent user enumeration
     if (!user) {
+      this.logger.debug(`Login failed: User not found for email ${dto.email}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 
     if (!user.isActive) {
+      this.logger.debug(`Login failed: Account is not activated for email ${dto.email}`);
       throw new UnauthorizedException('Account is not activated. Please verify your email first.');
     }
 
@@ -151,11 +166,13 @@ export class AuthService {
     const isPasswordValid = await verifyPassword(dto.password, user.passwordHash);
 
     if (!isPasswordValid) {
+      this.logger.debug(`Login failed: Invalid password for email ${dto.email}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 
     // Generate token pair
     const tokenPair = await this.refreshTokenService.generateTokenPair(user.id, user.role);
+    this.logger.debug(`Token pair generated for user ID: ${user.id}`);
 
     // Save hashed refresh token to DB
     await this.refreshTokenService.saveRefreshToken({
@@ -165,11 +182,18 @@ export class AuthService {
       userAgent: meta.userAgent,
       ipAddress: meta.ipAddress,
     });
+    this.logger.debug(`Refresh token saved to database`, { jti: tokenPair.jti });
 
     // Update last login timestamp
     await this.userService.updateLastLogin(user.id);
+    this.logger.debug(`Last login timestamp updated for user ID: ${user.id}`);
 
     const onboardingStatus = await this.profileService.getOnboardingStatus(user.id);
+    this.logger.debug(`Onboarding status retrieved`, {
+      userId: user.id,
+      needsOnboarding: onboardingStatus.needsOnboarding,
+      completion: onboardingStatus.profileCompletion,
+    });
 
     return {
       accessToken: tokenPair.accessToken,
@@ -203,6 +227,8 @@ export class AuthService {
     accessToken: string;
     refreshToken: string;
   }> {
+    this.logger.debug(`Refresh tokens request received`);
+
     // Atomically validates the old token and issues a new pair in one transaction.
     // This eliminates the race condition window that existed when validate and
     // rotate were two separate operations.
@@ -211,6 +237,8 @@ export class AuthService {
       userAgent: meta.userAgent,
       ipAddress: meta.ipAddress,
     });
+
+    this.logger.debug(`Tokens refreshed successfully, new pair rotated`);
 
     return {
       accessToken: tokenPair.accessToken,
@@ -225,13 +253,15 @@ export class AuthService {
    * The access token remains valid until it naturally expires (15m max).
    */
   async logout(rawRefreshToken: string): Promise<{ message: string }> {
+    this.logger.debug(`Logout process initiated`);
     try {
       const { jti } = await this.refreshTokenService.findValidTokenRecord(rawRefreshToken);
       await this.refreshTokenService.revokeByJti(jti);
-    } catch {
+      this.logger.debug(`Refresh token successfully revoked for logout`, { jti });
+    } catch (e) {
       // Silently handle invalid tokens during logout
       // The user is logging out regardless — don't error
-      this.logger.debug('Logout called with invalid/expired refresh token');
+      this.logger.debug('Logout called with invalid/expired refresh token or error occurred: ' + (e as any).message);
     }
 
     return { message: 'Logged out successfully' };
@@ -243,21 +273,29 @@ export class AuthService {
    * Get authenticated user's session bootstrap data.
    */
   async getUserProfile(userId: string) {
+    this.logger.debug(`Fetching user profile details for user ID: ${userId}`);
     const user = await this.usersRepository.findActiveUserById(userId);
 
     if (!user) {
+      this.logger.debug(`User not found or inactive for user ID: ${userId}`);
       throw new UnauthorizedException('User not found');
     }
 
     if (user.deletedAt !== null) {
+      this.logger.debug(`User account has been deleted for user ID: ${userId}`);
       throw new UnauthorizedException('Account has been deleted');
     }
 
     if (!user.isActive) {
+      this.logger.debug(`User account is not active for user ID: ${userId}`);
       throw new UnauthorizedException('Account is not active');
     }
 
     const onboardingStatus = await this.profileService.getOnboardingStatus(userId);
+    this.logger.debug(`User profile session bootstrap loaded successfully`, {
+      userId,
+      needsOnboarding: onboardingStatus.needsOnboarding,
+    });
 
     return {
       authenticated: true,

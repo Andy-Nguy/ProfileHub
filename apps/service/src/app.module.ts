@@ -13,11 +13,13 @@ import { ExperienceEntity } from './entities/experience.entity';
 import { EducationEntity } from './entities/education.entity';
 import { InteractionEntity } from './entities/interaction.entity';
 import { SocialLinkEntity } from './entities/social-link.entity';
+import { CompanyEntity } from './entities/company.entity';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { CompaniesModule } from './modules/companies/companies.module';
 
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
@@ -56,6 +58,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
           EducationEntity,
           InteractionEntity,
           SocialLinkEntity,
+          CompanyEntity,
         ],
         // IMPORTANT: Set to false in production and use migrations instead
         synchronize: false,
@@ -68,6 +71,7 @@ import { RolesGuard } from './modules/auth/guards/roles.guard';
     UserModule,
     ProfileModule,
     StorageModule,
+    CompaniesModule,
   ],
   providers: [
     // ── Global Guards ───────────────────────────────────────────────

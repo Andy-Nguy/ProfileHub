@@ -10,15 +10,18 @@ import { SkillsDialog } from '../components/profile/dialogs/SkillsDialog';
 import { ExperienceDialog } from '../components/profile/dialogs/ExperienceDialog';
 import { EducationDialog } from '../components/profile/dialogs/EducationDialog';
 import { AvatarEditDialog } from '../components/profile/dialogs/AvatarEditDialog';
-import { profileAPI } from '../services/profile.service';
+import { SkillsSection } from '../components/profile/SkillsSection';
+import { ProfileResponse, profileAPI } from '../services/profile.service';
 import { useAuth } from '../contexts/AuthContext';
+import { IEducation, IExperience, ISocialLink } from '@profilehub/types';
 import {
   M3Card,
-  SkillChip,
   EndorsementButton,
   ProfileHeader,
   TimelineSection,
 } from '@profilehub/ui';
+import { DashboardLoader } from '../components/shared/LottieLoader';
+import { useMinimumLoading } from '../hooks/useMinimumLoading';
 
 
 
@@ -34,16 +37,23 @@ export const ProfilePage: React.FC = () => {
   const { user } = useAuth();
   const { t } = useTranslation('profile');
   
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false); // Legacy, can remove
   const [basicInfoOpen, setBasicInfoOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [skillsOpen, setSkillsOpen] = useState(false);
-  const [expState, setExpState] = useState<{ isOpen: boolean; id?: string; data?: any }>({ isOpen: false });
-  const [eduState, setEduState] = useState<{ isOpen: boolean; id?: string; data?: any }>({ isOpen: false });
+  const [expState, setExpState] = useState<{
+    isOpen: boolean;
+    id?: string;
+    data?: IExperience;
+  }>({ isOpen: false });
+  const [eduState, setEduState] = useState<{
+    isOpen: boolean;
+    id?: string;
+    data?: IEducation;
+  }>({ isOpen: false });
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -71,7 +81,7 @@ export const ProfilePage: React.FC = () => {
     try {
       const res = await profileAPI.uploadAvatar(file);
       // Update local profile state directly so UI responds instantly
-      setProfile((prev: any) => ({ ...prev, avatarUrl: res.avatarUrl }));
+      setProfile((prev) => (prev ? { ...prev, avatarUrl: res.avatarUrl } : prev));
     } catch (error) {
       console.error('Avatar upload failed', error);
     } finally {
@@ -83,12 +93,10 @@ export const ProfilePage: React.FC = () => {
     fetchProfile();
   }, [username, user]);
 
-  if (loading) {
-    return (
-      <div className="bg-background text-on-background min-h-screen flex items-center justify-center">
-        <div className="text-xl">{t('page.loading')}</div>
-      </div>
-    );
+  const showLoading = useMinimumLoading(loading);
+
+  if (showLoading) {
+    return <DashboardLoader label={t('page.loading')} />;
   }
 
   if (!profile) {
@@ -114,6 +122,16 @@ export const ProfilePage: React.FC = () => {
   }
 
   const isNewProfile = !profile.bio && profile.skills.length === 0;
+  const formatYearRange = (
+    startDate: string | Date,
+    endDate: string | Date | null,
+    isCurrent: boolean,
+  ) => {
+    const startYear = new Date(startDate).getFullYear();
+    const endYear = isCurrent ? 'Present' : endDate ? new Date(endDate).getFullYear() : '';
+
+    return `${startYear} - ${endYear}`;
+  };
 
   return (
     <>
@@ -149,8 +167,8 @@ export const ProfilePage: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 md:ml-72 flex flex-col">
-        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter overflow-y-auto">
+      <main className="flex-1 md:ml-72 flex flex-col min-h-[calc(100vh-64px)]">
+        <div className="flex-1 bg-surface py-[32px] px-[16px] md:px-gutter">
           <div className="max-w-[1280px] mx-auto space-y-6">
 
             {/* ── Profile Header ─────────────────────────────────── */}
@@ -163,6 +181,9 @@ export const ProfilePage: React.FC = () => {
                 displayName={profile.displayName}
                 headline={profile.headline}
                 location={profile.location}
+                industry={profile.industry}
+                username={profile.username}
+                socialLinks={profile.socialLinks}
                 avatarUrl={profile.avatarUrl}
                 coverUrl={profile.coverUrl}
                 showActions={!isOwnProfile}
@@ -235,14 +256,17 @@ export const ProfilePage: React.FC = () => {
                   <TimelineSection
                     title={t('page.experience')}
                     icon="work"
-                    items={profile.experiences?.map((exp: any) => ({
+                    items={profile.experiences.map((exp: IExperience) => ({
                       id: exp.id,
                       title: exp.title,
                       subtitle: exp.company,
-                      dateRange: `${new Date(exp.startDate).getFullYear()} - ${exp.isCurrent ? 'Present' : exp.endDate ? new Date(exp.endDate).getFullYear() : ''}`,
-                      description: exp.description,
+                      dateRange: formatYearRange(exp.startDate, exp.endDate, exp.isCurrent),
+                      description: exp.description ?? undefined,
+                      badge: exp.employmentType,
+                      location: exp.location ?? undefined,
+                      logoUrl: exp.companyDetails?.logoUrl ?? undefined,
                       onEdit: isOwnProfile ? () => setExpState({ isOpen: true, id: exp.id, data: exp }) : undefined,
-                    })) || []}
+                    }))}
                     onAdd={isOwnProfile ? () => setExpState({ isOpen: true }) : undefined}
                   />
                 </motion.div>
@@ -251,14 +275,14 @@ export const ProfilePage: React.FC = () => {
                   <TimelineSection
                     title={t('page.education')}
                     icon="school"
-                    items={profile.educations?.map((edu: any) => ({
+                    items={profile.educations.map((edu: IEducation) => ({
                       id: edu.id,
                       title: edu.institution,
-                      subtitle: `${edu.degree || ''} ${edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''}`,
-                      dateRange: `${new Date(edu.startDate).getFullYear()} - ${edu.isCurrent ? 'Present' : edu.endDate ? new Date(edu.endDate).getFullYear() : ''}`,
-                      description: edu.description,
+                      subtitle: [edu.degree, edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''].filter(Boolean).join(' '),
+                      dateRange: formatYearRange(edu.startDate, edu.endDate, edu.isCurrent),
+                      description: edu.description ?? undefined,
                       onEdit: isOwnProfile ? () => setEduState({ isOpen: true, id: edu.id, data: edu }) : undefined,
-                    })) || []}
+                    }))}
                     onAdd={isOwnProfile ? () => setEduState({ isOpen: true }) : undefined}
                   />
                 </motion.div>
@@ -267,31 +291,15 @@ export const ProfilePage: React.FC = () => {
               {/* Right: Skills + Social */}
               <div className="space-y-6">
                 <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+                  <SkillsSection
+                    skills={profile.skills}
+                    isOwner={isOwnProfile}
+                    onEdit={isOwnProfile ? () => setSkillsOpen(true) : undefined}
+                  />
+                </motion.div>
+
+                <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}>
                   <M3Card>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-title-lg text-title-lg text-on-surface flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">psychology</span>
-                        {t('page.skills')}
-                      </h3>
-                      {isOwnProfile && (
-                        <button
-                          onClick={() => setSkillsOpen(true)}
-                          className="text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full p-1.5 transition-colors"
-                          aria-label="Edit skills"
-                        >
-                          <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>edit</span>
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {profile.skills.map((skill: any) => (
-                        <SkillChip key={skill.id} name={skill.name} />
-                      ))}
-                    </div>
-
-                    <hr className="border-outline-variant mb-6" />
-
                     <h3 className="font-title-lg text-title-lg text-on-surface mb-4 flex items-center gap-2">
                       <span className="material-symbols-outlined text-primary">verified</span>
                       {t('page.endorsements')}
@@ -321,7 +329,7 @@ export const ProfilePage: React.FC = () => {
                       : t('page.socialPresenceOther', { name: profile.displayName })}
                   </p>
                   <div className="flex gap-3 flex-wrap">
-                    {profile.socialLinks?.map((link: any) => (
+                    {profile.socialLinks.map((link: ISocialLink) => (
                       <a
                         key={link.id}
                         href={link.url}

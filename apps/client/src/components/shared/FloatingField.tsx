@@ -7,6 +7,8 @@ interface FloatingFieldProps {
   value?: string;
   defaultValue?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   className?: string;
   bgClass?: string;
   required?: boolean;
@@ -22,6 +24,8 @@ export const FloatingField: React.FC<FloatingFieldProps> = ({
   value,
   defaultValue,
   onChange,
+  onFocus,
+  onBlur,
   className = '',
   bgClass = 'bg-surface-container-lowest',
   required,
@@ -35,6 +39,8 @@ export const FloatingField: React.FC<FloatingFieldProps> = ({
         value={value}
         defaultValue={defaultValue}
         onChange={onChange}
+        onFocus={onFocus}
+        onBlur={onBlur}
         required={required}
         className={`block px-4 pb-2.5 pt-5 w-full text-body-lg text-on-surface bg-transparent rounded-lg border border-outline appearance-none focus:outline-none focus:ring-0 focus:border-primary peer`}
       />

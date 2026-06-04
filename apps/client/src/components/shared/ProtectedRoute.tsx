@@ -1,6 +1,8 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { FullScreenLoader } from './LottieLoader';
+import { useMinimumLoading } from '../../hooks/useMinimumLoading';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,14 +17,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireOnboarding = true 
 }) => {
   const { isAuthenticated, isLoading, needsOnboarding } = useAuth();
+  const showLoading = useMinimumLoading(isLoading);
   const location = useLocation();
 
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-surface">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (showLoading) {
+    return <FullScreenLoader />;
   }
 
   if (!isAuthenticated) {
