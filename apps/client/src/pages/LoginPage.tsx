@@ -50,7 +50,7 @@ export const LoginPage: React.FC = () => {
     <div className="bg-surface text-on-surface h-screen w-screen overflow-hidden">
       <div className="flex h-full w-full">
         {/* Left Side: Branding & Value Prop */}
-        <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-primary-container text-on-primary p-gutter relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-primary-container text-on-primary-container p-gutter relative overflow-hidden">
           <div
             className="absolute inset-0 opacity-20 pointer-events-none"
             style={{
@@ -70,10 +70,10 @@ export const LoginPage: React.FC = () => {
             >
               hub
             </span>
-            <h1 className="font-display-lg text-display-lg text-on-primary font-bold">
+            <h1 className="font-display-lg text-display-lg text-on-primary-container font-bold">
               {t('auth:login.brandingHeading')}
             </h1>
-            <p className="font-body-lg text-body-lg text-on-primary opacity-80 leading-relaxed">
+            <p className="font-body-lg text-body-lg text-on-primary-container opacity-80 leading-relaxed">
               {t('auth:login.brandingSubtitle')}
             </p>
           </motion.div>

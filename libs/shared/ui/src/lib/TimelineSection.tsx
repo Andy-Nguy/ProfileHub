@@ -21,12 +21,12 @@ export interface TimelineSectionProps {
 }
 
 const EMPLOYMENT_TYPE_COLORS: Record<string, string> = {
-  internship:   'bg-amber-100 text-amber-700 border-amber-200',
-  full_time:    'bg-emerald-100 text-emerald-700 border-emerald-200',
-  part_time:    'bg-blue-100 text-blue-700 border-blue-200',
-  contract:     'bg-purple-100 text-purple-700 border-purple-200',
-  freelance:    'bg-indigo-100 text-indigo-700 border-indigo-200',
-  volunteer:    'bg-rose-100 text-rose-700 border-rose-200',
+  internship:   'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/50',
+  full_time:    'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/50',
+  part_time:    'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50',
+  contract:     'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800/50',
+  freelance:    'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800/50',
+  volunteer:    'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800/50',
 };
 
 function formatBadgeLabel(badge: string): string {

@@ -55,6 +55,13 @@
   --color-secondary-container: 139 241 230;
   --color-primary-container: 26 35 126;
   --color-surface-tint: 76 86 175;
+
+  /* Social Colors */
+  --color-social-github: #24292e;
+  --color-social-linkedin: #0a66c2;
+  --color-social-twitter: #1d9bf0;
+  --color-social-dribbble: #ea4c89;
+  --color-social-personal: #6366f1;
 }
 
 .dark {
@@ -106,6 +113,13 @@
   --color-secondary-container: 0 80 74;
   --color-primary-container: 52 61 150;
   --color-surface-tint: 189 194 255;
+
+  /* Social Colors in Dark Mode */
+  --color-social-github: #f0f6fc;
+  --color-social-linkedin: #58a6ff;
+  --color-social-twitter: #1d9bf0;
+  --color-social-dribbble: #ea4c89;
+  --color-social-personal: #818cf8;
 }
 
 html {

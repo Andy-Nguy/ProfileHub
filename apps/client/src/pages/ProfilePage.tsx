@@ -317,14 +317,14 @@ export const ProfilePage: React.FC = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="bg-primary-fixed rounded-[16px] p-6"
+                  className="bg-primary-fixed dark:bg-primary-container/10 dark:border dark:border-primary/20 rounded-[16px] p-6"
                   style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.08)' }}
                 >
-                  <h3 className="font-title-lg text-title-lg text-on-primary-fixed mb-2 flex items-center gap-2">
+                  <h3 className="font-title-lg text-title-lg text-on-primary-fixed dark:text-primary mb-2 flex items-center gap-2">
                     <span className="material-symbols-outlined">share</span>
                     {t('page.socialPresence')}
                   </h3>
-                  <p className="font-body-lg text-body-lg text-on-primary-fixed-variant mb-4">
+                  <p className="font-body-lg text-body-lg text-on-primary-fixed-variant dark:text-on-surface-variant mb-4">
                     {isOwnProfile
                       ? t('page.socialPresenceOwn')
                       : t('page.socialPresenceOther', { name: profile.displayName })}
@@ -336,7 +336,7 @@ export const ProfilePage: React.FC = () => {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed flex items-center justify-center hover:opacity-80 transition-opacity"
+                        className="w-10 h-10 rounded-full bg-on-primary-fixed text-primary-fixed dark:bg-primary dark:text-on-primary flex items-center justify-center hover:opacity-80 transition-opacity"
                         title={link.platform}
                       >
                         <span className="material-symbols-outlined">
@@ -347,7 +347,7 @@ export const ProfilePage: React.FC = () => {
                       </a>
                     ))}
                     {(!profile.socialLinks || profile.socialLinks.length === 0) && (
-                      <p className="text-on-primary-fixed-variant text-body-md">{t('page.noSocialLinks')}</p>
+                      <p className="text-on-primary-fixed-variant dark:text-on-surface-variant/60 text-body-md">{t('page.noSocialLinks')}</p>
                     )}
                   </div>
                 </motion.div>

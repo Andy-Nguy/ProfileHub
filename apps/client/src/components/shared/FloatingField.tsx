@@ -27,7 +27,7 @@ export const FloatingField: React.FC<FloatingFieldProps> = ({
   onFocus,
   onBlur,
   className = '',
-  bgClass = 'bg-surface-container-lowest',
+  bgClass = 'bg-surface',
   required,
 }) => {
   return (
@@ -77,7 +77,7 @@ export const FloatingTextarea: React.FC<FloatingTextareaProps> = ({
   defaultValue,
   onChange,
   className = '',
-  bgClass = 'bg-surface-container-lowest',
+  bgClass = 'bg-surface',
   required,
 }) => {
   return (

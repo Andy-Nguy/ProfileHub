@@ -109,6 +109,7 @@ export const OnboardingPage: React.FC = () => {
               label={t('profile:onboarding.displayNameLabel')}
               value={formData.displayName}
               onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
+              bgClass="bg-surface-container-lowest"
               required
             />
 
@@ -117,6 +118,7 @@ export const OnboardingPage: React.FC = () => {
               label={t('profile:onboarding.headlineLabel')}
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+              bgClass="bg-surface-container-lowest"
             />
 
             <div className="space-y-3">
@@ -186,12 +188,14 @@ export const OnboardingPage: React.FC = () => {
                       label={t('profile:onboarding.locationLabel')}
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      bgClass="bg-surface-container-lowest"
                     />
                     <FloatingField
                       id="industry"
                       label={t('profile:onboarding.industryLabel')}
                       value={formData.industry}
                       onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                      bgClass="bg-surface-container-lowest"
                     />
                   </div>
                   <div>

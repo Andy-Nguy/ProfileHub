@@ -50,11 +50,11 @@ function getGradient(name: string) {
 
 // Map platform names to Material Symbols icons + colors
 const SOCIAL_CONFIG: Record<string, { icon: string; label: string; color: string }> = {
-  github:   { icon: 'code',        label: 'GitHub',   color: '#24292e' },
-  linkedin: { icon: 'work',        label: 'LinkedIn', color: '#0a66c2' },
-  twitter:  { icon: 'chat',        label: 'Twitter',  color: '#1d9bf0' },
-  dribbble: { icon: 'sports_basketball', label: 'Dribbble', color: '#ea4c89' },
-  personal: { icon: 'language',    label: 'Website',  color: '#6366f1' },
+  github:   { icon: 'code',        label: 'GitHub',   color: 'var(--color-social-github)' },
+  linkedin: { icon: 'work',        label: 'LinkedIn', color: 'var(--color-social-linkedin)' },
+  twitter:  { icon: 'chat',        label: 'Twitter',  color: 'var(--color-social-twitter)' },
+  dribbble: { icon: 'sports_basketball', label: 'Dribbble', color: 'var(--color-social-dribbble)' },
+  personal: { icon: 'language',    label: 'Website',  color: 'var(--color-social-personal)' },
 };
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
