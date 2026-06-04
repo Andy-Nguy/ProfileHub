@@ -6,14 +6,116 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --color-on-primary-fixed-variant: 52 61 150;
+  --color-surface-dim: 217 218 219;
+  --color-on-error-container: 147 0 10;
+  --color-secondary-fixed: 142 244 233;
+  --color-primary: 0 6 102;
+  --color-on-secondary-fixed-variant: 0 80 74;
+  --color-on-primary: 255 255 255;
+  --color-on-secondary: 255 255 255;
+  --color-inverse-on-surface: 240 241 242;
+  --color-primary-fixed-dim: 189 194 255;
+  --color-outline-variant: 198 197 212;
+  --color-secondary-fixed-dim: 113 215 205;
+  --color-on-surface-variant: 69 70 82;
+  --color-tertiary: 42 22 0;
+  --color-surface-container-highest: 225 227 228;
+  --color-background: 248 249 250;
+  --color-inverse-primary: 189 194 255;
+  --color-on-secondary-fixed: 0 32 29;
+  --color-on-tertiary-fixed-variant: 103 61 0;
+  --color-secondary: 0 106 99;
+  --color-outline: 118 118 131;
+  --color-tertiary-container: 71 41 0;
+  --color-inverse-surface: 46 49 50;
+  --color-on-primary-container: 134 144 238;
+  --color-on-background: 25 28 29;
+  --color-primary-fixed: 224 224 255;
+  --color-on-tertiary-container: 211 135 26;
+  --color-surface: 248 249 250;
+  --color-tertiary-fixed-dim: 255 184 102;
+  --color-on-error: 255 255 255;
+  --color-surface-container-lowest: 255 255 255;
+  --color-error-container: 255 218 214;
+  --color-surface-variant: 225 227 228;
+  --color-surface-container-low: 243 244 245;
+  --color-on-tertiary: 255 255 255;
+  --color-on-surface: 25 28 29;
+  --color-surface-bright: 248 249 250;
+  --color-tertiary-fixed: 255 221 186;
+  --color-on-tertiary-fixed: 43 23 0;
+  --color-surface-container-high: 231 232 233;
+  --color-on-secondary-container: 0 111 103;
+  --color-surface-container: 237 238 239;
+  --color-on-primary-fixed: 0 7 103;
+  --color-error: 186 26 26;
+  --color-secondary-container: 139 241 230;
+  --color-primary-container: 26 35 126;
+  --color-surface-tint: 76 86 175;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-on-primary-fixed-variant: 189 194 255;
+  --color-surface-dim: 17 20 21;
+  --color-on-error-container: 255 218 214;
+  --color-secondary-fixed: 142 244 233;
+  --color-primary: 189 194 255;
+  --color-on-secondary-fixed-variant: 113 215 205;
+  --color-on-primary: 0 7 103;
+  --color-on-secondary: 0 55 51;
+  --color-inverse-on-surface: 25 28 29;
+  --color-primary-fixed-dim: 189 194 255;
+  --color-outline-variant: 69 70 82;
+  --color-secondary-fixed-dim: 113 215 205;
+  --color-on-surface-variant: 198 197 212;
+  --color-tertiary: 255 184 102;
+  --color-surface-container-highest: 50 53 54;
+  --color-background: 17 20 21;
+  --color-inverse-primary: 76 86 175;
+  --color-on-secondary-fixed: 0 32 29;
+  --color-on-tertiary-fixed-variant: 255 184 102;
+  --color-secondary: 113 215 205;
+  --color-outline: 144 144 154;
+  --color-tertiary-container: 103 61 0;
+  --color-inverse-surface: 225 227 228;
+  --color-on-primary-container: 224 224 255;
+  --color-on-background: 225 227 228;
+  --color-primary-fixed: 224 224 255;
+  --color-on-tertiary-container: 255 221 186;
+  --color-surface: 17 20 21;
+  --color-tertiary-fixed-dim: 255 184 102;
+  --color-on-error: 105 0 5;
+  --color-surface-container-lowest: 12 15 16;
+  --color-error-container: 147 0 10;
+  --color-surface-variant: 69 70 82;
+  --color-surface-container-low: 29 32 33;
+  --color-on-tertiary: 71 41 0;
+  --color-on-surface: 225 227 228;
+  --color-surface-bright: 55 58 59;
+  --color-tertiary-fixed: 255 221 186;
+  --color-on-tertiary-fixed: 43 23 0;
+  --color-surface-container-high: 39 42 43;
+  --color-on-secondary-container: 142 244 233;
+  --color-surface-container: 33 36 37;
+  --color-on-primary-fixed: 0 7 103;
+  --color-error: 255 180 171;
+  --color-secondary-container: 0 80 74;
+  --color-primary-container: 52 61 150;
+  --color-surface-tint: 189 194 255;
+}
+
 html {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background: #f8f9fa;
-  color: #191c1d;
+  background: rgb(var(--color-background));
+  color: rgb(var(--color-on-background));
   margin: 0;
 }
 
@@ -37,11 +139,11 @@ body {
 
 /* ── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-thumb { background: #c4c6cf; border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--color-outline-variant)); border-radius: 3px; }
 
 /* ── Focus ring ────────────────────────────────── */
 *:focus-visible {
-  outline: 2px solid #000666;
+  outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
 }
 

@@ -21,7 +21,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, index, onClic
   return (
     <motion.div
       onClick={onClick}
-      className="p-5 rounded-xl bg-white border border-outline-variant/30 cursor-pointer hover:shadow-md transition-shadow group"
+      className="p-5 rounded-xl bg-surface-container-lowest border border-outline-variant/30 cursor-pointer hover:shadow-md transition-shadow group"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: index * 0.05 }}
@@ -31,11 +31,11 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ profile, index, onClic
           <img
             src={profile.avatarUrl}
             alt={profile.displayName}
-            className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
+            className="w-12 h-12 rounded-full object-cover ring-2 ring-surface shadow-sm"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center ring-2 ring-white shadow-sm">
-            <span className="text-sm font-bold text-white">{initials}</span>
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center ring-2 ring-surface shadow-sm">
+            <span className="text-sm font-bold text-on-primary">{initials}</span>
           </div>
         )}
 

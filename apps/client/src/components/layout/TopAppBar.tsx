@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useLogout } from '../../hooks/useApi';
 import { Button } from '../shared/Button';
 import { LanguageSwitcher } from '../shared/LanguageSwitcher';
+import { ThemeToggle } from '../shared/ThemeToggle';
 
 interface NavItem {
   icon: string;
@@ -112,6 +113,8 @@ export const TopAppBar: React.FC = () => {
           <div className="flex items-center gap-2 ml-auto">
             {/* Language Switcher — always visible on desktop */}
             <LanguageSwitcher className="hidden sm:flex" />
+            <ThemeToggle className="hidden sm:flex" />
+            {!isAuthenticated && <ThemeToggle className="sm:hidden" />}
 
             {!isAuthenticated ? (
               <>
@@ -161,14 +164,20 @@ export const TopAppBar: React.FC = () => {
                 {/* Right Profile Dropdown - ONLY for Account details, Language, and Logout */}
                 {isMenuOpen && (
                   <div className="absolute right-0 mt-3 w-56 overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-xl z-50">
-                    <div className="border-b border-outline-variant px-4 py-3 bg-gray-50/50">
+                    <div className="border-b border-outline-variant px-4 py-3 bg-surface-container-low">
                       <p className="font-label-lg text-label-lg text-on-surface truncate">{displayName}</p>
                       <p className="text-xs text-on-surface-variant truncate">{user?.email}</p>
                     </div>
                     {/* Language switcher inside the dropdown for mobile */}
-                    <div className="border-b border-outline-variant px-4 py-3 flex items-center justify-between sm:hidden bg-white">
+                    <div className="border-b border-outline-variant px-4 py-3 flex items-center justify-between sm:hidden bg-surface">
                       <span className="text-sm text-on-surface-variant">{t('language.label')}</span>
                       <LanguageSwitcher />
+                    </div>
+                    <div className="border-b border-outline-variant px-4 py-3 flex items-center justify-between sm:hidden bg-surface">
+                      <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '20px' }}>
+                        contrast
+                      </span>
+                      <ThemeToggle />
                     </div>
                     <Button
                       type="button"
@@ -176,7 +185,7 @@ export const TopAppBar: React.FC = () => {
                       isLoading={logoutMutation.isPending}
                       loadingText={t('nav.loggingOut')}
                       icon={<span className="material-symbols-outlined">logout</span>}
-                      className="w-full gap-3 px-4 py-3 text-left font-label-lg text-label-lg text-on-surface hover:bg-error-container hover:text-on-error-container transition-colors bg-white"
+                      className="w-full gap-3 px-4 py-3 text-left font-label-lg text-label-lg text-on-surface hover:bg-error-container hover:text-on-error-container transition-colors bg-surface"
                     >
                       {t('nav.logout')}
                     </Button>
@@ -200,15 +209,15 @@ export const TopAppBar: React.FC = () => {
 
             {/* Slide-in Menu Panel */}
             <aside
-              className="absolute inset-y-0 left-0 w-72 bg-white flex flex-col shadow-2xl transition-transform duration-300 ease-out"
+              className="absolute inset-y-0 left-0 w-72 bg-surface flex flex-col shadow-2xl transition-transform duration-300 ease-out"
               style={{ animation: 'slideInLeft 0.25s ease-out' }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-surface">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant bg-surface">
                 <span className="font-title-lg text-title-lg font-bold text-primary">ProHub</span>
                 <button
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
                   aria-label="Close menu"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
@@ -216,18 +225,25 @@ export const TopAppBar: React.FC = () => {
               </div>
 
               {/* User Minimal Card inside Drawer */}
-              <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+              <div className="px-6 py-5 border-b border-outline-variant bg-surface-container-low flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary text-on-primary font-bold flex items-center justify-center text-sm shadow-inner">
                   {userInitial}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 truncate">{displayName}</h3>
-                  <p className="text-xs text-gray-500 truncate">Workspace member</p>
+                  <h3 className="text-sm font-semibold text-on-surface truncate">{displayName}</h3>
+                  <p className="text-xs text-on-surface-variant truncate">Workspace member</p>
                 </div>
               </div>
 
+              <div className="px-6 py-4 border-b border-outline-variant bg-surface flex items-center justify-between">
+                <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: '20px' }}>
+                  contrast
+                </span>
+                <ThemeToggle />
+              </div>
+
               {/* Nav Items List */}
-              <nav className="flex-1 px-3 py-4 space-y-1 bg-white overflow-y-auto">
+              <nav className="flex-1 px-3 py-4 space-y-1 bg-surface overflow-y-auto">
                 {NAV_ITEMS.map((item) => {
                   const isActive =
                     location.pathname === item.to ||
@@ -240,7 +256,7 @@ export const TopAppBar: React.FC = () => {
                       className={`flex items-center px-4 py-3 rounded-xl transition-all ${
                         isActive
                           ? 'bg-secondary-container text-on-secondary-container font-semibold'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                       }`}
                     >
                       <span className="material-symbols-outlined mr-3 text-current" style={{ fontSize: '22px' }}>
@@ -253,7 +269,7 @@ export const TopAppBar: React.FC = () => {
               </nav>
 
               {/* Bottom Big Share Button inside Drawer */}
-              <div className="p-5 border-t border-gray-100 bg-gray-50/50">
+              <div className="p-5 border-t border-outline-variant bg-surface-container-low">
                 <button
                   className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-3 rounded-xl hover:bg-primary/95 transition-colors shadow-sm flex items-center justify-center gap-2"
                   onClick={() => {

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useRegister, useVerifyEmail } from '../hooks/useApi';
 import { Button } from '../components/shared/Button';
 import { LanguageSwitcher } from '../components/shared/LanguageSwitcher';
+import { ThemeToggle } from '../components/shared/ThemeToggle';
 
 export const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -114,8 +115,9 @@ export const RegisterPage: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             {/* Language switcher */}
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <LanguageSwitcher />
+              <ThemeToggle />
             </div>
 
             {/* Header */}

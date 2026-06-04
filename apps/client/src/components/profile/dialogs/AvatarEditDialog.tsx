@@ -122,37 +122,37 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
     >
       {/* Modal Card */}
       <div
-        className="relative bg-white rounded-2xl w-full shadow-2xl overflow-hidden flex flex-col transition-all duration-300"
+        className="relative bg-surface rounded-2xl w-full shadow-2xl overflow-hidden flex flex-col transition-all duration-300"
         style={{ maxWidth: '520px', maxHeight: '90vh' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant bg-surface">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-lg font-bold text-on-surface">
               {imageSrc ? 'Crop & Adjust Photo' : 'Profile Photo'}
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-on-surface-variant mt-0.5">
               {imageSrc ? 'Drag image to crop or rotate' : 'View or update your current photo'}
             </p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
           </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
+        <div className="flex-1 overflow-y-auto min-h-0 bg-surface">
           {!imageSrc ? (
             /* STATE 1: Display Mode (Like FB/LinkedIn) */
             <div className="p-8 flex flex-col items-center justify-center gap-6">
               {/* Profile Photo Display Frame */}
               <div className="relative group">
-                <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-white shadow-xl ring-1 ring-gray-100 bg-gray-50">
+                <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-surface shadow-xl ring-1 ring-outline-variant bg-surface-container-low">
                   <img
                     src={displayAvatar}
                     alt="Current profile"
@@ -174,16 +174,16 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
 
               {/* Detail Info */}
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-700">
+                <p className="text-sm font-medium text-on-surface">
                   Visible to everyone on ProfileHub
                 </p>
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-on-surface-variant mt-1">
                   Upload a high-quality square or portrait image
                 </p>
               </div>
 
               {fileError && (
-                <div className="w-full flex items-center gap-2 text-red-600 text-sm bg-red-50 rounded-xl px-4 py-3 border border-red-100">
+                <div className="w-full flex items-center gap-2 text-on-error-container text-sm bg-error-container rounded-xl px-4 py-3 border border-error/20">
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
                   <span>{fileError}</span>
                 </div>
@@ -219,13 +219,13 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
               </div>
 
               {/* Adjustments Panel */}
-              <div className="bg-gray-50 rounded-2xl p-4 space-y-4 border border-gray-100">
+              <div className="bg-surface-container-low rounded-2xl p-4 space-y-4 border border-outline-variant">
                 {/* Zoom Control */}
                 <div className="flex items-center gap-4">
-                  <span className="text-xs font-semibold text-gray-500 w-12 shrink-0">Zoom</span>
+                  <span className="text-xs font-semibold text-on-surface-variant w-12 shrink-0">Zoom</span>
                   <button
                     onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
-                    className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+                    className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0"
                     aria-label="Zoom out"
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>remove</span>
@@ -237,28 +237,28 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                     step={0.05}
                     value={zoom}
                     onChange={(e) => setZoom(Number(e.target.value))}
-                    className="flex-1 h-1.5 rounded-full accent-indigo-600 cursor-pointer bg-gray-200"
+                    className="flex-1 h-1.5 rounded-full accent-primary cursor-pointer bg-surface-container-high"
                     aria-label="Zoom"
                   />
                   <button
                     onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
-                    className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+                    className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0"
                     aria-label="Zoom in"
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
                   </button>
-                  <span className="text-xs font-bold text-gray-500 w-10 text-right shrink-0">
+                  <span className="text-xs font-bold text-on-surface-variant w-10 text-right shrink-0">
                     {Math.round(zoom * 100)}%
                   </span>
                 </div>
 
                 {/* Rotate Control */}
                 <div className="flex items-center gap-4">
-                  <span className="text-xs font-semibold text-gray-500 w-12 shrink-0">Rotate</span>
+                  <span className="text-xs font-semibold text-on-surface-variant w-12 shrink-0">Rotate</span>
                   <div className="flex items-center gap-2 flex-1">
                     <button
                       onClick={() => handleRotate(-90)}
-                      className="flex items-center gap-1 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 px-3.5 py-1.5 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                      className="flex items-center gap-1 text-xs font-medium text-on-surface bg-surface hover:bg-surface-container-high px-3.5 py-1.5 rounded-lg transition-colors border border-outline-variant shadow-sm"
                       aria-label="Rotate left"
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>rotate_left</span>
@@ -266,7 +266,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                     </button>
                     <button
                       onClick={() => handleRotate(90)}
-                      className="flex items-center gap-1 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 px-3.5 py-1.5 rounded-lg transition-colors border border-gray-200 shadow-sm"
+                      className="flex items-center gap-1 text-xs font-medium text-on-surface bg-surface hover:bg-surface-container-high px-3.5 py-1.5 rounded-lg transition-colors border border-outline-variant shadow-sm"
                       aria-label="Rotate right"
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>rotate_right</span>
@@ -275,7 +275,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                     {rotation !== 0 && (
                       <button
                         onClick={() => setRotation(0)}
-                        className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors px-2 py-1.5 ml-auto"
+                        className="text-xs font-semibold text-error hover:text-error/80 transition-colors px-2 py-1.5 ml-auto"
                       >
                         Reset
                       </button>
@@ -284,7 +284,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                 </div>
               </div>
 
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-xs text-on-surface-variant text-center">
                 Drag to reposition • Scroll or pinch to zoom
               </p>
             </div>
@@ -292,20 +292,20 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 px-6 py-4 flex items-center justify-between bg-gray-50/60">
+        <div className="border-t border-outline-variant px-6 py-4 flex items-center justify-between bg-surface-container-low">
           {!imageSrc ? (
             /* STATE 1 Footer */
             <>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow duration-200"
+                className="flex items-center gap-2 text-sm font-semibold text-on-primary bg-primary hover:bg-surface-tint px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow duration-200"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>upload</span>
                 Upload Photo
               </button>
               <button
                 onClick={onClose}
-                className="text-sm font-semibold text-gray-600 hover:text-gray-800 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                className="text-sm font-semibold text-on-surface-variant hover:text-on-surface px-4 py-2.5 rounded-xl hover:bg-surface-container-high transition-colors"
               >
                 Close
               </button>
@@ -315,7 +315,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
             <>
               <button
                 onClick={handleCancelEdit}
-                className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-800 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-1.5 text-sm font-semibold text-on-surface-variant hover:text-on-surface px-4 py-2.5 rounded-xl hover:bg-surface-container-high transition-colors"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
                 Back
@@ -323,19 +323,19 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
-                  className="text-sm font-semibold text-gray-500 hover:text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
+                  className="text-sm font-semibold text-on-surface-variant hover:text-on-surface px-4 py-2.5 rounded-xl hover:bg-surface-container-high transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={isUploading}
-                  className="flex items-center gap-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                  className="flex items-center gap-2 text-sm font-semibold text-on-primary bg-primary hover:bg-surface-tint disabled:opacity-60 px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                 >
                   {isUploading ? (
                     <>
                       <span
-                        className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full"
+                        className="inline-block w-4 h-4 border-2 border-on-primary/40 border-t-on-primary rounded-full"
                         style={{ animation: 'spin 0.7s linear infinite' }}
                       />
                       Saving…

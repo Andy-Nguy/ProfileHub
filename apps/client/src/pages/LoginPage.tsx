@@ -6,6 +6,7 @@ import { useLogin } from '../hooks/useApi';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/shared/Button';
 import { LanguageSwitcher } from '../components/shared/LanguageSwitcher';
+import { ThemeToggle } from '../components/shared/ThemeToggle';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -92,8 +93,9 @@ export const LoginPage: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             {/* Language switcher (top-right of form area) */}
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <LanguageSwitcher />
+              <ThemeToggle />
             </div>
 
             {/* Header */}

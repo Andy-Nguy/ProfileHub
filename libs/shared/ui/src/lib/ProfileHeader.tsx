@@ -141,7 +141,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           >
             {showFallback ? (
               <div
-                className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-2xl md:text-3xl border-[3px] border-white shadow-md"
+                className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-2xl md:text-3xl border-[3px] border-surface shadow-md"
                 style={{
                   background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})`,
                   opacity: avatarUploading ? 0.6 : 1,
@@ -153,7 +153,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
               <img
                 src={avatarUrl!}
                 alt={displayName}
-                className="w-full h-full rounded-full object-cover border-[3px] border-white shadow-md"
+                className="w-full h-full rounded-full object-cover border-[3px] border-surface shadow-md"
                 style={{ opacity: avatarUploading ? 0.6 : 1 }}
                 onError={() => setImgError(true)}
               />
@@ -184,7 +184,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
             {/* Edit badge */}
             {isOwnProfile && !avatarUploading && (
               <div
-                className="absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center shadow-md z-10"
+                className="absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-surface flex items-center justify-center shadow-md z-10"
                 style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
               >
                 <span className="material-symbols-outlined text-white" style={{ fontSize: '12px' }}>edit</span>
