@@ -21,7 +21,7 @@ export class User implements IUser {
   @Column({ type: 'varchar', length: 50, unique: true })
   username!: string;
 
-  @Column({ name: 'password_hash', type: 'varchar', length: 255 })
+  @Column({ name: 'password_hash', type: 'varchar', length: 255, select: false })
   passwordHash!: string;
 
   @Column({
