@@ -226,6 +226,7 @@ export class AuthService {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
+    skipCookie?: boolean;
   }> {
     this.logger.debug(`Refresh tokens request received`);
 
@@ -243,6 +244,7 @@ export class AuthService {
     return {
       accessToken: tokenPair.accessToken,
       refreshToken: tokenPair.refreshToken,
+      skipCookie: tokenPair.skipCookie,
     };
   }
 

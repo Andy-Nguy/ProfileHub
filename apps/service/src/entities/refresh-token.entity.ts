@@ -34,6 +34,15 @@ export class RefreshTokenEntity {
   @Column({ name: 'is_revoked', type: 'boolean', default: false })
   isRevoked!: boolean;
 
+  @Column({ name: 'replaced_by_jti', type: 'uuid', nullable: true })
+  replacedByJti!: string | null;
+
+  @Column({ name: 'revoked_at', type: 'timestamptz', nullable: true })
+  revokedAt!: Date | null;
+
+  @Column({ name: 'revoked_reason', type: 'text', nullable: true })
+  revokedReason!: string | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 
