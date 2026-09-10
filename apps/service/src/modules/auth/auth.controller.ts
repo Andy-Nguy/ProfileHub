@@ -109,9 +109,10 @@ export class AuthController {
       ipAddress: req.ip ?? req.socket.remoteAddress,
     });
 
-    // Set new refresh token cookie (rotation)
-    const nodeEnv = this.config.get<string>('NODE_ENV', 'development');
-    res.cookie(getRefreshCookieName(), result.refreshToken, getRefreshCookieOptions(nodeEnv));
+    if (!result.skipCookie && result.refreshToken) {
+      const nodeEnv = this.config.get<string>('NODE_ENV', 'development');
+      res.cookie(getRefreshCookieName(), result.refreshToken, getRefreshCookieOptions(nodeEnv));
+    }
 
     return {
       accessToken: result.accessToken,

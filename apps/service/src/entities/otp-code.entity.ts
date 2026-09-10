@@ -37,6 +37,12 @@ export class OtpCodeEntity {
   @Column({ name: 'is_used', type: 'boolean', default: false })
   isUsed!: boolean;
 
+  @Column({ name: 'resend_count', type: 'int', default: 0 })
+  resendCount!: number;
+
+  @Column({ name: 'last_sent_at', type: 'timestamptz', nullable: true })
+  lastSentAt!: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt!: Date;
 }

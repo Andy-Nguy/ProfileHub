@@ -1,4 +1,4 @@
-import { apiClient } from './api.service';
+import { apiClient, refreshAccessToken } from './api.service';
 
 import { ILoginDto, IRegisterDto, IVerifyEmailDto } from '@profilehub/types';
 
@@ -19,8 +19,8 @@ export const authAPI = {
   },
 
   refresh: async () => {
-    const response = await apiClient.post('/auth/refresh');
-    return response.data;
+    const accessToken = await refreshAccessToken();
+    return { accessToken };
   },
 
   logout: async () => {
