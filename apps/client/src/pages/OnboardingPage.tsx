@@ -121,6 +121,7 @@ export const OnboardingPage: React.FC = () => {
               label={t('profile:onboarding.headlineLabel')}
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+              required
             />
 
             <div className="space-y-3">

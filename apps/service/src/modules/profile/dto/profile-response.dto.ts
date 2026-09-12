@@ -53,6 +53,34 @@ export class ProfileResponseDto {
 
 }
 
+export class OnboardingProfileDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  displayName: string;
+
+  @ApiProperty({ nullable: true })
+  headline: string | null;
+
+  @ApiProperty({ nullable: true })
+  avatarUrl: string | null;
+
+  @ApiProperty({ enum: VisibilityTypeEnum })
+  visibility: VisibilityTypeEnum;
+}
+
+export class OnboardingStatusResponseDto {
+  @ApiProperty()
+  needsOnboarding: boolean;
+
+  @ApiProperty()
+  profileCompletion: number;
+
+  @ApiProperty({ type: OnboardingProfileDto, nullable: true })
+  profile: OnboardingProfileDto | null;
+}
+
 export class DiscoveryProfileDto {
   @ApiProperty()
   id: string;
