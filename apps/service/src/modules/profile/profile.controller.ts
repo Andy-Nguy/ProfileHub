@@ -8,7 +8,16 @@ import {
 } from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
 import { ProfileEntity } from '../../entities';
-import { UpdateProfileDto, UpsertProfileDto, ProfileResponseDto, ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
+import {
+  UpdateOnboardingDto,
+  UpdateProfileDto,
+  ProfileResponseDto,
+  OnboardingStatusResponseDto,
+  ExperienceDto,
+  EducationDto,
+  SkillDto,
+  SocialLinkDto,
+} from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
 import { ExperienceMapper, EducationMapper, SkillMapper, SocialLinkMapper, ProfileMapper } from './mappers';
@@ -62,15 +71,26 @@ export class ProfileController {
     return user.profile;
   }
 
+  // PATCH /profiles/onboarding → complete first-time profile setup
+  @Patch('onboarding')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Complete onboarding for the authenticated user' })
+  @ApiResponse({ status: 200, type: OnboardingStatusResponseDto })
+  async updateOnboarding(
+    @CurrentUser('id') userId: string,
+    @Body() dto: UpdateOnboardingDto,
+  ) {
+    const status = await this.profileService.updateOnboarding(userId, dto);
+    return this.profileMapper.toOnboardingStatusResponseDto(status);
+  }
+
   // GET /profiles/:id → get profile details by profile ID
   @Get(':id')
-
   @ApiOperation({ summary: 'Get profile details by profile ID' })
   async getProfileById(@Param('id', ParseUUIDPipe) id: string) {
     const user = await this.profileService.getProfileByProfileId(id);
     return user.profile;
   }
-
 
   // PATCH /profiles/me → update basic profile
   @Patch('me')

@@ -14,6 +14,7 @@ export class EducationMapper {
       startDate: this.toDateOnlyString(entity.startDate),
       endDate: entity.endDate ? this.toDateOnlyString(entity.endDate) : null,
       isCurrent: entity.isCurrent,
+      institutionLogoUrl: entity.institutionLogoUrl ?? null,
       description: entity.description,
       displayOrder: entity.displayOrder,
       createdAt: entity.createdAt.toISOString(),

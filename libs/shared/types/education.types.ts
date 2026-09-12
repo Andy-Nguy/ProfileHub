@@ -7,6 +7,7 @@ export interface IEducation {
   startDate: string | Date;
   endDate: string | Date | null;
   isCurrent: boolean;
+  institutionLogoUrl: string | null;
   description: string | null;
   displayOrder: number;
   createdAt: string | Date;

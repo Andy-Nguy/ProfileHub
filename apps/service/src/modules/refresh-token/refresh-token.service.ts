@@ -11,6 +11,7 @@ interface TokenPair {
   accessToken: string;
   refreshToken: string;
   jti: string;
+  skipCookie?: boolean;
 }
 
 @Injectable()
@@ -35,20 +36,22 @@ export class RefreshTokenService {
    */
   async generateTokenPair(userId: string, role: string): Promise<TokenPair> {
     const jti = generateJti();
-
     const payload: JwtPayload = { sub: userId, role, jti };
 
-    const accessToken = this.jwtService.sign(payload, {
-      secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
-      expiresIn: '15m',
-    });
-
+    const accessToken = this.signAccessToken(payload);
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.config.getOrThrow<string>('JWT_REFRESH_SECRET'),
       expiresIn: '7d',
     });
 
     return { accessToken, refreshToken, jti };
+  }
+
+  private signAccessToken(payload: JwtPayload): string {
+    return this.jwtService.sign(payload, {
+      secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
+      expiresIn: '15m',
+    });
   }
 
   /**
@@ -112,8 +115,6 @@ export class RefreshTokenService {
     ipAddress?: string;
   }): Promise<TokenPair> {
     // Step 1: Verify JWT signature BEFORE entering the transaction.
-    // This is safe outside the transaction — it's a pure crypto operation
-    // with no DB state. If the signature is invalid, we reject fast.
     let payload: JwtPayload;
     try {
       payload = this.jwtService.verify<JwtPayload>(params.rawToken, {
@@ -123,41 +124,72 @@ export class RefreshTokenService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    // Steps 2–8: Everything that touches DB state runs inside the transaction.
     return this.refreshRepo.manager.transaction(async (manager) => {
-      // Step 2: Lock the user row — this serializes all concurrent refresh
-      // requests for the same user. Only one will proceed at a time.
-      await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [
+      // Step 2: Lock the user row.
+      const userResult = await manager.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [
         payload.sub,
       ]);
+      if (userResult.length === 0) {
+        throw new UnauthorizedException('User not found');
+      }
 
-      // Step 3: Look up token record by JTI (now safe — we hold the lock)
+      // Step 3: Look up token record by JTI.
       const tokenRecord = await manager.findOne(RefreshTokenEntity, {
         where: { jti: payload.jti },
       });
 
-      // Step 4: Token not found in DB
+      // Step 4: Token not found in DB.
       if (!tokenRecord) {
         throw new UnauthorizedException('Refresh token not found');
       }
 
-      // Step 5: Revoked token reuse — genuine attack or double-submit
-      // Revoke ALL tokens for this user as a security measure.
+      // Step 5: Revoked token — distinguish rotation race from theft.
       if (tokenRecord.isRevoked) {
+        let successorActive = false;
+        if (tokenRecord.replacedByJti) {
+          const successor = await manager.findOne(RefreshTokenEntity, {
+            where: { jti: tokenRecord.replacedByJti, isRevoked: false },
+          });
+          successorActive = !!successor;
+        }
+
+        // Same cookie presented again after rotation (reload / Strict Mode /
+        // overlapping refresh). Re-issue an access token for the live successor
+        // and do not rotate again or overwrite the cookie.
+        if (successorActive && tokenRecord.replacedByJti) {
+          this.logger.debug(
+            `Idempotent refresh after rotation for user ${tokenRecord.userId}`,
+          );
+          return {
+            accessToken: this.signAccessToken({
+              sub: payload.sub,
+              role: payload.role,
+              jti: tokenRecord.replacedByJti,
+            }),
+            refreshToken: '',
+            jti: tokenRecord.replacedByJti,
+            skipCookie: true,
+          };
+        }
+
         this.logger.warn(
-          `⚠️  Revoked refresh token reuse detected for user ${tokenRecord.userId}. Revoking all tokens.`,
+          `⚠️  Genuine revoked refresh token reuse detected for user ${tokenRecord.userId}. Revoking all tokens.`,
         );
         await manager.update(
           RefreshTokenEntity,
           { userId: tokenRecord.userId, isRevoked: false },
-          { isRevoked: true },
+          {
+            isRevoked: true,
+            revokedAt: new Date(),
+            revokedReason: 'reuse_or_security',
+          },
         );
         throw new UnauthorizedException(
           'Token reuse detected. All sessions invalidated.',
         );
       }
 
-      // Step 6: Expired token
+      // Step 6: Expired token.
       if (new Date() > tokenRecord.expiresAt) {
         await manager.update(RefreshTokenEntity, tokenRecord.id, {
           isRevoked: true,
@@ -165,26 +197,31 @@ export class RefreshTokenService {
         throw new UnauthorizedException('Refresh token has expired');
       }
 
-      // Step 7: Verify raw token against stored SHA-256 hash
+      // Step 7: Verify raw token against stored SHA-256 hash.
       const isValid = verifyToken(params.rawToken, tokenRecord.tokenHash);
       if (!isValid) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      // Step 8a: Generate new token pair
+      // Step 8a: Generate new token pair.
       const tokenPair = await this.generateTokenPair(payload.sub, payload.role);
       const newTokenHash = hashToken(tokenPair.refreshToken);
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 
-      // Step 8b: Mark ALL existing active tokens as revoked (rotation)
+      // Step 8b: Revoke ONLY the presented token and record lineage.
       await manager.update(
         RefreshTokenEntity,
-        { userId: payload.sub, isRevoked: false },
-        { isRevoked: true },
+        { jti: payload.jti },
+        {
+          isRevoked: true,
+          revokedAt: new Date(),
+          replacedByJti: tokenPair.jti,
+          revokedReason: 'rotated',
+        },
       );
 
-      // Step 8c: Save the new token record
+      // Step 8c: Save the new token record.
       const newRecord = manager.create(RefreshTokenEntity, {
         userId: payload.sub,
         jti: tokenPair.jti,
@@ -219,18 +256,44 @@ export class RefreshTokenService {
       where: { jti: payload.jti },
     });
 
-    if (!tokenRecord || tokenRecord.isRevoked) {
+    if (!tokenRecord) {
       throw new UnauthorizedException('Refresh token not found or already revoked');
     }
 
-    return { userId: payload.sub, jti: payload.jti };
+    if (!tokenRecord.isRevoked) {
+      return { userId: payload.sub, jti: payload.jti };
+    }
+
+    let current = tokenRecord;
+    while (current.isRevoked && current.replacedByJti) {
+      const next = await this.refreshRepo.findOne({
+        where: { jti: current.replacedByJti },
+      });
+      if (!next) {
+        break;
+      }
+      current = next;
+    }
+
+    if (current.isRevoked) {
+      throw new UnauthorizedException('Refresh token not found or already revoked');
+    }
+
+    return { userId: payload.sub, jti: current.jti };
   }
 
   /**
    * Revoke a single refresh token by JTI.
    */
   async revokeByJti(jti: string): Promise<void> {
-    await this.refreshRepo.update({ jti }, { isRevoked: true });
+    await this.refreshRepo.update(
+      { jti },
+      {
+        isRevoked: true,
+        revokedAt: new Date(),
+        revokedReason: 'logout',
+      },
+    );
   }
 
   /**
@@ -238,6 +301,13 @@ export class RefreshTokenService {
    * Used for security events (password change, account compromise, etc.)
    */
   async revokeAllUserTokens(userId: string): Promise<void> {
-    await this.refreshRepo.update({ userId, isRevoked: false }, { isRevoked: true });
+    await this.refreshRepo.update(
+      { userId, isRevoked: false },
+      {
+        isRevoked: true,
+        revokedAt: new Date(),
+        revokedReason: 'reuse_or_security',
+      },
+    );
   }
 }

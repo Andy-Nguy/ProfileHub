@@ -3,6 +3,7 @@ import { ProfileEntity } from '../../../entities/profile.entity';
 import {
   DiscoveryFeedResponseDto,
   DiscoveryProfileDto,
+  OnboardingStatusResponseDto,
   ProfileResponseDto,
 } from '../dto';
 import { EducationMapper } from './education.mapper';
@@ -20,6 +21,28 @@ export class ProfileMapper {
   ) {}
 
 
+
+  toOnboardingStatusResponseDto(status: {
+    needsOnboarding: boolean;
+    profileCompletion: number;
+    profile: ProfileEntity | null;
+  }): OnboardingStatusResponseDto {
+    const profile = status.profile;
+
+    return {
+      needsOnboarding: status.needsOnboarding,
+      profileCompletion: status.profileCompletion,
+      profile: profile
+        ? {
+            id: profile.id,
+            displayName: profile.displayName,
+            headline: profile.headline,
+            avatarUrl: profile.avatarUrl,
+            visibility: profile.visibility,
+          }
+        : null,
+    };
+  }
 
   toProfileResponseDto(
     profile: ProfileEntity,

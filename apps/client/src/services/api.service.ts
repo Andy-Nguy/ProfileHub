@@ -1,4 +1,8 @@
-import { getStoredAuthSession, setStoredAuthSession, removeStoredAuthSession } from './auth-session.service';
+import {
+  getStoredAuthSession,
+  setStoredAuthSession,
+  removeStoredAuthSession,
+} from './auth-session.service';
 
 export class ApiError extends Error {
   response?: {
@@ -13,58 +17,91 @@ export class ApiError extends Error {
 }
 
 // ── Token Refresh Mutex ─────────────────────────────────────────────────────
-// Prevents multiple concurrent 401s from each triggering a separate /auth/refresh call.
-// The first one calls refresh; subsequent ones queue up and reuse the same promise.
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
+// One in-flight /auth/refresh for the whole app (interceptor + AuthProvider
+// bootstrap + React Strict Mode). Two parallel refreshes rotate the same cookie
+// and the loser looks like a logout.
+let refreshInFlight: Promise<string> | null = null;
+let pendingAccessToken: string | null = null;
 
-function subscribeToTokenRefresh(cb: (token: string) => void) {
-  refreshSubscribers.push(cb);
+export function setPendingAccessToken(token: string | null) {
+  pendingAccessToken = token;
 }
 
-function notifyRefreshSubscribers(token: string) {
-  refreshSubscribers.forEach((cb) => cb(token));
-  refreshSubscribers = [];
+const MAX_REFRESH_RACE_RETRIES = 3;
+
+function isRefreshRace(data: any): boolean {
+  return (
+    data?.code === 'REFRESH_RACE' ||
+    data?.message?.code === 'REFRESH_RACE'
+  );
 }
 
-async function doRefresh(): Promise<string> {
+async function doRefreshOnce(retryCount = 0): Promise<string> {
   const response = await fetch('/api/auth/refresh', {
     method: 'POST',
-    credentials: 'include', // send httpOnly refresh-token cookie
+    credentials: 'include',
   });
 
+  if (response.status === 409) {
+    const data = await response.json().catch(() => ({}));
+    if (isRefreshRace(data) && retryCount < MAX_REFRESH_RACE_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      return doRefreshOnce(retryCount + 1);
+    }
+    throw new ApiError(
+      (typeof data?.message === 'string' && data.message) || 'Refresh race',
+      {
+        status: 409,
+        data,
+      },
+    );
+  }
+
   if (!response.ok) {
-    throw new Error('Refresh failed');
+    const errorData = await response.json().catch(() => ({}));
+    throw new ApiError(errorData.message || 'Refresh failed', {
+      status: response.status,
+      data: errorData,
+    });
   }
 
   const data = await response.json();
   const newToken: string = data.accessToken;
 
-  // Persist new token while keeping existing user data
   const existing = getStoredAuthSession();
   if (existing && newToken) {
     setStoredAuthSession({ ...existing, accessToken: newToken });
+  } else if (newToken) {
+    pendingAccessToken = newToken;
   }
 
   return newToken;
 }
 
-// ── ApiClient ───────────────────────────────────────────────────────────────
+/**
+ * Rotate the refresh cookie and return a new access token.
+ * Concurrent callers share one request.
+ */
+export function refreshAccessToken(): Promise<string> {
+  if (!refreshInFlight) {
+    refreshInFlight = doRefreshOnce().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
 class ApiClient {
   private baseUrl = '/api';
-
-  // ── Token Management ──────────────────────────────────────────────────
 
   private getAccessToken(): string | null {
     try {
       const session = getStoredAuthSession();
-      return session?.accessToken ?? null;
+      return session?.accessToken ?? pendingAccessToken;
     } catch {
       return null;
     }
   }
-
-  // ── Request Headers ───────────────────────────────────────────────────
 
   private getHeaders(customHeaders: Record<string, string> = {}): HeadersInit {
     const headers: Record<string, string> = { ...customHeaders };
@@ -90,8 +127,6 @@ class ApiClient {
     };
   }
 
-  // ── Public HTTP Methods ───────────────────────────────────────────────
-
   async get<T = any>(url: string): Promise<{ data: T }> {
     return this.requestWithRetry<T>(url, 'GET');
   }
@@ -113,22 +148,19 @@ class ApiClient {
   }
 
   /**
-   * Core fetch logic with automatic 401 → refresh → retry.
-   *
-   * Flow:
-   *  1. Make the request.
-   *  2. If response is 401 AND this is not the refresh/login endpoint:
-   *     a. If a refresh is already in-flight, queue this request behind it.
-   *     b. Otherwise start a refresh, notify all waiting requests on success,
-   *        clear the session on failure, and redirect to /login.
-   *  3. Retry the original request once with the new token.
+   * Core fetch with 401 → refresh → retry.
+   * Does not hard-redirect to /login; AuthProvider / ProtectedRoute own that.
    */
   private async requestWithRetry<T>(
     url: string,
     method: string,
     body?: any,
   ): Promise<{ data: T }> {
-    const isAuthEndpoint = url.includes('/auth/refresh') || url.includes('/auth/login');
+    const isAuthEndpoint =
+      url.includes('/auth/refresh') ||
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/verify-email');
 
     const makeRequest = () =>
       fetch(`${this.baseUrl}${url}`, this.buildFetchOptions(method, body));
@@ -136,36 +168,19 @@ class ApiClient {
     let response = await makeRequest();
 
     if (response.status === 401 && !isAuthEndpoint) {
-      if (isRefreshing) {
-        // Wait for the ongoing refresh, then retry with the new token
-        await new Promise<string>((resolve, reject) => {
-          subscribeToTokenRefresh((token) => {
-            if (token) resolve(token);
-            else reject(new Error('Refresh failed'));
-          });
-        });
+      try {
+        await refreshAccessToken();
         response = await makeRequest();
-      } else {
-        isRefreshing = true;
-        try {
-          const newToken = await doRefresh();
-          notifyRefreshSubscribers(newToken);
-          response = await makeRequest(); // retry with new token in localStorage
-        } catch {
-          notifyRefreshSubscribers(''); // unblock waiting requests
+      } catch (err) {
+        if (err instanceof ApiError && err.response?.status === 401) {
           removeStoredAuthSession();
-          window.location.href = '/login';
-          throw new ApiError('Session expired. Redirecting to login.');
-        } finally {
-          isRefreshing = false;
         }
+        throw err;
       }
     }
 
     return this.handleResponse<T>(response);
   }
-
-  // ── Response Handler ──────────────────────────────────────────────────
 
   private async handleResponse<T>(response: Response): Promise<{ data: T }> {
     let data: any;

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { User } from '../../entities/user.entity';
-import { UpdateProfileDto, UpsertProfileDto, ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
+import { UpdateOnboardingDto, UpdateProfileDto, ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
 import { ProfileRepository } from './profile.repository';
 import { ProfileEntity, ExperienceEntity, EducationEntity, SkillEntity, SocialLinkEntity } from '../../entities';
 
@@ -82,6 +82,12 @@ export class ProfileService {
       profileCompletion: completion,
       profile,
     };
+  }
+
+  async updateOnboarding(userId: string, dto: UpdateOnboardingDto) {
+    this.logger.debug(`Updating onboarding profile for user ID: ${userId}`, { dto });
+    await this.upsertProfile(userId, dto);
+    return this.getOnboardingStatus(userId);
   }
 
   // ── BASIC PROFILE UPDATE ──────────────────────────────────────────

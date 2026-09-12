@@ -7,7 +7,7 @@ export class CreateCompanyDto {
   @IsString()
   @MaxLength(255)
   @Transform(({ value }) => value?.trim())
-  name!: string;
+  name: string;
 
   @ApiPropertyOptional()
   @IsOptional()

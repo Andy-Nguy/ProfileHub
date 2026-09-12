@@ -9,6 +9,7 @@ import { ISkill, IExperience, IEducation, ISocialLink } from '@profilehub/types'
 import { SkillsSection } from '../components/profile/SkillsSection';
 import { DashboardLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
+import { Logo } from '../components/shared/Logo';
 
 const formatYearRange = (
   startDate: string | Date,
@@ -176,6 +177,7 @@ export const PublicProfilePage: React.FC = () => {
                     .join(' '),
                   dateRange: formatYearRange(edu.startDate, edu.endDate, edu.isCurrent),
                   description: edu.description ?? undefined,
+                  logoUrl: edu.institutionLogoUrl ?? undefined,
                 }))}
               />
             </div>
@@ -186,7 +188,7 @@ export const PublicProfilePage: React.FC = () => {
       {/* Footer */}
       <footer className="border-t border-surface-variant bg-surface-container-low">
         <div className="max-w-[1024px] mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <span className="font-bold text-primary text-lg">ProHub</span>
+          <Logo size="sm" to="/" />
           <div className="flex items-center gap-6 text-xs text-on-surface-variant">
             <a href="#" className="hover:text-on-surface transition-colors">
               {t('footer.privacyPolicy')}
