@@ -1,0 +1,71 @@
+/* From Uiverse.io by Praashoo7 */
+
+.loader {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.letter {
+  color: black;
+  opacity: 0;
+  animation: letter-loader-pass 2s ease-in-out infinite backwards;
+  letter-spacing: 0.5em;
+  text-shadow: 2px 2px 3px #919191;
+}
+
+.l {
+  animation-delay: 0.2s;
+}
+
+.o {
+  animation-delay: 0.4s;
+}
+
+.a {
+  animation-delay: 0.6s;
+}
+
+.d {
+  animation-delay: 0.8s;
+}
+
+.i {
+  animation-delay: 1s;
+}
+
+.n {
+  animation-delay: 1.2s;
+}
+
+.g {
+  animation-delay: 1.4s;
+}
+
+.d1 {
+  animation-name: letter-loader-pass;
+  animation-delay: 1.6s;
+}
+
+.d2 {
+  animation-name: letter-loader-pass;
+  animation-delay: 2s;
+}
+
+@keyframes letter-loader-pass {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}

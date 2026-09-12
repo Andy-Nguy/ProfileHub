@@ -2,7 +2,6 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { FullScreenLoader } from './LottieLoader';
-import { useMinimumLoading } from '../../hooks/useMinimumLoading';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,16 +10,19 @@ interface ProtectedRouteProps {
 
 /**
  * ProtectedRoute - handles authentication and onboarding redirection.
+ *
+ * If a cached session already exists, the page renders immediately so F5
+ * does not flash a full-screen loader and then a second in-layout loader.
+ * FullScreenLoader is only used when we have no user yet (cold bootstrap).
  */
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   requireOnboarding = true 
 }) => {
   const { isAuthenticated, isLoading, needsOnboarding } = useAuth();
-  const showLoading = useMinimumLoading(isLoading);
   const location = useLocation();
 
-  if (showLoading) {
+  if (isLoading && !isAuthenticated) {
     return <FullScreenLoader />;
   }
 
