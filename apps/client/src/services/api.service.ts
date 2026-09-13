@@ -16,6 +16,16 @@ export class ApiError extends Error {
   }
 }
 
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof ApiError) {
+    const errorMessage = error.response?.data?.message || error.message;
+    return Array.isArray(errorMessage)
+      ? errorMessage.join(', ')
+      : errorMessage || 'Unknown Error';
+  }
+  return 'Unknown Error';
+};
+
 // ── Token Refresh Mutex ─────────────────────────────────────────────────────
 // One in-flight /auth/refresh for the whole app (interceptor + AuthProvider
 // bootstrap + React Strict Mode). Two parallel refreshes rotate the same cookie
