@@ -16,6 +16,19 @@ export class ApiError extends Error {
   }
 }
 
+export const getErrorMessage = (error: unknown): string => {
+  if (error instanceof ApiError) {
+    const errorMessage = error.response?.data?.message || error.message;
+    return Array.isArray(errorMessage)
+      ? errorMessage.join(', ')
+      : errorMessage || 'Unknown Error';
+  }
+  return 'Unknown Error';
+};
+
+// ── API Configuration ──────────────────────────────────────────────────────
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 // ── Token Refresh Mutex ─────────────────────────────────────────────────────
 // One in-flight /auth/refresh for the whole app (interceptor + AuthProvider
 // bootstrap + React Strict Mode). Two parallel refreshes rotate the same cookie
@@ -37,7 +50,7 @@ function isRefreshRace(data: any): boolean {
 }
 
 async function doRefreshOnce(retryCount = 0): Promise<string> {
-  const response = await fetch('/api/auth/refresh', {
+  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
     method: 'POST',
     credentials: 'include',
   });
@@ -92,7 +105,7 @@ export function refreshAccessToken(): Promise<string> {
 }
 
 class ApiClient {
-  private baseUrl = '/api';
+  private baseUrl = API_BASE_URL;
 
   private getAccessToken(): string | null {
     try {

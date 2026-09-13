@@ -29,3 +29,31 @@ export interface IProfile {
   educations?: IEducation[];
   socialLinks?: ISocialLink[];
 }
+
+export interface ProfileResponse extends IProfile {
+  username?: string;
+  completionPercent: number;
+  needsOnboarding: boolean;
+  likesCount: number;
+  experiences: IExperience[];
+  educations: IEducation[];
+  skills: ISkill[];
+  socialLinks: ISocialLink[];
+}
+
+export interface DiscoveryFeedResponse {
+  data: ProfileResponse[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface OnboardingStatusResponse {
+  needsOnboarding: boolean;
+  profileCompletion: number;
+  profile: Pick<IProfile, 'id' | 'displayName' | 'headline' | 'avatarUrl' | 'visibility'> | null;
+}
+
+export interface UploadAvatarResponse {
+  avatarUrl: string;
+}
