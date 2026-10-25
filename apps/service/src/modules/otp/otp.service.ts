@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { OtpCodeEntity, OtpPurpose } from '../../entities/otp-code.entity';
 import { generateOtp, hashOtp, verifyOtp } from '../../shared/helpers';
 
-const OTP_EXPIRY_MINUTES = 5;
+export const OTP_EXPIRY_MINUTES = 5;
 const MAX_OTP_ATTEMPTS = 5;
 
 @Injectable()
@@ -34,7 +34,6 @@ export class OtpService {
 
     const rawOtp = generateOtp();
     const codeHash = await hashOtp(rawOtp);
-    //TODO: remove the hash OTP code,and check remove OTP when user first type correct OTP CODE when register
 
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + OTP_EXPIRY_MINUTES);

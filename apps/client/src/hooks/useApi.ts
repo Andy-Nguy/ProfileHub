@@ -1,7 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { authAPI } from '../services/auth-login.service';
 import { ILoginDto, IRegisterDto, IVerifyEmailDto } from '@profilehub/types';
-import { DiscoveryFeedResponse, ProfileResponse } from '../services/profile.service';
+import { DiscoveryFeedResponse } from '../services/profile.service';
 
 const API = '/api';
 
@@ -71,55 +71,3 @@ export function useDiscoveryFeed(page = 1, limit = 20, search = '') {
     staleTime: 0,
   });
 }
-
-// ── Profile by Username ─────────────────
-export function useProfile(username: string) {
-  return useQuery({
-    queryKey: ['profile', username],
-    queryFn: () => fetchJson<ProfileResponse>(`${API}/profiles/${username}`),
-    enabled: !!username,
-  });
-}
-
-// ── Toggle Like (Optimistic) ────────────
-export function useToggleLike() {
-  const qc = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (profileId: string) => {
-      const res = await fetch(`${API}/interactions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          targetType: 'profile',
-          targetId: profileId,
-          interactionType: 'like',
-        }),
-      });
-      return res.json();
-    },
-    onMutate: async (profileId) => {
-      await qc.cancelQueries({ queryKey: ['discovery'] });
-      const prev = qc.getQueriesData({ queryKey: ['discovery'] });
-
-      qc.setQueriesData<DiscoveryFeedResponse>({ queryKey: ['discovery'] }, (old?: DiscoveryFeedResponse) => {
-        if (!old?.data) return old;
-        return {
-          ...old,
-          data: old.data.map((p: ProfileResponse) =>
-            p.id === profileId ? { ...p, likesCount: p.likesCount + 1 } : p,
-          ),
-        };
-      });
-
-      return { prev };
-    },
-    onError: (_err, _id, ctx) => {
-      ctx?.prev?.forEach(([key, data]) => qc.setQueryData(key, data));
-    },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ['discovery'] });
-    },
-  });
-}
-
