@@ -21,7 +21,7 @@ export const AboutDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucce
       await profileAPI.updateProfile({ bio });
       onSuccess();
       onClose();
-    } catch (e) {
+    } catch {
       // Error handled
     } finally {
       setLoading(false);

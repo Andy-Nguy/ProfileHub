@@ -102,11 +102,11 @@ export function useToggleLike() {
       await qc.cancelQueries({ queryKey: ['discovery'] });
       const prev = qc.getQueriesData({ queryKey: ['discovery'] });
 
-      qc.setQueriesData<DiscoveryFeedResponse>({ queryKey: ['discovery'] }, (old) => {
+      qc.setQueriesData<DiscoveryFeedResponse>({ queryKey: ['discovery'] }, (old?: DiscoveryFeedResponse) => {
         if (!old?.data) return old;
         return {
           ...old,
-          data: old.data.map((p) =>
+          data: old.data.map((p: ProfileResponse) =>
             p.id === profileId ? { ...p, likesCount: p.likesCount + 1 } : p,
           ),
         };

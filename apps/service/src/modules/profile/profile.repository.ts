@@ -9,8 +9,6 @@ import { ExperienceEntity } from '../../entities/experience.entity';
 import { EducationEntity } from '../../entities/education.entity';
 import { SkillEntity } from '../../entities/skill.entity';
 import { SocialLinkEntity } from '../../entities/social-link.entity';
-import { UpsertProfileDto } from './dto/upsert-profile.dto';
-import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
 
 @Injectable()

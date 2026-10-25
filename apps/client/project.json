@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/client/src",
   "projectType": "application",
+  "tags": ["scope:client"],
   "targets": {
     "build": {
       "executor": "@nx/vite:build",
@@ -11,6 +12,15 @@
     "serve": {
       "executor": "@nx/vite:dev-server",
       "options": { "buildTarget": "client:build" }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/client/tsconfig.json --noEmit"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
     }
   }
 }

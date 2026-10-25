@@ -160,7 +160,7 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
       }
       onSuccess();
       onClose();
-    } catch (e) {
+    } catch {
       // Error handled
     } finally {
       setLoading(false);
@@ -176,7 +176,7 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
       await apiClient.delete(`/profiles/me/experiences/${experienceId}`);
       onSuccess();
       onClose();
-    } catch (e) {
+    } catch {
       // Error handled
     } finally {
       setLoading(false);

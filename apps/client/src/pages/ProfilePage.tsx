@@ -81,7 +81,7 @@ export const ProfilePage: React.FC = () => {
     try {
       const res = await profileAPI.uploadAvatar(file);
       // Update local profile state directly so UI responds instantly
-      setProfile((prev) => (prev ? { ...prev, avatarUrl: res.avatarUrl } : prev));
+      setProfile((prev: ProfileResponse | null) => (prev ? { ...prev, avatarUrl: res.avatarUrl } : prev));
     } catch (error) {
       console.error('Avatar upload failed', error);
     } finally {

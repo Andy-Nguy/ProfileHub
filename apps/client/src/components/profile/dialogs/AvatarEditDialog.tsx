@@ -1,7 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Cropper, { Area, Point } from 'react-easy-crop';
-import { useTranslation } from 'react-i18next';
 import getCroppedImg from '../../../utils/cropImage';
 
 export interface AvatarEditDialogProps {
@@ -32,7 +31,6 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
   onUpload,
   isUploading,
 }) => {
-  const { t } = useTranslation('profile');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // States
@@ -91,8 +89,8 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
         await onUpload(file);
         onClose();
       }
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }, [imageSrc, croppedAreaPixels, rotation, onUpload, onClose]);
 

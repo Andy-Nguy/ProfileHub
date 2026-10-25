@@ -2,72 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { SideNav } from '../components/layout/SideNav';
 import { AppFooter } from '../components/layout/AppFooter';
 import { useDiscoveryFeed } from '../hooks/useApi';
 import { ProfileResponse } from '../services/profile.service';
 import { ISkill } from '@profilehub/types';
-import { DashboardLoader, LottieLoader } from '../components/shared/LottieLoader';
+import { LottieLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';
 import { useDebounce } from '../hooks/useDebounce';
-
-
-const MOCK_PROFILES = [
-  {
-    id: '1',
-    username: 'jdoe',
-    displayName: 'John Doe',
-    headline: 'Senior Software Engineer | Cloud Architect',
-    avatarUrl: 'https://i.pravatar.cc/150?u=1',
-    skills: [{ name: 'React' }, { name: 'Node.js' }, { name: 'AWS' }],
-    likesCount: 156,
-  },
-  {
-    id: '2',
-    username: 'asmith',
-    displayName: 'Alice Smith',
-    headline: 'UI/UX Designer | Branding Expert',
-    avatarUrl: 'https://i.pravatar.cc/150?u=2',
-    skills: [{ name: 'Figma' }, { name: 'Adobe XD' }, { name: 'Branding' }],
-    likesCount: 89,
-  },
-  {
-    id: '3',
-    username: 'bwilliams',
-    displayName: 'Bob Williams',
-    headline: 'Data Scientist | Machine Learning Enthusiast',
-    avatarUrl: 'https://i.pravatar.cc/150?u=3',
-    skills: [{ name: 'Python' }, { name: 'PyTorch' }, { name: 'Pandas' }],
-    likesCount: 210,
-  },
-  {
-    id: '4',
-    username: 'ejohnson',
-    displayName: 'Emily Johnson',
-    headline: 'Product Manager | Agile Coach',
-    avatarUrl: 'https://i.pravatar.cc/150?u=4',
-    skills: [{ name: 'Jira' }, { name: 'Scrum' }, { name: 'Roadmapping' }],
-    likesCount: 45,
-  },
-  {
-    id: '5',
-    username: 'mgarcia',
-    displayName: 'Michael Garcia',
-    headline: 'Full Stack Developer | Open Source Contributor',
-    avatarUrl: 'https://i.pravatar.cc/150?u=5',
-    skills: [{ name: 'TypeScript' }, { name: 'GraphQL' }, { name: 'Docker' }],
-    likesCount: 128,
-  },
-  {
-    id: '6',
-    username: 'smartinez',
-    displayName: 'Sophia Martinez',
-    headline: 'DevOps Engineer | SRE',
-    avatarUrl: 'https://i.pravatar.cc/150?u=6',
-    skills: [{ name: 'Kubernetes' }, { name: 'Terraform' }, { name: 'Go' }],
-    likesCount: 72,
-  },
-];
 
 export const DiscoveryPage: React.FC = () => {
   const navigate = useNavigate();

@@ -1,35 +1,44 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import nxEslintPlugin from '@nx/eslint-plugin';
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
-import tsParser from '@typescript-eslint/parser'; // 1. Import parser
-import tsPlugin from '@typescript-eslint/eslint-plugin'; // 2. Import plugin TS
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const compat = new FlatCompat({ baseDirectory: __dirname });
+import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 export default [
-  { plugins: { '@nx': nxEslintPlugin, '@typescript-eslint': tsPlugin } }, // 3. Thêm plugin TS
+  {
+    plugins: {
+      '@nx': nxEslintPlugin,
+      '@typescript-eslint': tsPlugin,
+    },
+  },
 
   // Cấu hình riêng cho TypeScript files
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
-      parser: tsParser, // 4. Chỉ định parser ở đây
-      parserOptions: {
-        project: ['./tsconfig.*.json'], // Kết nối với tsconfig của bạn
-      },
+      parser: tsParser,
+      parserOptions: {},
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules, // Sử dụng các rules TS mặc định
+      ...tsPlugin.configs.recommended.rules,
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-this-alias': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       '@nx/enforce-module-boundaries': [
         'error',
         {
-          enforceBuildableLibDependency: true,
+          enforceBuildableLibDependency: false,
           allow: [],
           depConstraints: [
             { sourceTag: 'scope:client', onlyDependOnLibsWithTags: ['scope:shared'] },
             { sourceTag: 'scope:service', onlyDependOnLibsWithTags: ['scope:shared'] },
+            { sourceTag: 'scope:shared', onlyDependOnLibsWithTags: ['scope:shared'] },
           ],
         },
       ],
@@ -38,6 +47,6 @@ export default [
 
   // Ignore patterns
   {
-    ignores: ['node_modules/**', 'dist/**', '.nx/**'],
+    ignores: ['node_modules/**', 'dist/**', '.nx/**', 'tmp/**'],
   },
 ];

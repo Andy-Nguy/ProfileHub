@@ -4,7 +4,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
+import { Repository } from 'typeorm';
 import { OtpCodeEntity, OtpPurpose } from '../../entities/otp-code.entity';
 import { generateOtp, hashOtp, verifyOtp } from '../../shared/helpers';
 
