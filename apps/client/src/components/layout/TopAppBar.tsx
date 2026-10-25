@@ -45,7 +45,6 @@ export const TopAppBar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  // Close mobile nav on route change
   useEffect(() => {
     setIsMobileNavOpen(false);
   }, [location.pathname]);
@@ -67,15 +66,14 @@ export const TopAppBar: React.FC = () => {
   return (
     <>
       <header
-        className="bg-surface shadow-sm flex justify-between items-center h-16 px-gutter w-full sticky top-0 z-50"
-        style={{ boxShadow: '0 1px 3px 0 rgba(0,0,0,.1), 0 1px 2px 0 rgba(0,0,0,.06)' }}
+        className="bg-white/70 backdrop-blur-xl flex justify-between items-center h-14 px-6 w-full sticky top-0 z-50 border-b border-slate-200/60"
       >
-        <div className="flex items-center gap-4 w-full">
-          {/* Mobile Menu Toggle - opens Left Drawer */}
+        <div className="flex items-center gap-8 w-full">
+          {/* Mobile Menu Toggle */}
           {isAuthenticated && (
             <button
               onClick={() => setIsMobileNavOpen(true)}
-              className="md:hidden text-on-surface-variant hover:bg-surface-container-high rounded-full p-2 transition-all"
+              className="md:hidden text-slate-500 hover:bg-slate-100 rounded-full p-2 transition-all"
               aria-label="Open navigation menu"
             >
               <span className="material-symbols-outlined">menu</span>
@@ -83,92 +81,91 @@ export const TopAppBar: React.FC = () => {
           )}
 
           {/* Logo */}
-          <div className="md:ml-2">
+          <div className="flex-shrink-0 transition-transform hover:scale-105 active:scale-95 cursor-pointer" onClick={() => navigate('/')}>
             <Logo size="md" />
           </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex gap-6 ml-8">
-            <Link
-              to="/discovery"
-              className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors py-4"
-            >
-              {t('nav.discover')}
-            </Link>
-            <Link
-              to="/network"
-              className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors py-4"
-            >
-              {t('nav.network')}
-            </Link>
-            <Link
-              to="/resources"
-              className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary transition-colors py-4"
-            >
-              {t('nav.resources')}
-            </Link>
+          {/* Desktop Nav - Airy & Refined */}
+          <nav className="hidden md:flex items-center gap-1 ml-4">
+            {[
+              { to: '/discovery', label: t('nav.discover') },
+              { to: '/network', label: t('nav.network') },
+              { to: '/resources', label: t('nav.resources') },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`relative px-4 py-1 text-sm font-medium transition-all duration-300 group ${
+                  location.pathname === item.to
+                    ? 'text-slate-900'
+                    : 'text-slate-500 hover:text-slate-900'
+                }`}
+              >
+                {item.label}
+                {location.pathname === item.to && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-slate-900 rounded-full" />
+                )}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-slate-400 rounded-full transition-all duration-300 group-hover:w-full"
+                      style={{ zIndex: location.pathname === item.to ? -1 : 1 }} />
+              </Link>
+            ))}
           </nav>
 
           {/* Auth Actions */}
-          <div className="flex items-center gap-2 ml-auto">
-            {/* Language Switcher — always visible on desktop */}
+          <div className="flex items-center gap-4 ml-auto">
+            <button className="hidden sm:flex text-slate-400 hover:text-slate-600 transition-colors relative group">
+              <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>notifications</span>
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 border-2 border-white rounded-full"></span>
+            </button>
+
             <LanguageSwitcher className="hidden sm:flex" />
 
             {!isAuthenticated ? (
-              <>
-                <div className="hidden md:flex items-center gap-2">
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="text-primary font-label-lg text-label-lg px-6 py-2 rounded-full hover:bg-surface-container-low transition-colors"
-                  >
-                    {t('nav.signIn')}
-                  </button>
-                  <button
-                    onClick={() => navigate('/register')}
-                    className="bg-primary text-on-primary font-label-lg text-label-lg px-6 py-2 rounded-full hover:bg-surface-tint transition-colors shadow-sm"
-                  >
-                    {t('nav.joinNow')}
-                  </button>
-                </div>
-                {/* Mobile login icon for space saving */}
+              <div className="hidden md:flex items-center gap-3">
                 <button
                   onClick={() => navigate('/login')}
-                  className="md:hidden text-primary p-2 hover:bg-surface-container-low rounded-full transition-all"
+                  className="text-sm font-medium text-slate-600 px-4 py-2 rounded-full hover:bg-slate-100 transition-all active:scale-95"
                 >
-                  <span className="material-symbols-outlined">login</span>
+                  {t('nav.signIn')}
                 </button>
-              </>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-slate-800 transition-all shadow-sm active:scale-95"
+                >
+                  {t('nav.joinNow')}
+                </button>
+              </div>
             ) : (
               <div className="relative" ref={menuRef}>
                 <button
                   type="button"
                   onClick={() => setIsMenuOpen((open) => !open)}
-                  className="flex items-center gap-3 rounded-full border border-outline-variant bg-surface px-3 py-2 hover:bg-surface-container-low transition-colors"
+                  className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-slate-100 transition-all active:scale-95"
                 >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-on-primary font-bold">
-                    {userInitial}
-                  </span>
+                  <div className="relative">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-300">
+                      {userInitial}
+                    </span>
+                    <span className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 border-2 border-white rounded-full"></span>
+                  </div>
                   <span className="hidden sm:block text-left">
-                    <span className="block font-label-lg text-label-lg text-on-surface">
+                    <span className="block text-sm font-medium text-slate-900 leading-none">
                       {displayName}
                     </span>
-                    <span className="block text-xs text-on-surface-variant">{t('nav.account')}</span>
                   </span>
-                  <span className="material-symbols-outlined text-on-surface-variant">
+                  <span className="material-symbols-outlined text-slate-400" style={{ fontSize: '18px' }}>
                     {isMenuOpen ? 'expand_less' : 'expand_more'}
                   </span>
                 </button>
 
-                {/* Right Profile Dropdown - ONLY for Account details, Language, and Logout */}
                 {isMenuOpen && (
-                  <div className="absolute right-0 mt-3 w-56 overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-xl z-50">
-                    <div className="border-b border-outline-variant px-4 py-3 bg-gray-50/50">
-                      <p className="font-label-lg text-label-lg text-on-surface truncate">{displayName}</p>
-                      <p className="text-xs text-on-surface-variant truncate">{user?.email}</p>
+                  <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="border-b border-slate-50 px-4 py-3 bg-slate-50/50">
+                      <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
+                      <p className="text-xs text-slate-500 truncate">{user?.email}</p>
                     </div>
-                    {/* Language switcher inside the dropdown for mobile */}
-                    <div className="border-b border-outline-variant px-4 py-3 flex items-center justify-between sm:hidden bg-white">
-                      <span className="text-sm text-on-surface-variant">{t('language.label')}</span>
+                    <div className="border-b border-slate-50 px-4 py-3 flex items-center justify-between sm:hidden bg-white">
+                      <span className="text-xs text-slate-500">{t('language.label')}</span>
                       <LanguageSwitcher />
                     </div>
                     <Button
@@ -176,8 +173,8 @@ export const TopAppBar: React.FC = () => {
                       onClick={handleLogout}
                       isLoading={logoutMutation.isPending}
                       loadingText={t('nav.loggingOut')}
-                      icon={<span className="material-symbols-outlined">logout</span>}
-                      className="w-full gap-3 px-4 py-3 text-left font-label-lg text-label-lg text-on-surface hover:bg-error-container hover:text-on-error-container transition-colors bg-white"
+                      icon={<span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>}
+                      className="w-full gap-3 px-4 py-3 text-left text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors bg-white border-none"
                     >
                       {t('nav.logout')}
                     </Button>
@@ -189,47 +186,41 @@ export const TopAppBar: React.FC = () => {
         </div>
       </header>
 
-      {/* Left Mobile Navigation Drawer (Integrated Hamburger Drawer) */}
+      {/* Left Mobile Navigation Drawer */}
       {isMobileNavOpen &&
         createPortal(
           <div className="fixed inset-0 z-[200] md:hidden" role="dialog" aria-modal="true">
-            {/* Backdrop Overlay */}
             <div
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+              className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity duration-300"
               onClick={() => setIsMobileNavOpen(false)}
             />
-
-            {/* Slide-in Menu Panel */}
             <aside
               className="absolute inset-y-0 left-0 w-72 bg-white flex flex-col shadow-2xl transition-transform duration-300 ease-out"
               style={{ animation: 'slideInLeft 0.25s ease-out' }}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-surface">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-white">
                 <div onClick={() => setIsMobileNavOpen(false)}>
                   <Logo size="md" to="/" />
                 </div>
                 <button
                   onClick={() => setIsMobileNavOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
                   aria-label="Close menu"
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
                 </button>
               </div>
 
-              {/* User Minimal Card inside Drawer */}
-              <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary text-on-primary font-bold flex items-center justify-center text-sm shadow-inner">
+              <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-sm">
                   {userInitial}
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 truncate">{displayName}</h3>
-                  <p className="text-xs text-gray-500 truncate">Workspace member</p>
+                  <h3 className="text-sm font-semibold text-slate-900 truncate">{displayName}</h3>
+                  <p className="text-xs text-slate-500 truncate">Workspace member</p>
                 </div>
               </div>
 
-              {/* Nav Items List */}
               <nav className="flex-1 px-3 py-4 space-y-1 bg-white overflow-y-auto">
                 {NAV_ITEMS.map((item) => {
                   const isActive =
@@ -242,8 +233,8 @@ export const TopAppBar: React.FC = () => {
                       onClick={() => setIsMobileNavOpen(false)}
                       className={`flex items-center px-4 py-3 rounded-xl transition-all ${
                         isActive
-                          ? 'bg-secondary-container text-on-secondary-container font-semibold'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-slate-100 text-slate-900 font-semibold'
+                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                       }`}
                     >
                       <span className="material-symbols-outlined mr-3 text-current" style={{ fontSize: '22px' }}>
@@ -255,13 +246,11 @@ export const TopAppBar: React.FC = () => {
                 })}
               </nav>
 
-              {/* Bottom Big Share Button inside Drawer */}
-              <div className="p-5 border-t border-gray-100 bg-gray-50/50">
+              <div className="p-5 border-t border-slate-100 bg-slate-50/50">
                 <button
-                  className="w-full bg-primary text-on-primary font-label-lg text-label-lg py-3 rounded-xl hover:bg-primary/95 transition-colors shadow-sm flex items-center justify-center gap-2"
+                  className="w-full bg-slate-900 text-white font-medium text-sm py-3 rounded-xl hover:bg-slate-800 transition-colors shadow-sm flex items-center justify-center gap-2"
                   onClick={() => {
                     setIsMobileNavOpen(false);
-                    // trigger share action (can log or expand later)
                   }}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
@@ -273,7 +262,6 @@ export const TopAppBar: React.FC = () => {
           document.body
         )}
 
-      {/* Slide in animation style */}
       <style>{`
         @keyframes slideInLeft {
           from { transform: translateX(-100%); }

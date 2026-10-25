@@ -1,4 +1,5 @@
-import { apiClient, ApiError } from './api.service';
+import { apiClient, getErrorMessage } from './api.service';
+import { toast } from 'sonner';
 
 export interface IEducationSearchResult {
   institution: string;
@@ -14,9 +15,7 @@ export const educationAPI = {
       );
       return response.data;
     } catch (error) {
-      if (error instanceof ApiError) {
-        console.error('Search education institutions failed', error.response?.data);
-      }
+      toast.error(`Search education institutions failed: ${getErrorMessage(error)}`);
       return [];
     }
   },
