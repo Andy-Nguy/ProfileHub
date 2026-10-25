@@ -5,8 +5,13 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useAuthSession } from '../services/auth-session.service';
+import {
+  useAuthSession,
+  getStoredAuthSession,
+  isAccessTokenFresh,
+} from '../services/auth-session.service';
 import { authAPI } from '../services/auth-login.service';
+import { ApiError, setPendingAccessToken } from '../services/api.service';
 import { AuthUser } from '@profilehub/types';
 
 interface AuthContextValue {
@@ -46,15 +51,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
    */
   const fetchAndApplyProfile = useCallback(
     async (accessToken: string) => {
-      const meRes = await authAPI.getMe();
-      if (meRes?.user) {
-        setSession({ accessToken, user: meRes.user });
-        setNeedsOnboarding(meRes.needsOnboarding ?? false);
-        setProfileCompletion(meRes.profileCompletion ?? 0);
-      } else {
-        clearSession();
-        setNeedsOnboarding(false);
-        setProfileCompletion(0);
+      setPendingAccessToken(accessToken);
+      try {
+        const meRes = await authAPI.getMe();
+        const latestToken =
+          getStoredAuthSession()?.accessToken ?? accessToken;
+        if (meRes?.user) {
+          setSession({ accessToken: latestToken, user: meRes.user });
+          setNeedsOnboarding(meRes.needsOnboarding ?? false);
+          setProfileCompletion(meRes.profileCompletion ?? 0);
+        } else {
+          clearSession();
+          setNeedsOnboarding(false);
+          setProfileCompletion(0);
+        }
+      } finally {
+        setPendingAccessToken(null);
       }
     },
     [setSession, clearSession],
@@ -63,55 +75,77 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // ── Bootstrap on mount ───────────────────────────────────────────────
 
   useEffect(() => {
+    let cancelled = false;
+
+    const dropSession = () => {
+      clearSession();
+      setNeedsOnboarding(false);
+      setProfileCompletion(0);
+    };
+
+    const shouldKeepSession = (tokenAtStart: string | undefined) => {
+      const latest = getStoredAuthSession()?.accessToken;
+      return !!latest && latest !== tokenAtStart;
+    };
+
     const init = async () => {
       setIsLoading(true);
-      try {
-        const existingToken = session?.accessToken;
+      const tokenAtStart = session?.accessToken;
 
-        if (existingToken) {
-          // Access token exists in storage.
-          // apiClient will automatically refresh it via the 401 interceptor
-          // if it has expired, so a single getMe() call is sufficient.
-          // If getMe() still throws after an internal refresh attempt, the
-          // interceptor redirects to /login — we just clear local state here.
+      try {
+        if (tokenAtStart && isAccessTokenFresh(tokenAtStart)) {
           try {
-            await fetchAndApplyProfile(existingToken);
-          } catch {
-            // Both the original getMe() AND the interceptor's refresh attempt
-            // failed. Session is unrecoverable — clear it.
-            clearSession();
-            setNeedsOnboarding(false);
-            setProfileCompletion(0);
+            await fetchAndApplyProfile(tokenAtStart);
+          } catch (err) {
+            if (cancelled || shouldKeepSession(tokenAtStart)) {
+              return;
+            }
+            const status =
+              err instanceof ApiError ? err.response?.status : undefined;
+            if (status === 409) {
+              return;
+            }
+            dropSession();
           }
           return;
         }
 
-        // No stored access token — could be a fresh visit with a valid
-        // refresh cookie from a previous session (e.g., after clearing localStorage).
-        // Try to get a new access token via the httpOnly cookie.
         try {
           const refreshRes = await authAPI.refresh();
+          if (cancelled) {
+            return;
+          }
           if (refreshRes?.accessToken) {
             await fetchAndApplyProfile(refreshRes.accessToken);
-          } else {
-            clearSession();
+          } else if (!shouldKeepSession(tokenAtStart)) {
+            dropSession();
           }
-        } catch {
-          // No valid refresh cookie either — user is logged out.
-          clearSession();
-          setNeedsOnboarding(false);
-          setProfileCompletion(0);
+        } catch (err) {
+          if (cancelled || shouldKeepSession(tokenAtStart)) {
+            return;
+          }
+          const status =
+            err instanceof ApiError ? err.response?.status : undefined;
+          if (status === 409) {
+            return;
+          }
+          dropSession();
         }
       } catch {
-        clearSession();
-        setNeedsOnboarding(false);
-        setProfileCompletion(0);
+        if (!cancelled && !shouldKeepSession(tokenAtStart)) {
+          dropSession();
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     init();
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Intentionally runs once on mount only
 

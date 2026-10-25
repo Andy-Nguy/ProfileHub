@@ -195,7 +195,7 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
               <img 
                 src={selectedCompanyDetails?.logoUrl || newCompanyLogoPreview!} 
                 alt="Company Logo" 
-                className="w-12 h-12 rounded bg-surface border border-outline-variant object-cover" 
+                className="w-12 h-12 rounded bg-white border border-outline-variant object-contain p-1" 
               />
             )}
             <div className="flex-1 relative">
@@ -221,7 +221,7 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
                           onClick={() => handleCompanySelect(comp)}
                         >
                           {comp.logoUrl ? (
-                            <img src={comp.logoUrl} alt={comp.name} className="w-8 h-8 rounded object-cover" />
+                            <img src={comp.logoUrl} alt={comp.name} className="w-8 h-8 rounded object-contain bg-white p-0.5" />
                           ) : (
                             <div className="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
                               {comp.name.charAt(0).toUpperCase()}

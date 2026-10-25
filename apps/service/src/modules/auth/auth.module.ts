@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { User } from '../../entities/user.entity';
 import { ProfileEntity } from '../../entities/profile.entity';
+import { RefreshTokenEntity } from '../../entities/refresh-token.entity';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -19,7 +20,7 @@ import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, ProfileEntity]),
+    TypeOrmModule.forFeature([User, ProfileEntity, RefreshTokenEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}), // secrets provided at sign/verify time
     ConfigModule,

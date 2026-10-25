@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useMinimumLoading } from '../../hooks/useMinimumLoading';
-import { WelcomeLoader } from '../shared/WelcomeLoader';
 import { useAuthSession } from '../../services/auth-session.service';
 import { profileAPI, ProfileResponse } from '../../services/profile.service';
 
@@ -34,7 +32,6 @@ export const SideNav: React.FC<SideNavProps> = ({ user }) => {
   const { t } = useTranslation('common');
   const [profile, setProfile] = useState<ProfileResponse | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
-  const showWelcome = useMinimumLoading(profileLoading, 3989);
 
   // Fetch the canonical user profile from the database if logged in
   useEffect(() => {
@@ -81,9 +78,14 @@ export const SideNav: React.FC<SideNavProps> = ({ user }) => {
           {/* Decorative Subtle Background Glow */}
           <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-primary/5 blur-xl pointer-events-none" />
 
-          {showWelcome ? (
-            /* ── Welcome animation while fetching user info ─────────────── */
-            <WelcomeLoader />
+          {profileLoading ? (
+            <div className="flex items-center gap-3.5 w-full animate-pulse" aria-hidden="true">
+              <div className="w-14 h-14 rounded-full bg-surface-container-high flex-shrink-0" />
+              <div className="flex-1 space-y-2 min-w-0">
+                <div className="h-4 w-28 rounded bg-surface-container-high" />
+                <div className="h-3 w-20 rounded bg-surface-container-high" />
+              </div>
+            </div>
           ) : (
             /* ── Resolved user card ───────────────────────────────────────── */
             <>

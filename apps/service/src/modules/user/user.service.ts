@@ -22,6 +22,14 @@ export class UserService {
     return this.repo.findOne({ where: { email } });
   }
 
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    this.logger.debug(`Finding user by email with password: ${email}`);
+    return this.repo.findOne({
+      where: { email },
+      select: ['id', 'email', 'username', 'role', 'isActive', 'passwordHash'],
+    });
+  }
+
   async findByUsername(username: string): Promise<User> {
     this.logger.debug(`Finding user by username: ${username}`);
     const user = await this.repo.findOne({ where: { username } });

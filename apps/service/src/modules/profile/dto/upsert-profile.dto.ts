@@ -5,7 +5,7 @@ import { VisibilityTypeEnum } from '../../../entities';
 export class UpsertProfileDto {
   @IsString()
   @MaxLength(100)
-  displayName!: string;
+  displayName: string;
 
   @IsOptional()
   @IsString()

@@ -1,4 +1,4 @@
-import { apiClient, ApiError } from './api.service';
+import { apiClient, getErrorMessage } from './api.service';
 import { ICompany } from '@profilehub/types';
 import { toast } from 'sonner';
 
@@ -9,9 +9,8 @@ export const companiesAPI = {
       const response = await apiClient.get<ICompany[]>(`/companies/search?q=${encodeURIComponent(query)}`);
       return response.data;
     } catch (error) {
-      if (error instanceof ApiError) {
-        console.error('Search companies failed', error.response?.data);
-      }
+      // Search usually doesn't show error toast to avoid noise, but we follow the style
+      toast.error(`Search companies failed: ${getErrorMessage(error)}`);
       return [];
     }
   },
@@ -26,17 +25,12 @@ export const companiesAPI = {
       if (data.file) {
         formData.append('file', data.file);
       }
-      
+
       const response = await apiClient.post<ICompany>('/companies', formData);
+      toast.success('Company created successfully');
       return response.data;
     } catch (error) {
-      if (error instanceof ApiError) {
-        const errorMessage = error.response?.data?.message || error.message;
-        const displayedMessage = Array.isArray(errorMessage) ? errorMessage.join(',') : errorMessage;
-        toast.error(`Create company failed: ${displayedMessage || 'Unknown Error'}`);
-      } else {
-        toast.error('Create company failed: Unknown Error');
-      }
+      toast.error(`Create company failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Logo } from '../shared/Logo';
 
 interface AppFooterProps {
   variant?: 'full' | 'compact';
@@ -23,7 +24,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ variant = 'full' }) => {
       <footer className="w-full mt-auto border-t border-outline-variant bg-surface-container-highest">
         <div className="max-w-[1280px] mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           {/* Brand */}
-          <span className="text-sm font-semibold text-on-surface">ProHub</span>
+          <Logo size="sm" to="/" textClassName="text-on-surface" />
 
           {/* Links */}
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
@@ -57,7 +58,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ variant = 'full' }) => {
 
           {/* Brand Block */}
           <div className="flex flex-col gap-3 max-w-xs">
-            <span className="text-2xl font-bold text-on-surface tracking-tight">ProHub</span>
+            <Logo size="lg" to="/" textClassName="text-on-surface" />
             <p className="text-sm text-on-surface-variant leading-relaxed">
               Nền tảng portfolio chuyên nghiệp giúp bạn xây dựng thương hiệu cá nhân và kết nối cộng đồng.
             </p>

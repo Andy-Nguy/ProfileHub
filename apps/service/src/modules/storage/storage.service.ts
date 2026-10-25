@@ -110,6 +110,38 @@ export class StorageService {
     return publicUrlData.publicUrl;
   }
 
+  async uploadInstitutionLogo(
+    institutionName: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    this.logger.debug(`Initiating institution logo upload for: ${institutionName}, size: ${file?.size} bytes`);
+    this.validateFile(file);
+
+    const storagePath = this.buildInstitutionLogoPath(institutionName, file);
+    this.logger.debug(`Generated institution logo target storage path: ${storagePath}`);
+
+    const { error } = await this.supabase.storage
+      .from(this.bucket)
+      .upload(storagePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false,
+      });
+
+    if (error) {
+      this.logger.debug(`Supabase institution logo upload failed for path: ${storagePath}. Error: ${error.message}`);
+      throw new InternalServerErrorException(
+        `Failed to upload institution logo: ${error.message}`,
+      );
+    }
+
+    const { data: publicUrlData } = this.supabase.storage
+      .from(this.bucket)
+      .getPublicUrl(storagePath);
+
+    this.logger.debug(`Institution logo public URL generated: ${publicUrlData.publicUrl}`);
+    return publicUrlData.publicUrl;
+  }
+
   // ── Private helpers ───────────────────────────────────────────────────────────
 
   /**
@@ -174,6 +206,15 @@ export class StorageService {
     const extension = this.getImageExtension(file.mimetype);
 
     return `logos/${safeDomain}/${timestamp}-${random}.${extension}`;
+  }
+
+  private buildInstitutionLogoPath(institutionName: string, file: Express.Multer.File): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).slice(2, 8);
+    const safeName = this.slugifyPathSegment(institutionName);
+    const extension = this.getImageExtension(file.mimetype);
+
+    return `institution-logos/${safeName}/${timestamp}-${random}.${extension}`;
   }
 
   private slugifyPathSegment(value: string): string {

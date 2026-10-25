@@ -7,6 +7,7 @@ import { authAPI } from '../services/auth-login.service';
 import { profileAPI } from '../services/profile.service';
 import { FloatingField } from '../components/shared/FloatingField';
 import { Button } from '../components/shared/Button';
+import { Logo } from '../components/shared/Logo';
 import { VisibilityTypeEnum } from '@profilehub/types';
 
 export const OnboardingPage: React.FC = () => {
@@ -67,6 +68,9 @@ export const OnboardingPage: React.FC = () => {
         transition={{ duration: 0.5 }}
       >
         <div className="text-center mb-10">
+          <div className="flex justify-center mb-6">
+            <Logo size="lg" to="/" />
+          </div>
           <span className="material-symbols-outlined text-primary text-6xl mb-4">
             waving_hand
           </span>
@@ -117,6 +121,7 @@ export const OnboardingPage: React.FC = () => {
               label={t('profile:onboarding.headlineLabel')}
               value={formData.headline}
               onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+              required
             />
 
             <div className="space-y-3">

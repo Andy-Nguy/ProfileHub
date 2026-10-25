@@ -281,6 +281,7 @@ export const ProfilePage: React.FC = () => {
                       subtitle: [edu.degree, edu.fieldOfStudy ? `in ${edu.fieldOfStudy}` : ''].filter(Boolean).join(' '),
                       dateRange: formatYearRange(edu.startDate, edu.endDate, edu.isCurrent),
                       description: edu.description ?? undefined,
+                      logoUrl: edu.institutionLogoUrl ?? undefined,
                       onEdit: isOwnProfile ? () => setEduState({ isOpen: true, id: edu.id, data: edu }) : undefined,
                     }))}
                     onAdd={isOwnProfile ? () => setEduState({ isOpen: true }) : undefined}

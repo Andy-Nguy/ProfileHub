@@ -52,6 +52,24 @@ export function removeStoredAuthSession() {
   clearAuthSession();
 }
 
+/** True if the JWT `exp` is still safely in the future. */
+export function isAccessTokenFresh(token: string, skewMs = 15_000): boolean {
+  try {
+    const segment = token.split('.')[1];
+    if (!segment) {
+      return false;
+    }
+    const normalized = segment.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(normalized)) as { exp?: number };
+    if (typeof payload.exp !== 'number') {
+      return false;
+    }
+    return payload.exp * 1000 - skewMs > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 export function useAuthSession() {
   const [session, setSession] = useState<AuthSession | null>(() => readAuthSession());
 

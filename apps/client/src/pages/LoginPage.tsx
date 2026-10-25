@@ -6,6 +6,7 @@ import { useLogin } from '../hooks/useApi';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/shared/Button';
 import { LanguageSwitcher } from '../components/shared/LanguageSwitcher';
+import { Logo, LogoIcon } from '../components/shared/Logo';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -63,12 +64,11 @@ export const LoginPage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span
-              className="material-symbols-outlined text-[80px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              hub
-            </span>
+            <div className="flex justify-center">
+              <div className="p-4 bg-white/10 backdrop-blur-sm rounded-3xl border border-white/20 shadow-xl inline-block">
+                <LogoIcon size={88} className="drop-shadow-lg" />
+              </div>
+            </div>
             <h1 className="font-display-lg text-display-lg text-on-primary font-bold">
               {t('auth:login.brandingHeading')}
             </h1>
@@ -98,6 +98,9 @@ export const LoginPage: React.FC = () => {
 
             {/* Header */}
             <div className="space-y-unit text-center lg:text-left">
+              <div className="flex justify-center lg:justify-start mb-4">
+                <Logo size="md" />
+              </div>
               <h2 className="font-headline-lg text-headline-lg font-bold text-on-surface">
                 {t('auth:login.title')}
               </h2>

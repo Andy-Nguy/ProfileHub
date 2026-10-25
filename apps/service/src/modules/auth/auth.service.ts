@@ -149,7 +149,7 @@ export class AuthService {
   }> {
     this.logger.debug(`Login attempt for email: ${dto.email}`);
 
-    const user = await this.userService.findByEmail(dto.email);
+    const user = await this.userService.findByEmailWithPassword(dto.email);
 
     // Generic error message to prevent user enumeration
     if (!user) {
@@ -226,6 +226,7 @@ export class AuthService {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
+    skipCookie?: boolean;
   }> {
     this.logger.debug(`Refresh tokens request received`);
 
@@ -243,6 +244,7 @@ export class AuthService {
     return {
       accessToken: tokenPair.accessToken,
       refreshToken: tokenPair.refreshToken,
+      skipCookie: tokenPair.skipCookie,
     };
   }
 

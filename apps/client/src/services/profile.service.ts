@@ -1,9 +1,10 @@
-import { toast } from 'sonner';
 import {
   CreateEducationDto,
   CreateExperienceDto,
   CreateSkillDto,
   CreateSocialLinkDto,
+  UpdateProfileDto,
+  UpdateOnboardingDto,
 } from '@profilehub/data-access';
 import {
   IEducation,
@@ -12,68 +13,22 @@ import {
   ISkill,
   ISocialLink,
   VisibilityTypeEnum,
+  ProfileResponse,
+  DiscoveryFeedResponse,
+  OnboardingStatusResponse,
+  UploadAvatarResponse,
 } from '@profilehub/types';
-import { apiClient, ApiError } from './api.service';
-
-export interface UpdateProfileDto {
-  displayName?: string;
-  headline?: string | null;
-  bio?: string | null;
-  avatarUrl?: string | null;
-  coverUrl?: string | null;
-  location?: string | null;
-  industry?: string | null;
-  visibility?: VisibilityTypeEnum;
-}
-
-export interface UpdateOnboardingDto extends UpdateProfileDto { }
-
-export interface OnboardingStatusResponse {
-  needsOnboarding: boolean;
-  profileCompletion: number;
-  profile: Pick<IProfile, 'id' | 'displayName' | 'headline' | 'avatarUrl' | 'visibility'> | null;
-}
-
-export interface ProfileResponse extends IProfile {
-  username?: string;
-  completionPercent: number;
-  needsOnboarding: boolean;
-  likesCount: number;
-  experiences: IExperience[];
-  educations: IEducation[];
-  skills: ISkill[];
-  socialLinks: ISocialLink[];
-}
-
-export interface DiscoveryFeedResponse {
-  data: ProfileResponse[];
-  total: number;
-  page: number;
-  totalPages: number;
-}
-
-export interface UploadAvatarResponse {
-  avatarUrl: string;
-}
-
-function showApiError(prefix: string, error: unknown) {
-  if (error instanceof ApiError) {
-    const errorMessage = error.response?.data?.message || error.message;
-    const displayedMessage = Array.isArray(errorMessage) ? errorMessage.join(',') : errorMessage;
-    toast.error(`${prefix}: ${displayedMessage || 'Unknown Error'}`);
-    return;
-  }
-
-  toast.error(`${prefix}: Unknown Error`);
-}
+import { apiClient, getErrorMessage } from './api.service';
+import { toast } from 'sonner';
 
 export const profileAPI = {
   updateOnboarding: async (dto: UpdateOnboardingDto): Promise<OnboardingStatusResponse> => {
     try {
       const response = await apiClient.patch<OnboardingStatusResponse>('/profiles/onboarding', dto);
+      toast.success('Onboarding status updated successfully');
       return response.data;
     } catch (error) {
-      showApiError('Update onboarding failed', error);
+      toast.error(`Update onboarding failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -83,13 +38,7 @@ export const profileAPI = {
       const response = await apiClient.get('/profiles/mine');
       return response.data;
     } catch (error) {
-      if (error instanceof ApiError) {
-        const errorMessage = error.response?.data?.message || error.message;
-        const displayedMessage = Array.isArray(errorMessage) ? errorMessage.join(',') : errorMessage;
-        toast.error(`Get profile failed: ${displayedMessage || 'Unknown Error'}`);
-      } else {
-        toast.error('Get profile failed: Unknown Error');
-      }
+      toast.error(`Get profile failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -99,7 +48,7 @@ export const profileAPI = {
       const response = await apiClient.get<ProfileResponse>(`/profiles/u/${username}`);
       return response.data;
     } catch (error) {
-      showApiError('Get public profile failed', error);
+      toast.error(`Get public profile failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -107,9 +56,10 @@ export const profileAPI = {
   updateProfile: async (dto: UpdateProfileDto): Promise<ProfileResponse> => {
     try {
       const response = await apiClient.patch<ProfileResponse>('/profiles/me', dto);
+      toast.success('Profile updated successfully');
       return response.data;
     } catch (error) {
-      showApiError('Update profile failed', error);
+      toast.error(`Update profile failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -119,9 +69,10 @@ export const profileAPI = {
       const formData = new FormData();
       formData.append('file', file);
       const response = await apiClient.post<UploadAvatarResponse>('/storage/avatar', formData);
+      toast.success('Avatar uploaded successfully');
       return response.data;
     } catch (error) {
-      showApiError('Upload avatar failed', error);
+      toast.error(`Upload avatar failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -140,7 +91,7 @@ export const profileAPI = {
       const response = await apiClient.get<DiscoveryFeedResponse>(`/profiles/discover?${query}`);
       return response.data;
     } catch (error) {
-      showApiError('Get discovery feed failed', error);
+      toast.error(`Get discovery feed failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -150,7 +101,7 @@ export const profileAPI = {
       const response = await apiClient.get<IExperience[]>('/profiles/me/experiences');
       return response.data;
     } catch (error) {
-      showApiError('Get experiences failed', error);
+      toast.error(`Get experiences failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -158,9 +109,10 @@ export const profileAPI = {
   addExperience: async (data: CreateExperienceDto): Promise<IExperience> => {
     try {
       const response = await apiClient.post<IExperience>('/profiles/me/experiences', data);
+      toast.success('Experience added successfully');
       return response.data;
     } catch (error) {
-      showApiError('Add experience failed', error);
+      toast.error(`Add experience failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -170,7 +122,7 @@ export const profileAPI = {
       const response = await apiClient.get<IEducation[]>('/profiles/me/educations');
       return response.data;
     } catch (error) {
-      showApiError('Get educations failed', error);
+      toast.error(`Get educations failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -178,9 +130,10 @@ export const profileAPI = {
   addEducation: async (data: CreateEducationDto): Promise<IEducation> => {
     try {
       const response = await apiClient.post<IEducation>('/profiles/me/educations', data);
+      toast.success('Education added successfully');
       return response.data;
     } catch (error) {
-      showApiError('Add education failed', error);
+      toast.error(`Add education failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -190,7 +143,7 @@ export const profileAPI = {
       const response = await apiClient.get<ISkill[]>('/profiles/me/skills');
       return response.data;
     } catch (error) {
-      showApiError('Get skills failed', error);
+      toast.error(`Get skills failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -198,9 +151,10 @@ export const profileAPI = {
   addSkill: async (data: CreateSkillDto): Promise<ISkill> => {
     try {
       const response = await apiClient.post<ISkill>('/profiles/me/skills', data);
+      toast.success('Skill added successfully');
       return response.data;
     } catch (error) {
-      showApiError('Add skill failed', error);
+      toast.error(`Add skill failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -210,7 +164,7 @@ export const profileAPI = {
       const response = await apiClient.get<ISocialLink[]>('/profiles/me/social-links');
       return response.data;
     } catch (error) {
-      showApiError('Get social links failed', error);
+      toast.error(`Get social links failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
@@ -218,9 +172,10 @@ export const profileAPI = {
   addSocialLink: async (data: CreateSocialLinkDto): Promise<ISocialLink> => {
     try {
       const response = await apiClient.post<ISocialLink>('/profiles/me/social-links', data);
+      toast.success('Social link added successfully');
       return response.data;
     } catch (error) {
-      showApiError('Add social link failed', error);
+      toast.error(`Add social link failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },

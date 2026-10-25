@@ -6,7 +6,7 @@ export class SkillDto {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => value?.trim())
-  name!: string;
+  name: string;
 
   @IsEnum(SkillCategory)
   @IsOptional()
@@ -16,8 +16,8 @@ export class SkillDto {
 export class SocialLinkDto {
   @IsString()
   @IsNotEmpty()
-  platform!: string;
+  platform: string;
 
   @IsUrl()
-  url!: string;
+  url: string;
 }

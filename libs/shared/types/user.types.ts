@@ -7,7 +7,6 @@ export interface IUser {
   id: string;
   email: string;
   username: string;
-  passwordHash: string;
   role: UserRole;
   isActive: boolean;
   emailVerifiedAt: Date | null;
