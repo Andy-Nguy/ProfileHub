@@ -42,7 +42,6 @@ export class ProfileController {
   @ApiResponse({ status: 200, type: ProfileResponseDto })
   async getMyProfile(@CurrentUser('id') userId: string) {
     const user = await this.profileService.getUserFullProfile(userId);
-    const status = await this.profileService.getOnboardingStatus(userId);
     return user.profile;
   }
 

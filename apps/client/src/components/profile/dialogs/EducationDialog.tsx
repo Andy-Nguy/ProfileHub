@@ -164,7 +164,7 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
       }
       onSuccess();
       onClose();
-    } catch (e) {
+    } catch {
       // Errors are handled by apiClient interceptors / profileAPI
     } finally {
       setLoading(false);
@@ -180,7 +180,7 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
       await apiClient.delete(`/profiles/me/educations/${educationId}`);
       onSuccess();
       onClose();
-    } catch (e) {
+    } catch {
       // Error handled
     } finally {
       setLoading(false);

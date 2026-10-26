@@ -5,7 +5,7 @@ import { profileAPI, ProfileResponse } from '../services/profile.service';
 import { EndorsementButton } from '@profilehub/ui';
 import { ProfileHeader } from '@profilehub/ui';
 import { TimelineSection } from '@profilehub/ui';
-import { ISkill, IExperience, IEducation, ISocialLink } from '@profilehub/types';
+import { IExperience, IEducation } from '@profilehub/types';
 import { SkillsSection } from '../components/profile/SkillsSection';
 import { DashboardLoader } from '../components/shared/LottieLoader';
 import { useMinimumLoading } from '../hooks/useMinimumLoading';

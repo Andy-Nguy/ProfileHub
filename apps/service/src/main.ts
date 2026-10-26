@@ -20,7 +20,7 @@ if (isCompiled) {
       baseUrl: path.resolve(__dirname, '../../..'),
       paths: tsconfigBase.compilerOptions.paths,
     });
-  } catch (e) {
+  } catch {
     // Silent catch
   }
 }

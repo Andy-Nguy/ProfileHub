@@ -26,7 +26,7 @@ export const BasicInfoDialog: React.FC<Props> = ({ isOpen, onClose, profile, onS
       await profileAPI.updateProfile(formData);
       onSuccess();
       onClose();
-    } catch (e) {
+    } catch {
       // Error handled by api service toast
     } finally {
       setLoading(false);

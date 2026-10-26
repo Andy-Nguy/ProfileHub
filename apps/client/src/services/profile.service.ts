@@ -9,15 +9,20 @@ import {
 import {
   IEducation,
   IExperience,
-  IProfile,
   ISkill,
   ISocialLink,
-  VisibilityTypeEnum,
   ProfileResponse,
   DiscoveryFeedResponse,
   OnboardingStatusResponse,
   UploadAvatarResponse,
 } from '@profilehub/types';
+
+export type {
+  ProfileResponse,
+  DiscoveryFeedResponse,
+  OnboardingStatusResponse,
+  UploadAvatarResponse,
+};
 import { apiClient, getErrorMessage } from './api.service';
 import { toast } from 'sonner';
 
