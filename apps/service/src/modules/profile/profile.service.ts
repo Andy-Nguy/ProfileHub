@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { User } from '../../entities/user.entity';
 import { UpdateOnboardingDto, UpdateProfileDto, ExperienceDto, EducationDto, SkillDto, SocialLinkDto } from './dto';
 import { ProfileRepository } from './profile.repository';
@@ -122,6 +122,9 @@ export class ProfileService {
     if (!profile) {
       this.logger.debug(`Skill creation failed: Profile not found for user ID: ${userId}`);
       throw new NotFoundException('Profile not found');
+    }
+    if (await this.profileRepository.existsSkillByNormalizedName(profile.id, dto.name)) {
+      throw new ConflictException('Skill already exists');
     }
     const skill = await this.profileRepository.createSkill(profile.id, dto);
     this.logger.debug(`Skill created successfully`, { skillId: skill.id });
@@ -257,6 +260,9 @@ export class ProfileService {
     if (!profile) {
       this.logger.debug(`Social link creation failed: Profile not found for user ID: ${userId}`);
       throw new NotFoundException('Profile not found');
+    }
+    if (await this.profileRepository.existsSocialLinkByPlatform(profile.id, dto.platform)) {
+      throw new ConflictException('Social link for this platform already exists');
     }
     const sl = await this.profileRepository.createSocialLink(profile.id, dto);
     this.logger.debug(`Social link created successfully`, { linkId: sl.id });

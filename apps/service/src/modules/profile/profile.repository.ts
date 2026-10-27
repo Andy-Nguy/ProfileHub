@@ -127,15 +127,8 @@ export class ProfileRepository {
   }
 
   async createSkill(profileId: string, dto: SkillDto): Promise<SkillEntity> {
-    return this.dataSource.transaction(async (manager) => {
-      const count = await manager.createQueryBuilder(SkillEntity, 's')
-        .where('s.profileId = :profileId', { profileId })
-        .andWhere('LOWER(s.name) = LOWER(:name)', { name: dto.name })
-        .getCount();
-      if (count > 0) throw new Error('Skill already exists');
-      const skill = manager.create(SkillEntity, { profileId, ...dto });
-      return manager.save(skill);
-    });
+    const repo = this.dataSource.getRepository(SkillEntity);
+    return repo.save(repo.create({ profileId, ...dto }));
   }
 
   async updateSkill(profileId: string, skillId: string, dto: SkillDto): Promise<SkillEntity | null> {
@@ -194,16 +187,16 @@ export class ProfileRepository {
 
   // ── CV SECTION CRUD: SOCIAL LINK ──────────────────────────────────
 
-  async createSocialLink(profileId: string, dto: SocialLinkDto): Promise<SocialLinkEntity> {
-    return this.dataSource.transaction(async (manager) => {
-      const count = await manager.createQueryBuilder(SocialLinkEntity, 'sl')
-        .where('sl.profileId = :profileId', { profileId })
-        .andWhere('sl.platform = :platform', { platform: dto.platform })
-        .getCount();
-      if (count > 0) throw new Error('Platform already exists for this profile');
-      const sl = manager.create(SocialLinkEntity, { profileId, ...dto });
-      return manager.save(sl);
+  async existsSocialLinkByPlatform(profileId: string, platform: SocialLinkDto['platform']): Promise<boolean> {
+    const count = await this.dataSource.getRepository(SocialLinkEntity).count({
+      where: { profileId, platform },
     });
+    return count > 0;
+  }
+
+  async createSocialLink(profileId: string, dto: SocialLinkDto): Promise<SocialLinkEntity> {
+    const repo = this.dataSource.getRepository(SocialLinkEntity);
+    return repo.save(repo.create({ profileId, ...dto }));
   }
 
   async updateSocialLink(profileId: string, linkId: string, dto: SocialLinkDto): Promise<SocialLinkEntity | null> {
