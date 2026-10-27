@@ -1,6 +1,6 @@
 // dto/upsert-profile.dto.ts
 import { IsString, IsOptional, IsEnum, IsUrl, MaxLength } from 'class-validator';
-import { VisibilityTypeEnum } from '../../../entities';
+import { VisibilityTypeEnum } from '@profilehub/types';
 
 export class UpsertProfileDto {
   @IsString()

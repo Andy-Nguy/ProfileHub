@@ -33,8 +33,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
 
     setLoading(true);
     try {
-      const newSkill = await profileAPI.addSkill({ name: trimmed, category: selectedCategory });
-      setSkills(prev => [...prev, newSkill]);
+      await profileAPI.addSkill({ name: trimmed, category: selectedCategory });
       setInputValue('');
       onSuccess();
     } catch {

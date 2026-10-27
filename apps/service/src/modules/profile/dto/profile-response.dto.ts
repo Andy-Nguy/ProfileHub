@@ -1,7 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VisibilityTypeEnum } from '../../../entities';
+import {
+  VisibilityTypeEnum,
+  ProfileResponse,
+  OnboardingStatusResponse,
+  IDiscoveryProfile,
+  DiscoveryFeedResponse,
+  IEducation,
+  IExperience,
+  ISkill,
+  ISocialLink,
+} from '@profilehub/types';
 
-export class ProfileResponseDto {
+export class ProfileResponseDto implements ProfileResponse {
   @ApiProperty()
   id: string;
 
@@ -50,7 +60,17 @@ export class ProfileResponseDto {
   @ApiProperty()
   updatedAt: string;
 
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
+  experiences: IExperience[];
 
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
+  educations: IEducation[];
+
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
+  skills: ISkill[];
+
+  @ApiProperty({ type: 'array', items: { type: 'object' } })
+  socialLinks: ISocialLink[];
 }
 
 export class OnboardingProfileDto {
@@ -70,7 +90,7 @@ export class OnboardingProfileDto {
   visibility: VisibilityTypeEnum;
 }
 
-export class OnboardingStatusResponseDto {
+export class OnboardingStatusResponseDto implements OnboardingStatusResponse {
   @ApiProperty()
   needsOnboarding: boolean;
 
@@ -81,7 +101,7 @@ export class OnboardingStatusResponseDto {
   profile: OnboardingProfileDto | null;
 }
 
-export class DiscoveryProfileDto {
+export class DiscoveryProfileDto implements IDiscoveryProfile {
   @ApiProperty()
   id: string;
 
@@ -110,9 +130,9 @@ export class DiscoveryProfileDto {
   skills: { name: string }[];
 }
 
-export class DiscoveryFeedResponseDto {
+export class DiscoveryFeedResponseDto implements DiscoveryFeedResponse {
   @ApiProperty({ type: [DiscoveryProfileDto] })
-  data: DiscoveryProfileDto[];
+  items: DiscoveryProfileDto[];
 
   @ApiProperty()
   total: number;
@@ -121,66 +141,5 @@ export class DiscoveryFeedResponseDto {
   page: number;
 
   @ApiProperty()
-  totalPages: number;
-}
-
-export class EducationResponseDto {
-  id: string;
-  profileId: string;
-  institution: string;
-  degree: string | null;
-  fieldOfStudy: string | null;
-  startDate: string;
-  endDate: string | null;
-  isCurrent: boolean;
-  institutionLogoUrl: string | null;
-  description: string | null;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export class ExperienceResponseDto {
-  id: string;
-  profileId: string;
-  companyId: string | null;
-  title: string;
-  company: string;
-  companyDetails: CompanyProfileResponseDto | null;
-  location: string | null;
-  employmentType: string;
-  startDate: string;
-  endDate: string | null;
-  isCurrent: boolean;
-  description: string | null;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export class CompanyProfileResponseDto {
-  id: string;
-  name: string;
-  domain: string | null;
-  logoUrl: string | null;
-}
-
-export class SkillResponseDto {
-  id: string;
-  profileId: string;
-  name: string;
-  category: string;
-  endorsementCount: number;
-  displayOrder: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export class SocialLinkResponseDto {
-  id: string;
-  profileId: string;
-  platform: string;
-  url: string;
-  createdAt: string;
-  updatedAt: string;
+  limit: number;
 }

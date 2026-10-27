@@ -8,11 +8,12 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
+import { ISocialLink } from '@profilehub/types';
 import { ProfileEntity } from './profile.entity';
 
 @Entity('social_links')
 @Unique(['profileId', 'platform'])
-export class SocialLinkEntity {
+export class SocialLinkEntity implements ISocialLink {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
