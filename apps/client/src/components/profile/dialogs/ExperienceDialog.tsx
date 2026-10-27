@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BaseDialog } from './BaseDialog';
 import { FloatingField, FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
+import { toast } from 'sonner';
 import { profileAPI } from '../../../services/profile.service';
-import { apiClient } from '../../../services/api.service';
+import { getErrorMessage } from '../../../services/api.service';
 import { EmploymentType, IExperience, ICompany } from '@profilehub/types';
 import { companiesAPI } from '../../../services/companies.service';
 
@@ -154,14 +155,14 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
       };
 
       if (experienceId) {
-        await apiClient.put(`/profiles/me/experiences/${experienceId}`, payload);
+        await profileAPI.updateExperience(experienceId, payload);
       } else {
         await profileAPI.addExperience(payload);
       }
       onSuccess();
       onClose();
-    } catch {
-      // Error handled
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -173,11 +174,11 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
 
     setLoading(true);
     try {
-      await apiClient.delete(`/profiles/me/experiences/${experienceId}`);
+      await profileAPI.deleteExperience(experienceId);
       onSuccess();
       onClose();
-    } catch {
-      // Error handled
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

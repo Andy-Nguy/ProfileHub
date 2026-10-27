@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BaseDialog } from './BaseDialog';
 import { FloatingField, FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
+import { toast } from 'sonner';
 import { profileAPI } from '../../../services/profile.service';
-import { apiClient } from '../../../services/api.service';
+import { getErrorMessage } from '../../../services/api.service';
 import { IEducation } from '@profilehub/types';
 import { educationAPI, IEducationSearchResult } from '../../../services/education.service';
 
@@ -140,13 +141,11 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
       let institutionLogoUrl: string | null = selectedInstitution?.institutionLogoUrl || null;
 
       if (isCreatingNew && newInstitutionLogo && searchQuery.trim()) {
-        const uploadForm = new FormData();
-        uploadForm.append('file', newInstitutionLogo);
-        const res = await apiClient.post<{ institutionLogoUrl: string }>(
-          `/storage/institution-logo?institutionName=${encodeURIComponent(searchQuery.trim())}`,
-          uploadForm,
+        const res = await educationAPI.uploadInstitutionLogo(
+          searchQuery.trim(),
+          newInstitutionLogo,
         );
-        institutionLogoUrl = res.data.institutionLogoUrl;
+        institutionLogoUrl = res.institutionLogoUrl;
       }
 
       const payload = {
@@ -158,14 +157,14 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
       };
 
       if (educationId) {
-        await apiClient.put(`/profiles/me/educations/${educationId}`, payload);
+        await profileAPI.updateEducation(educationId, payload);
       } else {
         await profileAPI.addEducation(payload);
       }
       onSuccess();
       onClose();
-    } catch {
-      // Errors are handled by apiClient interceptors / profileAPI
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -177,11 +176,11 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
 
     setLoading(true);
     try {
-      await apiClient.delete(`/profiles/me/educations/${educationId}`);
+      await profileAPI.deleteEducation(educationId);
       onSuccess();
       onClose();
-    } catch {
-      // Error handled
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
