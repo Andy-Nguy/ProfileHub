@@ -3,14 +3,45 @@ import { SkillCategory } from '@profilehub/types';
 
 // Category config — chỉ dùng label & icon cho section header trong SkillsSection.
 // Chip tags dùng style neutral thống nhất, không màu mè.
-export const SKILL_CATEGORY_CONFIG: Record<SkillCategory, { label: string; icon: string }> = {
-  [SkillCategory.TECHNICAL]: { label: 'Technical', icon: 'engineering' },
-  [SkillCategory.TOOL]: { label: 'Tools & Software', icon: 'build' },
-  [SkillCategory.DOMAIN]: { label: 'Domain Knowledge', icon: 'menu_book' },
-  [SkillCategory.LANGUAGE]: { label: 'Languages', icon: 'translate' },
-  [SkillCategory.CERTIFICATION]: { label: 'Certifications', icon: 'workspace_premium' },
-  [SkillCategory.SOFT_SKILL]: { label: 'Soft Skills', icon: 'psychology' },
-  [SkillCategory.OTHER]: { label: 'Other', icon: 'more_horiz' },
+export const SKILL_CATEGORY_CONFIG: Record<
+  SkillCategory,
+  { label: string; labelKey: string; icon: string }
+> = {
+  [SkillCategory.TECHNICAL]: {
+    label: 'Technical',
+    labelKey: 'skills.categories.technical',
+    icon: 'engineering',
+  },
+  [SkillCategory.TOOL]: {
+    label: 'Tools & Software',
+    labelKey: 'skills.categories.tools',
+    icon: 'build',
+  },
+  [SkillCategory.DOMAIN]: {
+    label: 'Domain Knowledge',
+    labelKey: 'skills.categories.domain',
+    icon: 'menu_book',
+  },
+  [SkillCategory.LANGUAGE]: {
+    label: 'Languages',
+    labelKey: 'skills.categories.language',
+    icon: 'translate',
+  },
+  [SkillCategory.CERTIFICATION]: {
+    label: 'Certifications',
+    labelKey: 'skills.categories.certification',
+    icon: 'workspace_premium',
+  },
+  [SkillCategory.SOFT_SKILL]: {
+    label: 'Soft Skills',
+    labelKey: 'skills.categories.softSkill',
+    icon: 'psychology',
+  },
+  [SkillCategory.OTHER]: {
+    label: 'Other',
+    labelKey: 'skills.categories.other',
+    icon: 'more_horiz',
+  },
 };
 
 interface SkillTagProps {

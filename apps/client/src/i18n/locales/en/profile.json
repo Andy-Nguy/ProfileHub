@@ -39,7 +39,8 @@
     "completeProfileCta": "Complete your profile →",
     "experience": "Experience",
     "education": "Education",
-    "backToDiscovery": "Back to Discovery"
+    "backToDiscovery": "Back to Discovery",
+    "linkCopied": "Profile link copied to clipboard!"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",
@@ -70,5 +71,96 @@
     "errorLoading": "Error loading profiles",
     "endorsements": "endorsements",
     "noResults": "No professionals found matching your search."
+  },
+  "dialogs": {
+    "organization": {
+      "searching": "Searching...",
+      "createItem": "+ Create \"{{name}}\"",
+      "noResults": "No existing {{entity}} found.",
+      "createNewTitle": "Create New {{entity}}",
+      "logoLabel": "{{entity}} Logo (Optional)",
+      "logoAlt": "{{entity}} Logo"
+    },
+    "basicInfo": {
+      "title": "Edit Basic Info",
+      "displayName": "Display Name *",
+      "headline": "Headline *",
+      "location": "Location",
+      "bio": "About Me / Bio"
+    },
+    "about": {
+      "title": "Edit About",
+      "bioLabel": "Bio Summary"
+    },
+    "skills": {
+      "title": "Edit Skills",
+      "inputLabel": "Add a skill and press Enter",
+      "addAriaLabel": "Add skill",
+      "categoryLabel": "Category",
+      "filterLabel": "Filter",
+      "filterAll": "All ({{count}})",
+      "emptyAll": "No skills added yet. Add your first skill above!",
+      "emptyCategory": "No skills in this category."
+    },
+    "experience": {
+      "addTitle": "Add Experience",
+      "editTitle": "Edit Experience",
+      "jobTitle": "Job Title *",
+      "companyName": "Company Name *",
+      "entityCompany": "Company",
+      "companyDomain": "Company Domain (e.g. google.com)",
+      "location": "Location",
+      "employmentType": "Employment Type",
+      "employmentTypes": {
+        "fullTime": "Full-time",
+        "partTime": "Part-time",
+        "contract": "Contract",
+        "internship": "Internship",
+        "freelance": "Freelance",
+        "volunteer": "Volunteer"
+      },
+      "startDate": "Start Date *",
+      "endDate": "End Date",
+      "currentRole": "I currently work here",
+      "description": "Description",
+      "confirmDelete": "Are you sure you want to delete this experience?"
+    },
+    "education": {
+      "addTitle": "Add Education",
+      "editTitle": "Edit Education",
+      "institution": "School / Institution *",
+      "entityInstitution": "Institution",
+      "degree": "Degree (e.g. Bachelor's)",
+      "fieldOfStudy": "Field of Study",
+      "startDate": "Start Date *",
+      "endDate": "End Date",
+      "currentStudy": "I am currently studying here",
+      "description": "Description / Activities",
+      "confirmDelete": "Are you sure you want to delete this education?"
+    },
+    "avatar": {
+      "ariaLabel": "Edit Profile Photo",
+      "titleView": "Profile Photo",
+      "titleCrop": "Crop & Adjust Photo",
+      "subtitleView": "View or update your current photo",
+      "subtitleCrop": "Drag image to crop or rotate",
+      "currentPhotoAlt": "Current profile",
+      "changePhoto": "CHANGE PHOTO",
+      "visibilityHint": "Visible to everyone on ProfileHub",
+      "qualityHint": "Upload a high-quality square or portrait image",
+      "errorInvalidType": "Please select a valid image file (JPEG, PNG, WebP).",
+      "errorMaxSize": "Image must be smaller than 10 MB.",
+      "zoom": "Zoom",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "rotate": "Rotate",
+      "rotateLeft": "Left",
+      "rotateRight": "Right",
+      "reset": "Reset",
+      "cropHint": "Drag to reposition • Scroll or pinch to zoom",
+      "uploadPhoto": "Upload Photo",
+      "applyPhoto": "Apply Photo",
+      "saving": "Saving…"
+    }
   }
 }

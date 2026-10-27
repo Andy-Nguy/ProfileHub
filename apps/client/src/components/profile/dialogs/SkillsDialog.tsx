@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BaseDialog } from './BaseDialog';
 import { SkillTag, SKILL_CATEGORY_CONFIG } from '../../shared/SkillTag';
 import { ProfileResponse, profileAPI } from '../../../services/profile.service';
-import { apiClient } from '../../../services/api.service';
+import { getErrorMessage } from '../../../services/api.service';
+import { toast } from 'sonner';
 import { ISkill, SkillCategory } from '@profilehub/types';
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
 const ALL_CATEGORIES = Object.values(SkillCategory);
 
 export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSuccess }) => {
+  const { t } = useTranslation('profile');
   const [skills, setSkills] = useState<ISkill[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<SkillCategory>(SkillCategory.OTHER);
@@ -36,8 +39,8 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
       await profileAPI.addSkill({ name: trimmed, category: selectedCategory });
       setInputValue('');
       onSuccess();
-    } catch {
-      // Error shown via toast in profileAPI
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -53,11 +56,11 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
   const removeSkill = async (id: string) => {
     setLoading(true);
     try {
-      await apiClient.delete(`/profiles/me/skills/${id}`);
+      await profileAPI.deleteSkill(id);
       setSkills(prev => prev.filter(s => s.id !== id));
       onSuccess();
-    } catch {
-      // Error handled
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -74,7 +77,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
   }, {});
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={onClose} title="Edit Skills">
+    <BaseDialog isOpen={isOpen} onClose={onClose} title={t('dialogs.skills.title')}>
       <div className="space-y-5">
 
         {/* ── Add Skill Row ── */}
@@ -98,13 +101,13 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
                 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2
                 peer-focus:top-4 peer-focus:scale-75 peer-focus:-translate-y-4 left-2"
             >
-              Add a skill and press Enter
+              {t('dialogs.skills.inputLabel')}
             </label>
             <button
               onClick={addSkill}
               disabled={loading || !inputValue.trim()}
               className="absolute right-3 top-4 text-primary hover:text-primary/70 transition-colors disabled:opacity-40"
-              aria-label="Add skill"
+              aria-label={t('dialogs.skills.addAriaLabel')}
             >
               <span className="material-symbols-outlined">add_circle</span>
             </button>
@@ -112,7 +115,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
 
           {/* Category Selector */}
           <div>
-            <p className="text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wide">Category</p>
+            <p className="text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wide">{t('dialogs.skills.categoryLabel')}</p>
             <div className="flex flex-wrap gap-2">
               {ALL_CATEGORIES.map((cat) => {
                 const cfg = SKILL_CATEGORY_CONFIG[cat];
@@ -129,7 +132,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
                     `}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>{cfg.icon}</span>
-                    {cfg.label}
+                    {t(cfg.labelKey)}
                   </button>
                 );
               })}
@@ -140,7 +143,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
         {/* ── Filter Bar ── */}
         {skills.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wide">Filter</p>
+            <p className="text-xs font-medium text-on-surface-variant mb-2 uppercase tracking-wide">{t('dialogs.skills.filterLabel')}</p>
             <div className="flex flex-wrap gap-1.5">
               <button
                 onClick={() => setActiveFilter('all')}
@@ -151,7 +154,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
                   }
                 `}
               >
-                All ({skills.length})
+                {t('dialogs.skills.filterAll', { count: skills.length })}
               </button>
               {ALL_CATEGORIES.filter(cat => countByCategory[cat] > 0).map(cat => {
                 const cfg = SKILL_CATEGORY_CONFIG[cat];
@@ -168,7 +171,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
                     `}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>{cfg.icon}</span>
-                    {cfg.label} ({countByCategory[cat]})
+                    {t(cfg.labelKey)} ({countByCategory[cat]})
                   </button>
                 );
               })}
@@ -180,7 +183,7 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
         <div className="min-h-[100px] border border-outline-variant rounded-xl p-4">
           {filteredSkills.length === 0 ? (
             <p className="text-on-surface-variant text-sm text-center py-6">
-              {skills.length === 0 ? 'No skills added yet. Add your first skill above!' : 'No skills in this category.'}
+              {skills.length === 0 ? t('dialogs.skills.emptyAll') : t('dialogs.skills.emptyCategory')}
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
