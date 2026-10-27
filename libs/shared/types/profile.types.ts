@@ -41,11 +41,23 @@ export interface ProfileResponse extends IProfile {
   socialLinks: ISocialLink[];
 }
 
+export interface IDiscoveryProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  headline: string | null;
+  avatarUrl: string | null;
+  location: string | null;
+  industry: string | null;
+  likesCount: number;
+  skills: { name: string }[];
+}
+
 export interface DiscoveryFeedResponse {
-  data: ProfileResponse[];
+  items: IDiscoveryProfile[];
   total: number;
   page: number;
-  totalPages: number;
+  limit: number;
 }
 
 export interface OnboardingStatusResponse {
@@ -56,4 +68,8 @@ export interface OnboardingStatusResponse {
 
 export interface UploadAvatarResponse {
   avatarUrl: string;
+}
+
+export interface SuccessResponse {
+  success: boolean;
 }

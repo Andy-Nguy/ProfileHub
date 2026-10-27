@@ -7,10 +7,7 @@ import {
   UpdateOnboardingDto,
 } from '@profilehub/data-access';
 import {
-  IEducation,
-  IExperience,
-  ISkill,
-  ISocialLink,
+  SuccessResponse,
   ProfileResponse,
   DiscoveryFeedResponse,
   OnboardingStatusResponse,
@@ -101,9 +98,9 @@ export const profileAPI = {
     }
   },
 
-  addExperience: async (data: CreateExperienceDto): Promise<IExperience> => {
+  addExperience: async (data: CreateExperienceDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.post<IExperience>('/profiles/me/experiences', data);
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/experiences', data);
       toast.success('Experience added successfully');
       return response.data;
     } catch (error) {
@@ -112,9 +109,9 @@ export const profileAPI = {
     }
   },
 
-  updateExperience: async (id: string, data: CreateExperienceDto): Promise<IExperience> => {
+  updateExperience: async (id: string, data: CreateExperienceDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.put<IExperience>(`/profiles/me/experiences/${id}`, data);
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/experiences/${id}`, data);
       toast.success('Experience updated successfully');
       return response.data;
     } catch (error) {
@@ -133,9 +130,9 @@ export const profileAPI = {
     }
   },
 
-  addEducation: async (data: CreateEducationDto): Promise<IEducation> => {
+  addEducation: async (data: CreateEducationDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.post<IEducation>('/profiles/me/educations', data);
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/educations', data);
       toast.success('Education added successfully');
       return response.data;
     } catch (error) {
@@ -144,9 +141,9 @@ export const profileAPI = {
     }
   },
 
-  updateEducation: async (id: string, data: CreateEducationDto): Promise<IEducation> => {
+  updateEducation: async (id: string, data: CreateEducationDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.put<IEducation>(`/profiles/me/educations/${id}`, data);
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/educations/${id}`, data);
       toast.success('Education updated successfully');
       return response.data;
     } catch (error) {
@@ -165,9 +162,9 @@ export const profileAPI = {
     }
   },
 
-  addSkill: async (data: CreateSkillDto): Promise<ISkill> => {
+  addSkill: async (data: CreateSkillDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.post<ISkill>('/profiles/me/skills', data);
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/skills', data);
       toast.success('Skill added successfully');
       return response.data;
     } catch (error) {
@@ -176,9 +173,9 @@ export const profileAPI = {
     }
   },
 
-  updateSkill: async (id: string, data: CreateSkillDto): Promise<ISkill> => {
+  updateSkill: async (id: string, data: CreateSkillDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.put<ISkill>(`/profiles/me/skills/${id}`, data);
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/skills/${id}`, data);
       toast.success('Skill updated successfully');
       return response.data;
     } catch (error) {
@@ -197,9 +194,9 @@ export const profileAPI = {
     }
   },
 
-  addSocialLink: async (data: CreateSocialLinkDto): Promise<ISocialLink> => {
+  addSocialLink: async (data: CreateSocialLinkDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.post<ISocialLink>('/profiles/me/social-links', data);
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/social-links', data);
       toast.success('Social link added successfully');
       return response.data;
     } catch (error) {
@@ -208,9 +205,9 @@ export const profileAPI = {
     }
   },
 
-  updateSocialLink: async (id: string, data: CreateSocialLinkDto): Promise<ISocialLink> => {
+  updateSocialLink: async (id: string, data: CreateSocialLinkDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.put<ISocialLink>(`/profiles/me/social-links/${id}`, data);
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/social-links/${id}`, data);
       toast.success('Social link updated successfully');
       return response.data;
     } catch (error) {

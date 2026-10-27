@@ -17,6 +17,7 @@
 - **Service**: Contains all business logic and orchestrates Repositories.
 - **Repository**: Only handles TypeORM queries and database operations.
 - Always use DTOs for API responses. Never return raw Entities.
+  - **Pragmatic exception (2026-10-26):** CV section entities (`Education`, `Experience`, `Skill`, `SocialLink`) contain no sensitive fields. They `implements` the shared interfaces in `@profilehub/types` and are embedded as-is inside `ProfileResponseDto` (no per-entity `toXxxResponseDto` mappers). CV create/update endpoints return `{ success: true }`. Entities with sensitive data (`User`, tokens, OTP) must still go through DTOs.
 
 ## Naming Conventions
 

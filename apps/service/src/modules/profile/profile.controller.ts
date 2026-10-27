@@ -1,18 +1,31 @@
-// profile.controller.ts
-
 import {
-  Controller, Get, Post, Body, HttpCode, HttpStatus, Patch, Put, Delete, Param, ParseUUIDPipe,
+  Controller,
+  Get,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Put,
+  Delete,
+  Param,
+  ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import {
-  ApiBearerAuth, ApiOperation, ApiResponse, ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { ProfileService } from './profile.service';
-import { ProfileEntity } from '../../entities';
 import {
   UpdateOnboardingDto,
   UpdateProfileDto,
   ProfileResponseDto,
   OnboardingStatusResponseDto,
+  DiscoveryFeedResponseDto,
+  DiscoveryQueryDto,
   ExperienceDto,
   EducationDto,
   SkillDto,
@@ -20,54 +33,45 @@ import {
 } from './dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
-import { ExperienceMapper, EducationMapper, SkillMapper, SocialLinkMapper, ProfileMapper } from './mappers';
 
 @ApiTags('Profile')
 @ApiBearerAuth()
 @Controller('profiles')
 export class ProfileController {
-
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly experienceMapper: ExperienceMapper,
-    private readonly educationMapper: EducationMapper,
-    private readonly skillMapper: SkillMapper,
-    private readonly socialLinkMapper: SocialLinkMapper,
-    private readonly profileMapper: ProfileMapper,
-  ) { }
+  constructor(private readonly profileService: ProfileService) {}
 
   // GET /profiles/mine → full profile of logged-in user
   @Get('mine')
-  @ApiOperation({ summary: "Get the authenticated user's own profile with all CV sections" })
+  @ApiOperation({
+    summary: "Get the authenticated user's own profile with all CV sections",
+  })
   @ApiResponse({ status: 200, type: ProfileResponseDto })
-  async getMyProfile(@CurrentUser('id') userId: string) {
-    const user = await this.profileService.getUserFullProfile(userId);
-    return user.profile;
+  async getMyProfile(
+    @CurrentUser('id') userId: string,
+  ): Promise<ProfileResponseDto> {
+    return this.profileService.getUserFullProfile(userId);
   }
 
   // GET /profiles/discover → get discovery feed
   @Public()
   @Get('discover')
   @ApiOperation({ summary: 'Get discovery feed' })
-  async getDiscoveryFeed() {
-    const users = await this.profileService.getAllUsersFullProfile();
-    const profiles = users.map(u => {
-      if (u.profile) {
-        u.profile.user = u; // Attach user to profile for mapping
-      }
-      return u.profile;
-    }).filter((p): p is ProfileEntity => p !== null);
-    return this.profileMapper.toDiscoveryFeedResponseDto(profiles, profiles.length, 1, profiles.length || 1);
+  @ApiResponse({ status: 200, type: DiscoveryFeedResponseDto })
+  async getDiscoveryFeed(
+    @Query() query: DiscoveryQueryDto,
+  ): Promise<DiscoveryFeedResponseDto> {
+    return this.profileService.getDiscoveryFeed(query);
   }
 
   // GET /profiles/u/:username → get full profile by username
   @Public()
   @Get('u/:username')
   @ApiOperation({ summary: 'Get full profile by username' })
-
-  async getProfileByUsername(@Param('username') username: string) {
-    const user = await this.profileService.getProfileByUsername(username);
-    return user.profile;
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  async getProfileByUsername(
+    @Param('username') username: string,
+  ): Promise<ProfileResponseDto> {
+    return this.profileService.getProfileByUsername(username);
   }
 
   // PATCH /profiles/onboarding → complete first-time profile setup
@@ -78,51 +82,56 @@ export class ProfileController {
   async updateOnboarding(
     @CurrentUser('id') userId: string,
     @Body() dto: UpdateOnboardingDto,
-  ) {
-    const status = await this.profileService.updateOnboarding(userId, dto);
-    return this.profileMapper.toOnboardingStatusResponseDto(status);
+  ): Promise<OnboardingStatusResponseDto> {
+    return this.profileService.updateOnboarding(userId, dto);
   }
 
   // GET /profiles/:id → get profile details by profile ID
   @Get(':id')
   @ApiOperation({ summary: 'Get profile details by profile ID' })
-  async getProfileById(@Param('id', ParseUUIDPipe) id: string) {
-    const user = await this.profileService.getProfileByProfileId(id);
-    return user.profile;
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
+  async getProfileById(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<ProfileResponseDto> {
+    return this.profileService.getProfileByProfileId(id);
   }
 
   // PATCH /profiles/me → update basic profile
   @Patch('me')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Create or update authenticated user profile' })
+  @ApiResponse({ status: 200, type: ProfileResponseDto })
   async updateProfile(
     @CurrentUser('id') userId: string,
     @Body() dto: UpdateProfileDto,
-  ) {
-    // Create or update authenticated user profile
-    const profile = await this.profileService.upsertProfile(userId, dto);
-    return profile;
+  ): Promise<ProfileResponseDto> {
+    return this.profileService.upsertProfile(userId, dto);
   }
 
   // ── CV SECTION CRUD: SKILL ────────────────────────────────────────
 
   @Post('me/skills')
   @HttpCode(HttpStatus.CREATED)
-  async createSkill(@CurrentUser('id') userId: string, @Body() dto: SkillDto) {
-    const skill = await this.profileService.createSkill(userId, dto);
-    return this.skillMapper.toResponseDto(skill);
+  createSkill(@CurrentUser('id') userId: string, @Body() dto: SkillDto) {
+    return this.profileService.createSkill(userId, dto);
   }
 
   @Put('me/skills/:id')
   @HttpCode(HttpStatus.OK)
-  async updateSkill(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: SkillDto) {
-    const skill = await this.profileService.updateSkill(userId, id, dto);
-    return this.skillMapper.toResponseDto(skill);
+  updateSkill(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SkillDto,
+  ) {
+    return this.profileService.updateSkill(userId, id, dto);
   }
 
   @Delete('me/skills/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteSkill(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+  deleteSkill(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.profileService.deleteSkill(userId, id);
   }
 
@@ -130,21 +139,29 @@ export class ProfileController {
 
   @Post('me/experiences')
   @HttpCode(HttpStatus.CREATED)
-  async createExperience(@CurrentUser('id') userId: string, @Body() dto: ExperienceDto) {
-    const exp = await this.profileService.createExperience(userId, dto);
-    return this.experienceMapper.toResponseDto(exp);
+  createExperience(
+    @CurrentUser('id') userId: string,
+    @Body() dto: ExperienceDto,
+  ) {
+    return this.profileService.createExperience(userId, dto);
   }
 
   @Put('me/experiences/:id')
   @HttpCode(HttpStatus.OK)
-  async updateExperience(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: ExperienceDto) {
-    const exp = await this.profileService.updateExperience(userId, id, dto);
-    return this.experienceMapper.toResponseDto(exp);
+  updateExperience(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ExperienceDto,
+  ) {
+    return this.profileService.updateExperience(userId, id, dto);
   }
 
   @Delete('me/experiences/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteExperience(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+  deleteExperience(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.profileService.deleteExperience(userId, id);
   }
 
@@ -152,21 +169,29 @@ export class ProfileController {
 
   @Post('me/educations')
   @HttpCode(HttpStatus.CREATED)
-  async createEducation(@CurrentUser('id') userId: string, @Body() dto: EducationDto) {
-    const edu = await this.profileService.createEducation(userId, dto);
-    return this.educationMapper.toResponseDto(edu);
+  createEducation(
+    @CurrentUser('id') userId: string,
+    @Body() dto: EducationDto,
+  ) {
+    return this.profileService.createEducation(userId, dto);
   }
 
   @Put('me/educations/:id')
   @HttpCode(HttpStatus.OK)
-  async updateEducation(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: EducationDto) {
-    const edu = await this.profileService.updateEducation(userId, id, dto);
-    return this.educationMapper.toResponseDto(edu);
+  updateEducation(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: EducationDto,
+  ) {
+    return this.profileService.updateEducation(userId, id, dto);
   }
 
   @Delete('me/educations/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteEducation(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+  deleteEducation(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.profileService.deleteEducation(userId, id);
   }
 
@@ -174,22 +199,29 @@ export class ProfileController {
 
   @Post('me/social-links')
   @HttpCode(HttpStatus.CREATED)
-  async createSocialLink(@CurrentUser('id') userId: string, @Body() dto: SocialLinkDto) {
-    const sl = await this.profileService.createSocialLink(userId, dto);
-    return this.socialLinkMapper.toResponseDto(sl);
+  createSocialLink(
+    @CurrentUser('id') userId: string,
+    @Body() dto: SocialLinkDto,
+  ) {
+    return this.profileService.createSocialLink(userId, dto);
   }
 
   @Put('me/social-links/:id')
   @HttpCode(HttpStatus.OK)
-  async updateSocialLink(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string, @Body() dto: SocialLinkDto) {
-    const sl = await this.profileService.updateSocialLink(userId, id, dto);
-    return this.socialLinkMapper.toResponseDto(sl);
+  updateSocialLink(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: SocialLinkDto,
+  ) {
+    return this.profileService.updateSocialLink(userId, id, dto);
   }
 
   @Delete('me/social-links/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteSocialLink(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+  deleteSocialLink(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     return this.profileService.deleteSocialLink(userId, id);
   }
 }
-

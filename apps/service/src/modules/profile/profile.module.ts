@@ -8,13 +8,6 @@ import { SkillEntity } from '../../entities/skill.entity';
 import { SocialLinkEntity } from '../../entities/social-link.entity';
 import { User } from '../../entities/user.entity';
 import { UserModule } from '../user/user.module';
-import {
-  EducationMapper,
-  ExperienceMapper,
-  ProfileMapper,
-  SkillMapper,
-  SocialLinkMapper,
-} from './mappers';
 import { ProfileController } from './profile.controller';
 import { ProfileRepository } from './profile.repository';
 import { ProfileService } from './profile.service';
@@ -33,15 +26,7 @@ import { ProfileService } from './profile.service';
     ]),
   ],
   controllers: [ProfileController],
-  providers: [
-    ProfileService,
-    ProfileRepository,
-    ExperienceMapper,
-    EducationMapper,
-    SkillMapper,
-    SocialLinkMapper,
-    ProfileMapper,
-  ],
+  providers: [ProfileService, ProfileRepository],
   exports: [ProfileService, ProfileRepository],
 })
 export class ProfileModule {}

@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsDateString, IsBoolean, ValidateIf, IsEnum, IsUUID } from 'class-validator';
-import { EmploymentType } from '../../../entities/experience.entity';
+import { EmploymentType } from '@profilehub/types';
 
 export class ExperienceDto {
   @IsString()
