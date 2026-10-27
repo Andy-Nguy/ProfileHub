@@ -3,6 +3,8 @@ import { BaseDialog } from './BaseDialog';
 import { FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
 import { ProfileResponse, profileAPI } from '../../../services/profile.service';
+import { getErrorMessage } from '../../../services/api.service';
+import { toast } from 'sonner';
 
 interface Props {
   isOpen: boolean;
@@ -21,8 +23,8 @@ export const AboutDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucce
       await profileAPI.updateProfile({ bio });
       onSuccess();
       onClose();
-    } catch {
-      // Error handled
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }

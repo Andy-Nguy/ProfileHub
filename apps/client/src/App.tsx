@@ -4,7 +4,6 @@ import { Toaster } from 'sonner';
 import { LandingPage } from './pages/LandingPage';
 import { DiscoveryPage } from './pages/DiscoveryPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { PublicProfilePage } from './pages/PublicProfilePage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -56,16 +55,17 @@ const App: React.FC = () => {
             />
 
             {/* Any user's public portfolio */}
-            <Route path="/u/:username" element={<PublicProfilePage />} />
+            <Route path="/u/:username" element={<ProfilePage />} />
 
             {/* Coming Soon Pages */}
             <Route path="/messages"  element={<ProtectedRoute><ComingSoonPage title="Messages" icon="mail" /></ProtectedRoute>} />
             <Route path="/network"   element={<ProtectedRoute><ComingSoonPage title="Network" icon="group" /></ProtectedRoute>} />
+            <Route path="/resources" element={<ComingSoonPage title="Resources" icon="folder" />} />
             <Route path="/analytics" element={<ProtectedRoute><ComingSoonPage title="Analytics" icon="insights" /></ProtectedRoute>} />
             <Route path="/settings"  element={<ProtectedRoute><ComingSoonPage title="Settings" icon="settings" /></ProtectedRoute>} />
           </Route>
 
-          <Route path="*" element={<ComingSoonPage title="Page Not Found" icon="search_off" />} />
+          <Route path="*" element={<ComingSoonPage title="Page Not Found" icon="search_off" hasSideNav={false} />} />
         </Routes>
       </div>
     </div>
