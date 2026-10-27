@@ -31,7 +31,11 @@
     "sharePortfolio": "Chia sẻ Portfolio"
   },
   "footer": {
+    "brandDescription": "Nền tảng portfolio chuyên nghiệp giúp bạn xây dựng thương hiệu cá nhân và kết nối cộng đồng.",
+    "legalHeading": "Pháp lý",
+    "communityHeading": "Cộng đồng",
     "copyright": "© {{year}} ProHub Community Hub. Phát triển nghề nghiệp thông qua chuyên môn tập thể.",
+    "madeIn": "Được tạo với ♥ tại Việt Nam",
     "privacyPolicy": "Chính sách Bảo mật",
     "termsOfService": "Điều khoản Dịch vụ",
     "communityGuidelines": "Nguyên tắc Cộng đồng",

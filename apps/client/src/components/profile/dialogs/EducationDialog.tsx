@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BaseDialog } from './BaseDialog';
 import { FloatingField, FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
@@ -24,6 +25,7 @@ function toDateInputValue(value: string | Date | null | undefined) {
 }
 
 export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId, initialData, onSuccess }) => {
+  const { t } = useTranslation(['profile', 'common']);
   const [formData, setFormData] = useState({
     institution: '',
     degree: '',
@@ -117,7 +119,7 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
 
   const handleDelete = async () => {
     if (!educationId) return;
-    if (!window.confirm('Are you sure you want to delete this education?')) return;
+    if (!window.confirm(t('dialogs.education.confirmDelete'))) return;
 
     setLoading(true);
     try {
@@ -132,13 +134,13 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
   };
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={onClose} title={educationId ? 'Edit Education' : 'Add Education'}>
+    <BaseDialog isOpen={isOpen} onClose={onClose} title={educationId ? t('dialogs.education.editTitle') : t('dialogs.education.addTitle')}>
       <div className="space-y-4">
         {/* Institution Autocomplete & Logo Upload Field */}
         <OrganizationField
           id="institution"
-          label="School / Institution *"
-          entityTypeLabel="Institution"
+          label={t('dialogs.education.institution')}
+          entityTypeLabel={t('dialogs.education.entityInstitution')}
           value={formData.institution}
           selectedEntity={selectedInstitution}
           onSelectEntity={(entity) => {
@@ -160,34 +162,34 @@ export const EducationDialog: React.FC<Props> = ({ isOpen, onClose, educationId,
           onChangeNewLogoFile={setNewInstitutionLogo}
         />
 
-        <FloatingField id="degree" label="Degree (e.g. Bachelor's)" value={formData.degree} onChange={e => setFormData({ ...formData, degree: e.target.value })} />
-        <FloatingField id="fieldOfStudy" label="Field of Study" value={formData.fieldOfStudy} onChange={e => setFormData({ ...formData, fieldOfStudy: e.target.value })} />
+        <FloatingField id="degree" label={t('dialogs.education.degree')} value={formData.degree} onChange={e => setFormData({ ...formData, degree: e.target.value })} />
+        <FloatingField id="fieldOfStudy" label={t('dialogs.education.fieldOfStudy')} value={formData.fieldOfStudy} onChange={e => setFormData({ ...formData, fieldOfStudy: e.target.value })} />
 
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="text-sm font-medium text-on-surface-variant block mb-1">Start Date *</label>
+            <label className="text-sm font-medium text-on-surface-variant block mb-1">{t('dialogs.education.startDate')}</label>
             <input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} className="w-full bg-transparent border border-outline rounded-lg p-3 text-on-surface focus:border-primary outline-none" />
           </div>
           <div className="flex-1">
-            <label className="text-sm font-medium text-on-surface-variant block mb-1">End Date</label>
+            <label className="text-sm font-medium text-on-surface-variant block mb-1">{t('dialogs.education.endDate')}</label>
             <input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} disabled={formData.isCurrent} className="w-full bg-transparent border border-outline rounded-lg p-3 text-on-surface focus:border-primary outline-none disabled:opacity-50" />
           </div>
         </div>
 
         <label className="flex items-center gap-2 cursor-pointer pt-2">
           <input type="checkbox" checked={formData.isCurrent} onChange={e => setFormData({ ...formData, isCurrent: e.target.checked })} className="w-5 h-5 rounded border-outline text-primary focus:ring-primary" />
-          <span className="text-on-surface text-sm">I am currently studying here</span>
+          <span className="text-on-surface text-sm">{t('dialogs.education.currentStudy')}</span>
         </label>
 
-        <FloatingTextarea id="description" label="Description / Activities" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} />
+        <FloatingTextarea id="description" label={t('dialogs.education.description')} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} />
 
         <div className="flex justify-between pt-4 border-t border-outline-variant mt-4">
           {educationId ? (
-            <Button className="text-error border border-error hover:bg-error/10 font-label-lg text-label-lg py-2.5 px-6 rounded-full transition-colors" onClick={handleDelete} isLoading={loading}>Delete</Button>
+            <Button className="text-error border border-error hover:bg-error/10 font-label-lg text-label-lg py-2.5 px-6 rounded-full transition-colors" onClick={handleDelete} isLoading={loading}>{t('common:delete')}</Button>
           ) : <div></div>}
           <div className="flex gap-3">
-            <Button className="border border-outline-variant text-primary font-label-lg text-label-lg py-2.5 px-6 rounded-full hover:bg-surface-container-low transition-colors" onClick={onClose} disabled={loading}>Cancel</Button>
-            <Button onClick={handleSave} isLoading={loading}>Save</Button>
+            <Button className="border border-outline-variant text-primary font-label-lg text-label-lg py-2.5 px-6 rounded-full hover:bg-surface-container-low transition-colors" onClick={onClose} disabled={loading}>{t('common:cancel')}</Button>
+            <Button onClick={handleSave} isLoading={loading}>{t('common:save')}</Button>
           </div>
         </div>
       </div>

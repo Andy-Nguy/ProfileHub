@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import Cropper, { Area, Point } from 'react-easy-crop';
 import getCroppedImg from '../../../utils/cropImage';
 
@@ -31,6 +32,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
   onUpload,
   isUploading,
 }) => {
+  const { t } = useTranslation(['profile', 'common']);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // States
@@ -39,7 +41,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
+  const [fileErrorKey, setFileErrorKey] = useState<string | null>(null);
 
   // Reset when dialog closes
   useEffect(() => {
@@ -49,18 +51,18 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
       setZoom(1);
       setRotation(0);
       setCroppedAreaPixels(null);
-      setFileError(null);
+      setFileErrorKey(null);
     }
   }, [isOpen]);
 
   const processFile = useCallback(async (file: File) => {
-    setFileError(null);
+    setFileErrorKey(null);
     if (!file.type.startsWith('image/')) {
-      setFileError('Please select a valid image file (JPEG, PNG, WebP).');
+      setFileErrorKey('dialogs.avatar.errorInvalidType');
       return;
     }
     if (file.size > MAX_BYTES) {
-      setFileError('Image must be smaller than 10 MB.');
+      setFileErrorKey('dialogs.avatar.errorMaxSize');
       return;
     }
     const dataUrl = await readFile(file);
@@ -98,7 +100,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
     setImageSrc(null);
     setZoom(1);
     setRotation(0);
-    setFileError(null);
+    setFileErrorKey(null);
   };
 
   const handleRotate = (deg: number) => {
@@ -113,7 +115,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Edit Profile Photo"
+      aria-label={t('dialogs.avatar.ariaLabel')}
       className="fixed inset-0 z-[200] flex items-center justify-center p-4"
       onClick={onClose}
       style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)' }}
@@ -128,15 +130,15 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white">
           <div>
             <h2 className="text-lg font-bold text-gray-900">
-              {imageSrc ? 'Crop & Adjust Photo' : 'Profile Photo'}
+              {imageSrc ? t('dialogs.avatar.titleCrop') : t('dialogs.avatar.titleView')}
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              {imageSrc ? 'Drag image to crop or rotate' : 'View or update your current photo'}
+              {imageSrc ? t('dialogs.avatar.subtitleCrop') : t('dialogs.avatar.subtitleView')}
             </p>
           </div>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('common:close')}
             className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
           >
             <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>close</span>
@@ -153,7 +155,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                 <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-white shadow-xl ring-1 ring-gray-100 bg-gray-50">
                   <img
                     src={displayAvatar}
-                    alt="Current profile"
+                    alt={t('dialogs.avatar.currentPhotoAlt')}
                     className="w-full h-full object-cover select-none"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=User&background=6366f1&color=fff&size=300`;
@@ -166,24 +168,24 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                   className="absolute inset-1 rounded-full bg-black/40 flex flex-col items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-white"
                 >
                   <span className="material-symbols-outlined text-2xl">photo_camera</span>
-                  <span className="text-xs font-semibold tracking-wider">CHANGE PHOTO</span>
+                  <span className="text-xs font-semibold tracking-wider">{t('dialogs.avatar.changePhoto')}</span>
                 </button>
               </div>
 
               {/* Detail Info */}
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-700">
-                  Visible to everyone on ProfileHub
+                  {t('dialogs.avatar.visibilityHint')}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Upload a high-quality square or portrait image
+                  {t('dialogs.avatar.qualityHint')}
                 </p>
               </div>
 
-              {fileError && (
+              {fileErrorKey && (
                 <div className="w-full flex items-center gap-2 text-red-600 text-sm bg-red-50 rounded-xl px-4 py-3 border border-red-100">
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>error</span>
-                  <span>{fileError}</span>
+                  <span>{t(fileErrorKey)}</span>
                 </div>
               )}
             </div>
@@ -220,11 +222,11 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
               <div className="bg-gray-50 rounded-2xl p-4 space-y-4 border border-gray-100">
                 {/* Zoom Control */}
                 <div className="flex items-center gap-4">
-                  <span className="text-xs font-semibold text-gray-500 w-12 shrink-0">Zoom</span>
+                  <span className="text-xs font-semibold text-gray-500 w-12 shrink-0">{t('dialogs.avatar.zoom')}</span>
                   <button
                     onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
                     className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
-                    aria-label="Zoom out"
+                    aria-label={t('dialogs.avatar.zoomOut')}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>remove</span>
                   </button>
@@ -236,12 +238,12 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                     value={zoom}
                     onChange={(e) => setZoom(Number(e.target.value))}
                     className="flex-1 h-1.5 rounded-full accent-indigo-600 cursor-pointer bg-gray-200"
-                    aria-label="Zoom"
+                    aria-label={t('dialogs.avatar.zoom')}
                   />
                   <button
                     onClick={() => setZoom((z) => Math.min(3, z + 0.1))}
                     className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
-                    aria-label="Zoom in"
+                    aria-label={t('dialogs.avatar.zoomIn')}
                   >
                     <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>add</span>
                   </button>
@@ -252,30 +254,30 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
 
                 {/* Rotate Control */}
                 <div className="flex items-center gap-4">
-                  <span className="text-xs font-semibold text-gray-500 w-12 shrink-0">Rotate</span>
+                  <span className="text-xs font-semibold text-gray-500 w-12 shrink-0">{t('dialogs.avatar.rotate')}</span>
                   <div className="flex items-center gap-2 flex-1">
                     <button
                       onClick={() => handleRotate(-90)}
                       className="flex items-center gap-1 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 px-3.5 py-1.5 rounded-lg transition-colors border border-gray-200 shadow-sm"
-                      aria-label="Rotate left"
+                      aria-label={t('dialogs.avatar.rotateLeft')}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>rotate_left</span>
-                      Left
+                      {t('dialogs.avatar.rotateLeft')}
                     </button>
                     <button
                       onClick={() => handleRotate(90)}
                       className="flex items-center gap-1 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 px-3.5 py-1.5 rounded-lg transition-colors border border-gray-200 shadow-sm"
-                      aria-label="Rotate right"
+                      aria-label={t('dialogs.avatar.rotateRight')}
                     >
                       <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>rotate_right</span>
-                      Right
+                      {t('dialogs.avatar.rotateRight')}
                     </button>
                     {rotation !== 0 && (
                       <button
                         onClick={() => setRotation(0)}
                         className="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors px-2 py-1.5 ml-auto"
                       >
-                        Reset
+                        {t('dialogs.avatar.reset')}
                       </button>
                     )}
                   </div>
@@ -283,7 +285,7 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
               </div>
 
               <p className="text-xs text-gray-400 text-center">
-                Drag to reposition • Scroll or pinch to zoom
+                {t('dialogs.avatar.cropHint')}
               </p>
             </div>
           )}
@@ -299,13 +301,13 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                 className="flex items-center gap-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl shadow-sm transition-all hover:shadow duration-200"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>upload</span>
-                Upload Photo
+                {t('dialogs.avatar.uploadPhoto')}
               </button>
               <button
                 onClick={onClose}
                 className="text-sm font-semibold text-gray-600 hover:text-gray-800 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                Close
+                {t('common:close')}
               </button>
             </>
           ) : (
@@ -316,14 +318,14 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                 className="flex items-center gap-1.5 text-sm font-semibold text-gray-600 hover:text-gray-800 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
-                Back
+                {t('common:back')}
               </button>
               <div className="flex gap-3">
                 <button
                   onClick={onClose}
                   className="text-sm font-semibold text-gray-500 hover:text-gray-700 px-4 py-2.5 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  Cancel
+                  {t('common:cancel')}
                 </button>
                 <button
                   onClick={handleSave}
@@ -336,12 +338,12 @@ export const AvatarEditDialog: React.FC<AvatarEditDialogProps> = ({
                         className="inline-block w-4 h-4 border-2 border-white/40 border-t-white rounded-full"
                         style={{ animation: 'spin 0.7s linear infinite' }}
                       />
-                      Saving…
+                      {t('dialogs.avatar.saving')}
                     </>
                   ) : (
                     <>
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
-                      Apply Photo
+                      {t('dialogs.avatar.applyPhoto')}
                     </>
                   )}
                 </button>
