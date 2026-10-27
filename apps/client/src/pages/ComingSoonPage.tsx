@@ -6,6 +6,7 @@ interface ComingSoonPageProps {
   title: string;
   icon: string;
   description?: string;
+  hasSideNav?: boolean;
 }
 
 /**
@@ -15,12 +16,13 @@ interface ComingSoonPageProps {
 export const ComingSoonPage: React.FC<ComingSoonPageProps> = ({ 
   title, 
   icon, 
-  description = "We're currently building this feature to provide you with the best professional experience. Stay tuned for updates!" 
+  description = "We're currently building this feature to provide you with the best professional experience. Stay tuned for updates!",
+  hasSideNav = true,
 }) => {
   return (
     <>
       {/* Main Content */}
-      <main className="flex-1 md:ml-72 flex flex-col">
+      <main className={`flex-1 flex flex-col ${hasSideNav ? 'md:ml-72' : ''}`}>
         <div className="flex-1 flex flex-col items-center justify-center bg-surface py-[32px] px-[16px] md:px-gutter">
           <motion.div 
             className="max-w-md w-full text-center space-y-6"

@@ -60,11 +60,12 @@ const App: React.FC = () => {
             {/* Coming Soon Pages */}
             <Route path="/messages"  element={<ProtectedRoute><ComingSoonPage title="Messages" icon="mail" /></ProtectedRoute>} />
             <Route path="/network"   element={<ProtectedRoute><ComingSoonPage title="Network" icon="group" /></ProtectedRoute>} />
+            <Route path="/resources" element={<ComingSoonPage title="Resources" icon="folder" />} />
             <Route path="/analytics" element={<ProtectedRoute><ComingSoonPage title="Analytics" icon="insights" /></ProtectedRoute>} />
             <Route path="/settings"  element={<ProtectedRoute><ComingSoonPage title="Settings" icon="settings" /></ProtectedRoute>} />
           </Route>
 
-          <Route path="*" element={<ComingSoonPage title="Page Not Found" icon="search_off" />} />
+          <Route path="*" element={<ComingSoonPage title="Page Not Found" icon="search_off" hasSideNav={false} />} />
         </Routes>
       </div>
     </div>
