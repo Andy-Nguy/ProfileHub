@@ -31,6 +31,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -60,6 +61,10 @@ async function bootstrap() {
       transform: true,       // Auto-transform payloads to DTO instances
     }),
   );
+
+  // ── Global Exception Filter ─────────────────────────────────────────
+  // Formats all errors consistently and hides internal 500 details
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // ── Swagger Configuration ───────────────────────────────────────────
   const config = new DocumentBuilder()
