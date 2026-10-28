@@ -39,7 +39,8 @@
     "completeProfileCta": "Complete your profile →",
     "experience": "Experience",
     "education": "Education",
-    "backToDiscovery": "Back to Discovery"
+    "backToDiscovery": "Back to Discovery",
+    "linkCopied": "Profile link copied to clipboard!"
   },
   "footer": {
     "privacyPolicy": "Privacy Policy",

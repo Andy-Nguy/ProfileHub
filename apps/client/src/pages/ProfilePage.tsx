@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { SideNav } from '../components/layout/SideNav';
+import { toast } from 'sonner';
 import { AppFooter } from '../components/layout/AppFooter';
 import { BasicInfoDialog } from '../components/profile/dialogs/BasicInfoDialog';
 import { AboutDialog } from '../components/profile/dialogs/AboutDialog';
@@ -89,6 +89,18 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleShare = () => {
+    const shareUrl = `${window.location.origin}/u/${profile?.username || username || ''}`;
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        toast.success(t('page.linkCopied') || 'Profile link copied to clipboard!');
+      })
+      .catch(() => {
+        toast.error('Failed to copy link to clipboard');
+      });
+  };
+
   useEffect(() => {
     fetchProfile();
   }, [username, user]);
@@ -101,23 +113,35 @@ export const ProfilePage: React.FC = () => {
 
   if (!profile) {
     return (
-      <div className="bg-background text-on-background min-h-screen flex">
-        {/* Side Navigation */}
-        <SideNav />
-
-        {/* Main Content */}
-        <main className="flex-1 md:ml-72 flex flex-col">
-          <div className="flex-1 flex items-center justify-center p-6">
-            <M3Card className="w-full max-w-2xl p-8 text-center">
-              <h1 className="text-2xl font-bold mb-2">{t('page.notFound')}</h1>
-              <p className="text-on-surface-variant">
-                {t('page.notFoundMessage', { username: username || 'you' })}
-              </p>
-            </M3Card>
+      <main className="flex-1 md:ml-72 min-h-[calc(100vh-64px)] flex flex-col justify-between bg-surface">
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div
+            className="bg-surface-container-lowest rounded-2xl border border-surface-variant p-10 text-center max-w-md w-full"
+            style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+          >
+            <span
+              className="material-symbols-outlined text-on-surface-variant/30 mb-3"
+              style={{ fontSize: '56px' }}
+            >
+              person_off
+            </span>
+            <h1 className="text-xl font-bold text-on-surface mb-2">{t('page.notFound')}</h1>
+            <p className="text-on-surface-variant text-sm mb-6">
+              {t('page.notFoundMessage', { username: username || user?.username || 'user' })}
+            </p>
+            <Link
+              to="/discovery"
+              className="inline-flex items-center gap-1.5 text-primary font-semibold text-sm hover:underline"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
+                arrow_back
+              </span>
+              {t('page.backToDiscovery')}
+            </Link>
           </div>
-          <AppFooter />
-        </main>
-      </div>
+        </div>
+        <AppFooter variant="compact" />
+      </main>
     );
   }
 
@@ -207,7 +231,10 @@ export const ProfilePage: React.FC = () => {
                       {isNewProfile ? t('page.completeProfile') : t('page.editProfile')}
                     </button>
 
-                    <button className="flex items-center gap-2 border border-outline-variant text-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors">
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center gap-2 border border-outline-variant text-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors"
+                    >
                       <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
                       {t('page.share')}
                     </button>
@@ -215,10 +242,22 @@ export const ProfilePage: React.FC = () => {
                 ) : (
                   <>
                     {/* Viewing someone else's profile */}
-                    <button className="flex items-center gap-2 bg-primary text-on-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-tint transition-all shadow-sm">
-                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>person_add</span>
-                      {t('page.connect')}
+                    <Link
+                      to="/discovery"
+                      className="flex items-center gap-1.5 border border-outline-variant text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg px-4 py-2 rounded-full hover:bg-surface-container-low transition-colors mr-auto"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_back</span>
+                      {t('page.backToDiscovery')}
+                    </Link>
+
+                    <button
+                      onClick={handleShare}
+                      className="flex items-center gap-2 border border-outline-variant text-primary font-label-lg text-label-lg px-5 py-2.5 rounded-full hover:bg-surface-container-low transition-colors"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>share</span>
+                      {t('page.share')}
                     </button>
+
                     <EndorsementButton count={profile.likesCount} isEndorsed={false} />
                   </>
                 )}
