@@ -19,4 +19,22 @@ export const educationAPI = {
       return [];
     }
   },
+
+  uploadInstitutionLogo: async (
+    institutionName: string,
+    file: File,
+  ): Promise<{ institutionLogoUrl: string }> => {
+    try {
+      const uploadForm = new FormData();
+      uploadForm.append('file', file);
+      const response = await apiClient.post<{ institutionLogoUrl: string }>(
+        `/storage/institution-logo?institutionName=${encodeURIComponent(institutionName)}`,
+        uploadForm,
+      );
+      return response.data;
+    } catch (error) {
+      toast.error(`Upload institution logo failed: ${getErrorMessage(error)}`);
+      throw error;
+    }
+  },
 };

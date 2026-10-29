@@ -15,7 +15,15 @@ import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
-import { RegisterDto, VerifyEmailDto, LoginDto, AuthMeResponseDto } from './dto';
+import {
+  RegisterDto,
+  VerifyEmailDto,
+  LoginDto,
+  AuthMeResponseDto,
+  MessageResponseDto,
+  LoginResponseDto,
+  RefreshResponseDto,
+} from './dto';
 import { Public } from './decorators/public.decorator';
 import {
   getRefreshCookieOptions,
@@ -39,7 +47,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user account' })
-  @ApiResponse({ status: 201, description: 'Registration successful' })
+  @ApiResponse({ status: 201, description: 'Registration successful', type: MessageResponseDto })
   @ApiResponse({ status: 409, description: 'Email or username already taken' })
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
@@ -52,7 +60,7 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Verify email with OTP code' })
-  @ApiResponse({ status: 200, description: 'Email verified successfully' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully', type: MessageResponseDto })
   @ApiResponse({ status: 400, description: 'Invalid or expired OTP' })
   async verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto);
@@ -65,7 +73,7 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } }) // 10 requests per minute
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiResponse({ status: 200, description: 'Login successful' })
+  @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(
     @Body() dto: LoginDto,
@@ -95,8 +103,8 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token cookie' })
-  @ApiResponse({ status: 200, description: 'Tokens refreshed' })
-  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully', type: RefreshResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawRefreshToken = req.cookies?.[getRefreshCookieName()];
 
@@ -125,7 +133,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout and revoke refresh token' })
-  @ApiResponse({ status: 200, description: 'Logged out successfully' })
+  @ApiResponse({ status: 200, description: 'Logged out successfully', type: MessageResponseDto })
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const rawRefreshToken = req.cookies?.[getRefreshCookieName()];
 

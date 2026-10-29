@@ -18,6 +18,7 @@ import {
   ApiBody,
   ApiConsumes,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -80,7 +81,9 @@ export class CompaniesController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get company by ID' })
+  @ApiParam({ name: 'id', description: 'Company UUID' })
   @ApiResponse({ status: 200, type: CompanyResponseDto })
+  @ApiResponse({ status: 404, description: 'Company not found' })
   async getById(
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<CompanyResponseDto> {

@@ -31,6 +31,15 @@ interface AuthContextValue {
    * Call this to clear the session (logout).
    */
   deauthenticate: () => void;
+  /**
+   * Re-fetches /auth/me and synchronizes session state, needsOnboarding,
+   * and profileCompletion in-place without page reload.
+   */
+  refreshUser: () => Promise<void>;
+  /**
+   * Directly updates onboarding status in state.
+   */
+  updateOnboardingStatus: (needsOnboarding: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -180,6 +189,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setProfileCompletion(0);
   }, [clearSession]);
 
+  /**
+   * Re-fetches the current user profile from /auth/me and updates state.
+   * Uses stored access token in authSession without needing full page reload.
+   */
+  const refreshUser = useCallback(async () => {
+    const currentSession = getStoredAuthSession();
+    if (!currentSession?.accessToken) {
+      return;
+    }
+    await fetchAndApplyProfile(currentSession.accessToken);
+  }, [fetchAndApplyProfile]);
+
+  /**
+   * Directly updates onboarding status in state.
+   */
+  const updateOnboardingStatus = useCallback((status: boolean) => {
+    setNeedsOnboarding(status);
+  }, []);
+
   // ── Render ───────────────────────────────────────────────────────────
 
   return (
@@ -192,6 +220,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         profileCompletion,
         authenticate,
         deauthenticate,
+        refreshUser,
+        updateOnboardingStatus,
       }}
     >
       {children}
