@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { BaseDialog } from './BaseDialog';
 import { SkillTag, SKILL_CATEGORY_CONFIG } from '../../shared/SkillTag';
 import { ProfileResponse, profileAPI } from '../../../services/profile.service';
-import { apiClient } from '../../../services/api.service';
+import { getErrorMessage } from '../../../services/api.service';
+import { toast } from 'sonner';
 import { ISkill, SkillCategory } from '@profilehub/types';
 
 interface Props {
@@ -36,8 +37,8 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
       await profileAPI.addSkill({ name: trimmed, category: selectedCategory });
       setInputValue('');
       onSuccess();
-    } catch {
-      // Error shown via toast in profileAPI
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -53,11 +54,11 @@ export const SkillsDialog: React.FC<Props> = ({ isOpen, onClose, profile, onSucc
   const removeSkill = async (id: string) => {
     setLoading(true);
     try {
-      await apiClient.delete(`/profiles/me/skills/${id}`);
+      await profileAPI.deleteSkill(id);
       setSkills(prev => prev.filter(s => s.id !== id));
       onSuccess();
-    } catch {
-      // Error handled
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
