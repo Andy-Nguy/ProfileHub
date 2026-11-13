@@ -5,6 +5,7 @@ import {
   OnboardingStatusResponse,
   IDiscoveryProfile,
   DiscoveryFeedResponse,
+  SuccessResponse,
   IEducation,
   IExperience,
   ISkill,
@@ -143,3 +144,9 @@ export class DiscoveryFeedResponseDto implements DiscoveryFeedResponse {
   @ApiProperty()
   limit: number;
 }
+
+export class SuccessResponseDto implements SuccessResponse {
+  @ApiProperty({ example: true })
+  success: boolean;
+}
+

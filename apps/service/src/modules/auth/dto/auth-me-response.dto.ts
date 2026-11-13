@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AuthMeProfileDto {
   @ApiProperty()
@@ -7,10 +7,10 @@ export class AuthMeProfileDto {
   @ApiProperty()
   displayName: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
   headline: string | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiPropertyOptional({ nullable: true })
   avatarUrl: string | null;
 
   @ApiProperty()
@@ -30,14 +30,21 @@ export class AuthMeUserDto {
   @ApiProperty()
   role: string;
 
-
+  @ApiPropertyOptional({ type: () => AuthMeProfileDto, nullable: true })
+  profile?: AuthMeProfileDto | null;
 }
 
 export class AuthMeResponseDto {
   @ApiProperty()
   authenticated: boolean;
 
+  @ApiProperty({ example: false })
+  needsOnboarding: boolean;
+
+  @ApiProperty({ example: 85 })
+  profileCompletion: number;
 
   @ApiProperty({ type: () => AuthMeUserDto })
   user: AuthMeUserDto;
 }
+
