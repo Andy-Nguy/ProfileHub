@@ -7,17 +7,19 @@ import {
   UpdateOnboardingDto,
 } from '@profilehub/data-access';
 import {
-  IEducation,
-  IExperience,
-  IProfile,
-  ISkill,
-  ISocialLink,
-  VisibilityTypeEnum,
+  SuccessResponse,
   ProfileResponse,
   DiscoveryFeedResponse,
   OnboardingStatusResponse,
   UploadAvatarResponse,
 } from '@profilehub/types';
+
+export type {
+  ProfileResponse,
+  DiscoveryFeedResponse,
+  OnboardingStatusResponse,
+  UploadAvatarResponse,
+};
 import { apiClient, getErrorMessage } from './api.service';
 import { toast } from 'sonner';
 
@@ -96,19 +98,9 @@ export const profileAPI = {
     }
   },
 
-  getExperiences: async (): Promise<IExperience[]> => {
+  addExperience: async (data: CreateExperienceDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.get<IExperience[]>('/profiles/me/experiences');
-      return response.data;
-    } catch (error) {
-      toast.error(`Get experiences failed: ${getErrorMessage(error)}`);
-      throw error;
-    }
-  },
-
-  addExperience: async (data: CreateExperienceDto): Promise<IExperience> => {
-    try {
-      const response = await apiClient.post<IExperience>('/profiles/me/experiences', data);
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/experiences', data);
       toast.success('Experience added successfully');
       return response.data;
     } catch (error) {
@@ -117,19 +109,30 @@ export const profileAPI = {
     }
   },
 
-  getEducations: async (): Promise<IEducation[]> => {
+  updateExperience: async (id: string, data: CreateExperienceDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.get<IEducation[]>('/profiles/me/educations');
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/experiences/${id}`, data);
+      toast.success('Experience updated successfully');
       return response.data;
     } catch (error) {
-      toast.error(`Get educations failed: ${getErrorMessage(error)}`);
+      toast.error(`Update experience failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
 
-  addEducation: async (data: CreateEducationDto): Promise<IEducation> => {
+  deleteExperience: async (id: string): Promise<void> => {
     try {
-      const response = await apiClient.post<IEducation>('/profiles/me/educations', data);
+      await apiClient.delete(`/profiles/me/experiences/${id}`);
+      toast.success('Experience deleted successfully');
+    } catch (error) {
+      toast.error(`Delete experience failed: ${getErrorMessage(error)}`);
+      throw error;
+    }
+  },
+
+  addEducation: async (data: CreateEducationDto): Promise<SuccessResponse> => {
+    try {
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/educations', data);
       toast.success('Education added successfully');
       return response.data;
     } catch (error) {
@@ -138,19 +141,30 @@ export const profileAPI = {
     }
   },
 
-  getSkills: async (): Promise<ISkill[]> => {
+  updateEducation: async (id: string, data: CreateEducationDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.get<ISkill[]>('/profiles/me/skills');
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/educations/${id}`, data);
+      toast.success('Education updated successfully');
       return response.data;
     } catch (error) {
-      toast.error(`Get skills failed: ${getErrorMessage(error)}`);
+      toast.error(`Update education failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
 
-  addSkill: async (data: CreateSkillDto): Promise<ISkill> => {
+  deleteEducation: async (id: string): Promise<void> => {
     try {
-      const response = await apiClient.post<ISkill>('/profiles/me/skills', data);
+      await apiClient.delete(`/profiles/me/educations/${id}`);
+      toast.success('Education deleted successfully');
+    } catch (error) {
+      toast.error(`Delete education failed: ${getErrorMessage(error)}`);
+      throw error;
+    }
+  },
+
+  addSkill: async (data: CreateSkillDto): Promise<SuccessResponse> => {
+    try {
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/skills', data);
       toast.success('Skill added successfully');
       return response.data;
     } catch (error) {
@@ -159,23 +173,55 @@ export const profileAPI = {
     }
   },
 
-  getSocialLinks: async (): Promise<ISocialLink[]> => {
+  updateSkill: async (id: string, data: CreateSkillDto): Promise<SuccessResponse> => {
     try {
-      const response = await apiClient.get<ISocialLink[]>('/profiles/me/social-links');
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/skills/${id}`, data);
+      toast.success('Skill updated successfully');
       return response.data;
     } catch (error) {
-      toast.error(`Get social links failed: ${getErrorMessage(error)}`);
+      toast.error(`Update skill failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },
 
-  addSocialLink: async (data: CreateSocialLinkDto): Promise<ISocialLink> => {
+  deleteSkill: async (id: string): Promise<void> => {
     try {
-      const response = await apiClient.post<ISocialLink>('/profiles/me/social-links', data);
+      await apiClient.delete(`/profiles/me/skills/${id}`);
+      toast.success('Skill deleted successfully');
+    } catch (error) {
+      toast.error(`Delete skill failed: ${getErrorMessage(error)}`);
+      throw error;
+    }
+  },
+
+  addSocialLink: async (data: CreateSocialLinkDto): Promise<SuccessResponse> => {
+    try {
+      const response = await apiClient.post<SuccessResponse>('/profiles/me/social-links', data);
       toast.success('Social link added successfully');
       return response.data;
     } catch (error) {
       toast.error(`Add social link failed: ${getErrorMessage(error)}`);
+      throw error;
+    }
+  },
+
+  updateSocialLink: async (id: string, data: CreateSocialLinkDto): Promise<SuccessResponse> => {
+    try {
+      const response = await apiClient.put<SuccessResponse>(`/profiles/me/social-links/${id}`, data);
+      toast.success('Social link updated successfully');
+      return response.data;
+    } catch (error) {
+      toast.error(`Update social link failed: ${getErrorMessage(error)}`);
+      throw error;
+    }
+  },
+
+  deleteSocialLink: async (id: string): Promise<void> => {
+    try {
+      await apiClient.delete(`/profiles/me/social-links/${id}`);
+      toast.success('Social link deleted successfully');
+    } catch (error) {
+      toast.error(`Delete social link failed: ${getErrorMessage(error)}`);
       throw error;
     }
   },

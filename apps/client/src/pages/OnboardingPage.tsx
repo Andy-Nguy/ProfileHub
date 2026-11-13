@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { authAPI } from '../services/auth-login.service';
+import { getErrorMessage } from '../services/api.service';
 import { profileAPI } from '../services/profile.service';
 import { FloatingField } from '../components/shared/FloatingField';
 import { Button } from '../components/shared/Button';
@@ -11,7 +11,7 @@ import { Logo } from '../components/shared/Logo';
 import { VisibilityTypeEnum } from '@profilehub/types';
 
 export const OnboardingPage: React.FC = () => {
-  const { user, authenticate } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -35,25 +35,10 @@ export const OnboardingPage: React.FC = () => {
 
     try {
       await profileAPI.updateOnboarding(formData);
-
-      // Re-fetch the user profile to get updated needsOnboarding = false.
-      // Note: authAPI.getMe() returns { user, needsOnboarding, profileCompletion }
-      // — no accessToken. We read the current token from localStorage directly.
-      const meRes = await authAPI.getMe();
-      if (meRes?.user) {
-        const storedSession = JSON.parse(
-          window.localStorage.getItem('profilehub.auth') || '{}',
-        );
-        if (storedSession.accessToken) {
-          await authenticate(storedSession.accessToken, meRes.user);
-        }
-      }
-
+      await refreshUser();
       navigate('/discovery');
-      // Refresh the page to update auth context needsOnboarding
-      window.location.reload();
-    } catch (err: any) {
-      setError(err.message || t('common:errorGeneric'));
+    } catch (err: unknown) {
+      setError(getErrorMessage(err) || t('common:errorGeneric'));
     } finally {
       setIsLoading(false);
     }

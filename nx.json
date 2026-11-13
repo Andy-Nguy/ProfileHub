@@ -15,6 +15,10 @@
       "inputs": ["production", "^production"],
       "cache": true
     },
+    "typecheck": {
+      "inputs": ["default"],
+      "cache": true
+    },
     "lint": {
       "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"],
       "cache": true

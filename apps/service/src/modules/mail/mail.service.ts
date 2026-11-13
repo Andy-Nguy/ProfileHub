@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { OTP_EXPIRY_MINUTES } from '../otp/otp.service';
 
 /**
  * Mail service implementation using Nodemailer.
@@ -36,24 +37,30 @@ export class MailService {
           <div style="text-align: center; margin: 30px 0;">
             <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #1a73e8; background-color: #f1f3f4; padding: 10px 20px; border-radius: 5px;">${otp}</span>
           </div>
-          <p style="font-size: 14px; color: #777;">This code will expire in 10 minutes. If you did not request this, please ignore this email.</p>
+          <p style="font-size: 14px; color: #777;">This code will expire in ${OTP_EXPIRY_MINUTES} minutes. If you did not request this, please ignore this email.</p>
           <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
           <p style="font-size: 12px; color: #999; text-align: center;">&copy; 2026 ProfileHub. All rights reserved.</p>
         </div>
       `,
     };
 
-    try {
-      await this.transporter.sendMail(mailOptions);
-      this.logger.log(`📧 Verification OTP sent successfully to ${email}`);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.stack : 'Unknown error';
-      this.logger.error(`❌ Failed to send OTP email to ${email}`, errorMessage);
+    const isMailConfigured = Boolean(
+      this.config.get<string>('MAIL_USER') && this.config.get<string>('MAIL_PASS'),
+    );
+
+    if (!isMailConfigured && this.config.get<string>('NODE_ENV') !== 'production') {
+      // Dev-only fallback: SMTP not configured, so surface the code locally.
+      this.logger.warn(`MAIL_USER/MAIL_PASS not set; dev OTP for ${email}: ${otp}`);
+      return;
     }
 
-    // Always log to console for backup during development
-    this.logger.log(`──────────────────────────────────────────`);
-    this.logger.log(`📧 [Backup Log] Verification OTP for ${email}: ${otp}`);
-    this.logger.log(`──────────────────────────────────────────`);
+    try {
+      await this.transporter.sendMail(mailOptions);
+      this.logger.log(`Verification email sent to ${email}`);
+    } catch (error) {
+      const stack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`Failed to send verification email to ${email}`, stack);
+      throw new InternalServerErrorException('Unable to send verification email. Please try again later.');
+    }
   }
 }

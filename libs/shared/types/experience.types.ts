@@ -12,7 +12,7 @@ export interface ICompany {
   name: string;
   domain: string | null;
   logoUrl: string | null;
-  createdAt: string | Date;
+  createdAt?: string | Date;
 }
 
 export interface IExperience {

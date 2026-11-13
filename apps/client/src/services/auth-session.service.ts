@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { AuthUser, AuthSession } from '@profilehub/types';
+import { AuthSession } from '@profilehub/types';
 
 const AUTH_STORAGE_KEY = 'profilehub.auth';
 const AUTH_SESSION_EVENT = 'profilehub-auth-changed';
