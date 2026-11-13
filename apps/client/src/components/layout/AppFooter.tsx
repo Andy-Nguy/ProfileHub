@@ -60,7 +60,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ variant = 'full' }) => {
           <div className="flex flex-col gap-3 max-w-xs">
             <Logo size="lg" to="/" textClassName="text-on-surface" />
             <p className="text-sm text-on-surface-variant leading-relaxed">
-              Nền tảng portfolio chuyên nghiệp giúp bạn xây dựng thương hiệu cá nhân và kết nối cộng đồng.
+              {t('footer.brandDescription')}
             </p>
           </div>
 
@@ -68,7 +68,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ variant = 'full' }) => {
           <div className="flex flex-wrap gap-x-12 gap-y-6">
             {/* Column 1 */}
             <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold text-on-surface uppercase tracking-widest">Pháp lý</p>
+              <p className="text-xs font-semibold text-on-surface uppercase tracking-widest">{t('footer.legalHeading')}</p>
               <nav className="flex flex-col gap-2">
                 <a href="#" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">
                   {t('footer.privacyPolicy')}
@@ -80,7 +80,7 @@ export const AppFooter: React.FC<AppFooterProps> = ({ variant = 'full' }) => {
             </div>
             {/* Column 2 */}
             <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold text-on-surface uppercase tracking-widest">Cộng đồng</p>
+              <p className="text-xs font-semibold text-on-surface uppercase tracking-widest">{t('footer.communityHeading')}</p>
               <nav className="flex flex-col gap-2">
                 <a href="#" className="text-sm text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap">
                   {t('footer.communityGuidelines')}
@@ -99,11 +99,11 @@ export const AppFooter: React.FC<AppFooterProps> = ({ variant = 'full' }) => {
         {/* ── Bottom Row: Copyright ── */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-on-surface-variant opacity-75 text-center sm:text-left">
-            © {year} ProHub Community Hub. Phát triển nghề nghiệp thông qua chuyên môn tập thể.
+            {t('footer.copyright', { year })}
           </p>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-primary opacity-80" />
-            <span className="text-xs text-on-surface-variant opacity-60">Made with ♥ in Vietnam</span>
+            <span className="text-xs text-on-surface-variant opacity-60">{t('footer.madeIn')}</span>
           </div>
         </div>
 

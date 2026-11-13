@@ -31,7 +31,11 @@
     "sharePortfolio": "Share Portfolio"
   },
   "footer": {
+    "brandDescription": "A professional portfolio platform helping you build your personal brand and connect with the community.",
+    "legalHeading": "Legal",
+    "communityHeading": "Community",
     "copyright": "© {{year}} ProHub Community Hub. Professional Growth through Collective Expertise.",
+    "madeIn": "Made with ♥ in Vietnam",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service",
     "communityGuidelines": "Community Guidelines",

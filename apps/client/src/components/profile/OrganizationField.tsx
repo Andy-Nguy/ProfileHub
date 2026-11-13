@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FloatingField } from '../shared/FloatingField';
 import { useDebounce } from '../../hooks/useDebounce';
 
@@ -40,6 +41,7 @@ export const OrganizationField: React.FC<OrganizationFieldProps> = ({
   onChangeNewLogoFile,
   extraNewFields,
 }) => {
+  const { t } = useTranslation('profile');
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchResults, setSearchResults] = useState<AutocompleteEntity[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -101,7 +103,7 @@ export const OrganizationField: React.FC<OrganizationFieldProps> = ({
         {activeLogo && (
           <img
             src={activeLogo}
-            alt={`${entityTypeLabel} Logo`}
+            alt={t('dialogs.organization.logoAlt', { entity: entityTypeLabel })}
             className="w-12 h-12 rounded bg-white border border-outline-variant object-contain p-1"
           />
         )}
@@ -121,7 +123,9 @@ export const OrganizationField: React.FC<OrganizationFieldProps> = ({
           {showDropdown && value.trim() && (
             <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-surface-container-highest border border-outline-variant rounded-lg shadow-lg max-h-60 overflow-y-auto">
               {isSearching ? (
-                <div className="p-3 text-sm text-on-surface-variant">Searching...</div>
+                <div className="p-3 text-sm text-on-surface-variant">
+                  {t('dialogs.organization.searching')}
+                </div>
               ) : searchResults.length > 0 ? (
                 <>
                   {searchResults.map((item, idx) => (
@@ -163,14 +167,14 @@ export const OrganizationField: React.FC<OrganizationFieldProps> = ({
                       }}
                       className="w-full text-left p-2 text-sm text-primary font-medium hover:bg-primary/10 rounded"
                     >
-                      + Create "{value}"
+                      {t('dialogs.organization.createItem', { name: value })}
                     </button>
                   </div>
                 </>
               ) : (
                 <div className="p-2">
                   <div className="p-2 text-sm text-on-surface-variant">
-                    No existing {entityTypeLabel.toLowerCase()}s found.
+                    {t('dialogs.organization.noResults', { entity: entityTypeLabel.toLowerCase() })}
                   </div>
                   <button
                     type="button"
@@ -181,7 +185,7 @@ export const OrganizationField: React.FC<OrganizationFieldProps> = ({
                     }}
                     className="w-full text-left p-2 text-sm text-primary font-medium hover:bg-primary/10 rounded mt-1"
                   >
-                    + Create "{value}"
+                    {t('dialogs.organization.createItem', { name: value })}
                   </button>
                 </div>
               )}
@@ -194,14 +198,14 @@ export const OrganizationField: React.FC<OrganizationFieldProps> = ({
       {isCreatingNew && !selectedEntity && (
         <div className="mt-3 p-4 bg-surface-container-low border border-outline-variant rounded-lg space-y-3">
           <div className="text-sm font-semibold text-on-surface">
-            Create New {entityTypeLabel}
+            {t('dialogs.organization.createNewTitle', { entity: entityTypeLabel })}
           </div>
 
           {extraNewFields}
 
           <div>
             <label className="text-sm font-medium text-on-surface-variant block mb-1">
-              {entityTypeLabel} Logo (Optional)
+              {t('dialogs.organization.logoLabel', { entity: entityTypeLabel })}
             </label>
             <input
               type="file"

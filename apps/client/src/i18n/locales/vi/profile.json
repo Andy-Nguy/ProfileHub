@@ -71,5 +71,96 @@
     "errorLoading": "Lỗi khi tải hồ sơ",
     "endorsements": "tín nhiệm",
     "noResults": "Không tìm thấy chuyên gia nào phù hợp với tìm kiếm của bạn."
+  },
+  "dialogs": {
+    "organization": {
+      "searching": "Đang tìm kiếm...",
+      "createItem": "+ Tạo mới \"{{name}}\"",
+      "noResults": "Không tìm thấy {{entity}} nào có sẵn.",
+      "createNewTitle": "Tạo mới {{entity}}",
+      "logoLabel": "Logo {{entity}} (Tùy chọn)",
+      "logoAlt": "Logo {{entity}}"
+    },
+    "basicInfo": {
+      "title": "Chỉnh sửa Thông tin cơ bản",
+      "displayName": "Tên hiển thị *",
+      "headline": "Tiêu đề chuyên môn *",
+      "location": "Địa điểm",
+      "bio": "Giới thiệu bản thân / Tiểu sử"
+    },
+    "about": {
+      "title": "Chỉnh sửa Giới thiệu",
+      "bioLabel": "Tóm tắt tiểu sử"
+    },
+    "skills": {
+      "title": "Chỉnh sửa Kỹ năng",
+      "inputLabel": "Nhập kỹ năng và nhấn Enter",
+      "addAriaLabel": "Thêm kỹ năng",
+      "categoryLabel": "Danh mục",
+      "filterLabel": "Bộ lọc",
+      "filterAll": "Tất cả ({{count}})",
+      "emptyAll": "Chưa có kỹ năng nào. Hãy thêm kỹ năng đầu tiên ở trên!",
+      "emptyCategory": "Không có kỹ năng nào trong danh mục này."
+    },
+    "experience": {
+      "addTitle": "Thêm Kinh nghiệm",
+      "editTitle": "Chỉnh sửa Kinh nghiệm",
+      "jobTitle": "Chức danh công việc *",
+      "companyName": "Tên công ty *",
+      "entityCompany": "Công ty",
+      "companyDomain": "Tên miền công ty (ví dụ: google.com)",
+      "location": "Địa điểm",
+      "employmentType": "Hình thức làm việc",
+      "employmentTypes": {
+        "fullTime": "Toàn thời gian",
+        "partTime": "Bán thời gian",
+        "contract": "Hợp đồng",
+        "internship": "Thực tập",
+        "freelance": "Tự do (Freelance)",
+        "volunteer": "Tình nguyện"
+      },
+      "startDate": "Ngày bắt đầu *",
+      "endDate": "Ngày kết thúc",
+      "currentRole": "Tôi hiện đang làm việc tại đây",
+      "description": "Mô tả công việc",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa kinh nghiệm này không?"
+    },
+    "education": {
+      "addTitle": "Thêm Học vấn",
+      "editTitle": "Chỉnh sửa Học vấn",
+      "institution": "Trường / Cơ sở đào tạo *",
+      "entityInstitution": "Cơ sở đào tạo",
+      "degree": "Bằng cấp (ví dụ: Cử nhân)",
+      "fieldOfStudy": "Chuyên ngành",
+      "startDate": "Ngày bắt đầu *",
+      "endDate": "Ngày kết thúc",
+      "currentStudy": "Tôi hiện đang theo học tại đây",
+      "description": "Mô tả / Hoạt động ngoại khóa",
+      "confirmDelete": "Bạn có chắc chắn muốn xóa thông tin học vấn này không?"
+    },
+    "avatar": {
+      "ariaLabel": "Chỉnh sửa Ảnh đại diện",
+      "titleView": "Ảnh đại diện",
+      "titleCrop": "Cắt & Điều chỉnh Ảnh",
+      "subtitleView": "Xem hoặc cập nhật ảnh hiện tại của bạn",
+      "subtitleCrop": "Kéo ảnh để cắt hoặc xoay",
+      "currentPhotoAlt": "Ảnh hồ sơ hiện tại",
+      "changePhoto": "ĐỔI ẢNH",
+      "visibilityHint": "Hiển thị công khai với mọi người trên ProfileHub",
+      "qualityHint": "Tải lên ảnh vuông hoặc chân dung chất lượng cao",
+      "errorInvalidType": "Vui lòng chọn tệp hình ảnh hợp lệ (JPEG, PNG, WebP).",
+      "errorMaxSize": "Kích thước ảnh phải nhỏ hơn 10 MB.",
+      "zoom": "Thu phóng",
+      "zoomOut": "Thu nhỏ",
+      "zoomIn": "Phóng to",
+      "rotate": "Xoay",
+      "rotateLeft": "Trái",
+      "rotateRight": "Phải",
+      "reset": "Đặt lại",
+      "cropHint": "Kéo để định vị lại • Cuộn hoặc chụm để thu phóng",
+      "uploadPhoto": "Tải ảnh lên",
+      "applyPhoto": "Áp dụng ảnh",
+      "saving": "Đang lưu…"
+    }
   }
 }

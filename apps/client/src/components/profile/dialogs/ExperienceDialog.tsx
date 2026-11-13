@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BaseDialog } from './BaseDialog';
 import { FloatingField, FloatingTextarea } from '../../shared/FloatingField';
 import { Button } from '../../shared/Button';
@@ -24,6 +25,7 @@ function toDateInputValue(value: string | Date | null | undefined) {
 }
 
 export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceId, initialData, onSuccess }) => {
+  const { t } = useTranslation(['profile', 'common']);
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -128,7 +130,7 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
 
   const handleDelete = async () => {
     if (!experienceId) return;
-    if (!window.confirm('Are you sure you want to delete this experience?')) return;
+    if (!window.confirm(t('dialogs.experience.confirmDelete'))) return;
 
     setLoading(true);
     try {
@@ -143,15 +145,15 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
   };
 
   return (
-    <BaseDialog isOpen={isOpen} onClose={onClose} title={experienceId ? 'Edit Experience' : 'Add Experience'}>
+    <BaseDialog isOpen={isOpen} onClose={onClose} title={experienceId ? t('dialogs.experience.editTitle') : t('dialogs.experience.addTitle')}>
       <div className="space-y-4">
-        <FloatingField id="title" label="Job Title *" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+        <FloatingField id="title" label={t('dialogs.experience.jobTitle')} value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
         
         {/* Company Autocomplete & Logo Upload Field */}
         <OrganizationField
           id="company"
-          label="Company Name *"
-          entityTypeLabel="Company"
+          label={t('dialogs.experience.companyName')}
+          entityTypeLabel={t('dialogs.experience.entityCompany')}
           value={formData.company}
           selectedEntity={selectedCompanyDetails}
           onSelectEntity={(entity) => {
@@ -174,56 +176,56 @@ export const ExperienceDialog: React.FC<Props> = ({ isOpen, onClose, experienceI
           extraNewFields={
             <FloatingField
               id="newCompanyDomain"
-              label="Company Domain (e.g. google.com)"
+              label={t('dialogs.experience.companyDomain')}
               value={newCompanyDomain}
               onChange={e => setNewCompanyDomain(e.target.value)}
             />
           }
         />
 
-        <FloatingField id="location" label="Location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
+        <FloatingField id="location" label={t('dialogs.experience.location')} value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} />
 
         <div className="flex gap-4 items-center">
-          <label className="text-sm font-medium text-on-surface-variant w-1/3">Employment Type</label>
+          <label className="text-sm font-medium text-on-surface-variant w-1/3">{t('dialogs.experience.employmentType')}</label>
           <select
             value={formData.employmentType}
             onChange={e => setFormData({ ...formData, employmentType: e.target.value as EmploymentType })}
             className="flex-1 bg-transparent border border-outline rounded-lg p-3 text-on-surface focus:border-primary outline-none"
           >
-            <option value={EmploymentType.FULL_TIME}>Full-time</option>
-            <option value={EmploymentType.PART_TIME}>Part-time</option>
-            <option value={EmploymentType.CONTRACT}>Contract</option>
-            <option value={EmploymentType.INTERNSHIP}>Internship</option>
-            <option value={EmploymentType.FREELANCE}>Freelance</option>
-            <option value={EmploymentType.VOLUNTEER}>Volunteer</option>
+            <option value={EmploymentType.FULL_TIME}>{t('dialogs.experience.employmentTypes.fullTime')}</option>
+            <option value={EmploymentType.PART_TIME}>{t('dialogs.experience.employmentTypes.partTime')}</option>
+            <option value={EmploymentType.CONTRACT}>{t('dialogs.experience.employmentTypes.contract')}</option>
+            <option value={EmploymentType.INTERNSHIP}>{t('dialogs.experience.employmentTypes.internship')}</option>
+            <option value={EmploymentType.FREELANCE}>{t('dialogs.experience.employmentTypes.freelance')}</option>
+            <option value={EmploymentType.VOLUNTEER}>{t('dialogs.experience.employmentTypes.volunteer')}</option>
           </select>
         </div>
 
         <div className="flex gap-4">
           <div className="flex-1">
-            <label className="text-sm font-medium text-on-surface-variant block mb-1">Start Date *</label>
+            <label className="text-sm font-medium text-on-surface-variant block mb-1">{t('dialogs.experience.startDate')}</label>
             <input type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} className="w-full bg-transparent border border-outline rounded-lg p-3 text-on-surface focus:border-primary outline-none" />
           </div>
           <div className="flex-1">
-            <label className="text-sm font-medium text-on-surface-variant block mb-1">End Date</label>
+            <label className="text-sm font-medium text-on-surface-variant block mb-1">{t('dialogs.experience.endDate')}</label>
             <input type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} disabled={formData.isCurrent} className="w-full bg-transparent border border-outline rounded-lg p-3 text-on-surface focus:border-primary outline-none disabled:opacity-50" />
           </div>
         </div>
 
         <label className="flex items-center gap-2 cursor-pointer pt-2">
           <input type="checkbox" checked={formData.isCurrent} onChange={e => setFormData({ ...formData, isCurrent: e.target.checked })} className="w-5 h-5 rounded border-outline text-primary focus:ring-primary" />
-          <span className="text-on-surface text-sm">I currently work here</span>
+          <span className="text-on-surface text-sm">{t('dialogs.experience.currentRole')}</span>
         </label>
 
-        <FloatingTextarea id="description" label="Description" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} />
+        <FloatingTextarea id="description" label={t('dialogs.experience.description')} value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} />
 
         <div className="flex justify-between pt-4 border-t border-outline-variant mt-4">
           {experienceId ? (
-            <Button className="text-error border border-error hover:bg-error/10 font-label-lg text-label-lg py-2.5 px-6 rounded-full transition-colors" onClick={handleDelete} isLoading={loading}>Delete</Button>
+            <Button className="text-error border border-error hover:bg-error/10 font-label-lg text-label-lg py-2.5 px-6 rounded-full transition-colors" onClick={handleDelete} isLoading={loading}>{t('common:delete')}</Button>
           ) : <div></div>}
           <div className="flex gap-3">
-            <Button className="border border-outline-variant text-primary font-label-lg text-label-lg py-2.5 px-6 rounded-full hover:bg-surface-container-low transition-colors" onClick={onClose} disabled={loading}>Cancel</Button>
-            <Button onClick={handleSave} isLoading={loading}>Save</Button>
+            <Button className="border border-outline-variant text-primary font-label-lg text-label-lg py-2.5 px-6 rounded-full hover:bg-surface-container-low transition-colors" onClick={onClose} disabled={loading}>{t('common:cancel')}</Button>
+            <Button onClick={handleSave} isLoading={loading}>{t('common:save')}</Button>
           </div>
         </div>
       </div>
